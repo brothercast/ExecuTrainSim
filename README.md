@@ -1,4 +1,4 @@
-# ExecuTrainServer
+# Executive Training Simulator
 
 ExecuTrainServer is part of the ExecuTrainSim project. This server handles requests and interactions with the Azure OpenAI API.
 
