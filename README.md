@@ -1,5 +1,7 @@
 # ExecuTrainSimulator  
-  
+
+![Screengrab1](./Screengrab1.jpg)
+
 ExecuTrainSimulator is a React application designed to provide dynamic training simulations for executives. The app leverages AI to generate scenarios that users can solve through a series of multiple-choice questions, leading to varying consequences and outcomes.  
   
 ## Table of Contents  
@@ -25,12 +27,12 @@ To get started with ExecuTrainSimulator, follow these steps:
 cd ExecuTrainSimulator  
  
 
-Dependencies
+### Dependencies
  
 Ensure you have the following installed on your machine:
 
-- Node.js: Download and install from Node.js official site.
-- npm: Comes bundled with Node.js, but ensure it's up-to-date by running:
+- **Node.js**: Download and install from Node.js official site.
+- **npm**: Comes bundled with Node.js, but ensure it's up-to-date by running:
 
     npm install -g npm  
  
