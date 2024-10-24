@@ -101,6 +101,15 @@ body {
   border-radius: 8px;  
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.0.6);  
 }  
+
+.custom-scenario-textarea {  
+  width: 100%;  
+  padding: 8px;  
+  border-radius: 4px;  
+  border: 1px solid #ccc;  
+  margin-bottom: 10px;  
+}  
+
   
 .scenario-card {  
   border: 2px solid #ddd;  
@@ -154,22 +163,46 @@ body {
   border-radius: 4px;  
   border: 1px solid #ccc;  
 }  
+
+.your-answer {
+  top: -15px;  
+  margin-bottom: 40px;
+} 
   
 .feedback-section {  
-  margin-top: 20px;  
+  margin-top: 10px; 
 }  
   
 .feedback {  
   background-color: #e0f7fa;  
-  padding: .25px 10px;  
-  border-radius: 10px;  
+  padding: 20px;  
+  padding-top: 1px;  
+  border-radius: 8px;  
+  position: relative;  
+  margin-top: 10px;  
 }  
   
 .feedback-title {  
   font-weight: bold;  
   color: #0073e6;  
-  margin-bottom: px;  
+  display: flex;  
+  align-items: center;  
+  position: absolute;  
+  top: -44px;  
+  left: 20px;  
+  background-color: #e0f7fa;  
+  padding: 4px 10px;  
+  border-radius: 5px 5px 0 0;  
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0);  
 }  
+  
+.feedback-title .icon {  
+  margin-right: 5px;  
+}  
+
+
+ 
+
   
 .scenario-description, .question-title {  
   margin-bottom: 15px;  
