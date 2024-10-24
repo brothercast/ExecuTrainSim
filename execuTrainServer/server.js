@@ -74,6 +74,48 @@ app.post('/api/openai/initial', async (req, res) => {
     });  
   }  
 });  
+
+app.post('/api/openai/custom_initial', async (req, res) => {  
+  const { role, experienceLevel, difficulty, customScenario } = req.body;  
+  const prompt = `Given the custom scenario description: "${customScenario}", generate a title, initial question, and options with consequences suitable for a ${role} with ${experienceLevel} experience at ${difficulty} difficulty. Return a JSON object with: { "scenario": { "title": "Scenario Title", "description": "${customScenario}", "initial_question": "The initial question for the user", "options": [ {"description": "Option 1 description"}, {"description": "Option 2 description"}, {"description": "Option 3 description"}, {"description": "Option 4 description"} ] } }`;  
+  
+  try {  
+    const response = await axios.post(  
+      chatGptEndpoint,  
+      {  
+        model: 'gpt-4o-mini',  
+        messages: [  
+          { role: "system", content: "You are a helpful assistant that responds in JSON format." },  
+          { role: "user", content: prompt }  
+        ],  
+        temperature: 0.75,  
+        max_tokens: 1800  
+      },  
+      {  
+        headers: {  
+          'Content-Type': 'application/json',  
+          'api-key': azureApiKey  
+        }  
+      }  
+    );  
+  
+    let content = response.data.choices[0].message.content;  
+    content = content.replace(/```json|```/g, '').trim();  
+  
+    try {  
+      const parsedContent = JSON.parse(content);  
+      res.json(parsedContent);  
+    } catch (parseError) {  
+      res.status(500).json({ error: 'Failed to parse JSON response', details: parseError.message });  
+    }  
+  } catch (error) {  
+    res.status(500).json({  
+      error: 'Failed to generate custom initial scenario',  
+      details: error.response ? error.response.data : error.message  
+    });  
+  }  
+});  
+
   
 app.post('/api/openai/followup', async (req, res) => {  
   const { role, experienceLevel, difficulty, scenario, question, answer, previousAnswers } = req.body;  
