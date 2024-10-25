@@ -118,7 +118,8 @@ const ExecutiveTrainingSimulator = () => {
         setDebriefing(null);    
         setCustomAnswers({});    
     
-        const imagePrompt = `Illustrate the following scenario: "${scenarioData.scenario.description}". Use a style similar to 1990s safety brochures: simple, clean lines, and a focus on clarity.`;    
+        const imagePrompt = `Create an isometric vector illustration depicting the scenario: "${scenarioData.scenario.description}". The style should reflect 1990s safety brochures, featuring simple, clean lines and a focus on clarity. Include diverse characters engaged in the scenario with dynamic poses and a touch of humor. Capture a vibrant, busy scene akin to basic instructional illustrations, incorporating various settings such as parks, homes, offices, or public spaces to effectively convey the scenario.`;  
+
             
         await generateImage(imagePrompt);    
       } else {    
