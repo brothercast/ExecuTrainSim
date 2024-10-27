@@ -2,11 +2,23 @@ require('dotenv').config();
 const express = require('express');  
 const axios = require('axios');  
 const bodyParser = require('body-parser');  
+const path = require('path');  
 const cors = require('cors');  
   
 const app = express();  
 app.use(cors());  
 app.use(bodyParser.json());  
+
+app.use(express.static(path.join(__dirname, 'build')));  
+
+app.get('*', (req, res) => {  
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));  
+});  
+
+const port = process.env.PORT || 3000;  
+app.listen(port, () => {  
+  console.log(`Server is running on port ${port}`);  
+});  
   
 const GPT_PORT = process.env.GPT_PORT || 5000;  
 const DALLE_PORT = process.env.DALLE_PORT || 5001;  
