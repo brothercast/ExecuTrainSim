@@ -145,8 +145,7 @@ body {
   background-color: #0073e6;  
   clip-path: polygon(0 0, 100% 50%, 0 100%);  
   margin-right: 10px; 
-  align-self: flex-start; 
-}  
+ }  
   
 .form-group {  
   margin-bottom: 20px;  

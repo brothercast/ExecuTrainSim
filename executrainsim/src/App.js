@@ -1,88 +1,90 @@
-import React, { useState, useEffect } from 'react';    
-import axios from 'axios';    
-import { Card, CardContent, CardHeader, CardTitle } from './components/ui/Card';    
-import Button from './components/ui/Button';    
-import Select from './components/ui/Select';    
-import Progress from './components/ui/Progress';    
-import { Info, Star, ChevronLeft, ChevronRight } from 'lucide-react';    
-import './styles/AppStyles.css';    
-    
-const ExecutiveTrainingSimulator = () => {    
-  const [role, setRole] = useState('');    
-  const [customRole, setCustomRole] = useState('');    
-  const [experienceLevel, setExperienceLevel] = useState('');    
-  const [difficulty, setDifficulty] = useState('');    
-  const [scenario, setScenario] = useState(null);    
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);    
-  const [answers, setAnswers] = useState([]);    
-  const [progress, setProgress] = useState(0);    
-  const [totalScore, setTotalScore] = useState(() => parseInt(localStorage.getItem('totalScore'), 10) || 0);    
-  const [simulationComplete, setSimulationComplete] = useState(false);    
-  const [debriefing, setDebriefing] = useState(null);    
-  const [imagePath, setImagePath] = useState(null);    
-  const [customAnswers, setCustomAnswers] = useState({});    
-  const [useCustomScenario, setUseCustomScenario] = useState(false);    
-  const [customScenarioText, setCustomScenarioText] = useState('');    
-  const [errorMessage, setErrorMessage] = useState('');    
-    
-  const roles = [    
-    { value: 'ceo', title: 'CEO - Chief Executive Officer' },    
-    { value: 'cfo', title: 'CFO - Chief Financial Officer' },    
-    { value: 'cmo', title: 'CMO - Chief Marketing Officer' },    
-    { value: 'cto', title: 'CTO - Chief Technology Officer' },    
-    { value: 'coo', title: 'COO - Chief Operations Officer' },    
-    { value: 'chro', title: 'CHRO - Chief Human Resources Officer' },    
-    { value: 'custom', title: 'Custom Role' }    
-  ];    
-    
-  const experienceLevels = [    
-    { value: 'junior', title: 'Junior (0-2 years)' },    
-    { value: 'mid', title: 'Mid-level (3-5 years)' },    
-    { value: 'senior', title: 'Senior (6-10 years)' },    
-    { value: 'executive', title: 'Executive (10+ years)' }    
-  ];    
-    
-  const difficultyLevels = [    
-    { value: 'easy', title: 'Easy' },    
-    { value: 'medium', title: 'Medium' },    
-    { value: 'hard', title: 'Hard' },    
-    { value: 'expert', title: 'Expert' }    
-  ];    
-    
-  useEffect(() => {    
-    localStorage.setItem('totalScore', totalScore);    
-  }, [totalScore]);    
-    
-  const fetchOpenAIResponse = async (input, endpointPath) => {    
-    try {    
-      const response = await axios.post(`http://localhost:5000${endpointPath}`, input, { headers: { 'Content-Type': 'application/json' } });    
-      return response.data;    
-    } catch (error) {    
-      console.error('Error fetching from OpenAI:', error);    
-      throw new Error(error.response ? error.response.data : error.message);    
-    }    
-  };    
-    
-  const generateImage = async (prompt) => {    
-    try {    
-      const response = await axios.post('http://localhost:5001/api/dalle/image', { prompt });    
-      setImagePath(response.data.imagePath);    
-    } catch (error) {    
-      console.error('Error generating image:', error.message);    
-    }    
-  };    
-    
+import React, { useState, useEffect } from 'react';  
+import axios from 'axios';  
+import { Card, CardContent, CardHeader, CardTitle } from './components/ui/Card';  
+import Button from './components/ui/Button';  
+import Select from './components/ui/Select';  
+import Progress from './components/ui/Progress';  
+import { Info, Star, ChevronLeft, ChevronRight } from 'lucide-react';  
+import './styles/AppStyles.css';  
+  
+const ExecutiveTrainingSimulator = () => {  
+  const [role, setRole] = useState('');  
+  const [customRole, setCustomRole] = useState('');  
+  const [experienceLevel, setExperienceLevel] = useState('');  
+  const [difficulty, setDifficulty] = useState('');  
+  const [scenario, setScenario] = useState(null);  
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);  
+  const [answers, setAnswers] = useState([]);  
+  const [progress, setProgress] = useState(0);  
+  const [totalScore, setTotalScore] = useState(() => parseInt(localStorage.getItem('totalScore'), 10) || 0);  
+  const [simulationComplete, setSimulationComplete] = useState(false);  
+  const [debriefing, setDebriefing] = useState(null);  
+  const [imagePath, setImagePath] = useState(null);  
+  const [customAnswers, setCustomAnswers] = useState({});  
+  const [useCustomScenario, setUseCustomScenario] = useState(false);  
+  const [customScenarioText, setCustomScenarioText] = useState('');  
+  const [errorMessage, setErrorMessage] = useState('');  
+  
+  const roles = [  
+    { value: 'ceo', title: 'CEO - Chief Executive Officer' },  
+    { value: 'cfo', title: 'CFO - Chief Financial Officer' },  
+    { value: 'cmo', title: 'CMO - Chief Marketing Officer' },  
+    { value: 'cto', title: 'CTO - Chief Technology Officer' },  
+    { value: 'coo', title: 'COO - Chief Operations Officer' },  
+    { value: 'chro', title: 'CHRO - Chief Human Resources Officer' },  
+    { value: 'custom', title: 'Custom Role' }  
+  ];  
+  
+  const experienceLevels = [  
+    { value: 'junior', title: 'Junior (0-2 years)' },  
+    { value: 'mid', title: 'Mid-level (3-5 years)' },  
+    { value: 'senior', title: 'Senior (6-10 years)' },  
+    { value: 'executive', title: 'Executive (10+ years)' }  
+  ];  
+  
+  const difficultyLevels = [  
+    { value: 'easy', title: 'Easy' },  
+    { value: 'medium', title: 'Medium' },  
+    { value: 'hard', title: 'Hard' },  
+    { value: 'expert', title: 'Expert' }  
+  ];  
+  
+  useEffect(() => {  
+    localStorage.setItem('totalScore', totalScore);  
+  }, [totalScore]);  
+  
+  const fetchOpenAIResponse = async (input, endpointPath) => {  
+    try {  
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}${endpointPath}`, input, { headers: { 'Content-Type': 'application/json' } });  
+      return response.data;  
+    } catch (error) {  
+      console.error('Error fetching from OpenAI:', error);  
+      setErrorMessage('Failed to fetch data from the server.');  
+      return null;  
+    }  
+  };  
+  
+  const generateImage = async (prompt) => {  
+    try {  
+      const response = await axios.post(`${process.env.REACT_APP_IMAGE_API_URL}/api/dalle/image`, { prompt });  
+      setImagePath(response.data.imagePath);  
+    } catch (error) {  
+      console.error('Error generating image:', error.message);  
+      setErrorMessage('Failed to generate image.');  
+    }  
+  };  
+  
   const generateSampleScenario = async () => {  
     const missingFields = [];  
     if (!role) missingFields.push("role");  
     if (!experienceLevel) missingFields.push("experience level");  
     if (!difficulty) missingFields.push("difficulty");  
-    
+  
     if (missingFields.length > 0) {  
       setErrorMessage(`Please select a ${missingFields.join(', ')} before generating a sample scenario.`);  
       return;  
     }  
-    
+  
     try {  
       const scenarioData = await fetchOpenAIResponse(  
         {  
@@ -92,7 +94,7 @@ const ExecutiveTrainingSimulator = () => {
         },  
         '/api/openai/initial'  
       );  
-    
+  
       if (scenarioData && scenarioData.scenario) {  
         setCustomScenarioText(scenarioData.scenario.description);  
       } else {  
@@ -103,58 +105,59 @@ const ExecutiveTrainingSimulator = () => {
       setErrorMessage('Failed to generate sample scenario. Please try again.');  
     }  
   };  
-    
-  const startSimulation = async () => {    
-    const selectedRole = role === 'custom' ? customRole : roles.find(r => r.value === role)?.title;    
-    if (!selectedRole || !experienceLevel || !difficulty) {    
-      setErrorMessage('Please select a role, experience level, and difficulty to start the simulation.');    
-      return;    
-    }    
+  
+  const startSimulation = async () => {  
+    const selectedRole = role === 'custom' ? customRole : roles.find(r => r.value === role)?.title;  
+    if (!selectedRole || !experienceLevel || !difficulty) {  
+      setErrorMessage('Please select a role, experience level, and difficulty to start the simulation.');  
+      return;  
+    }  
     setErrorMessage(''); // Clear previous errors if any  
-    
-    try {    
-      const scenarioData = useCustomScenario && customScenarioText    
-        ? await fetchOpenAIResponse({ customScenario: customScenarioText }, '/api/openai/custom_initial')    
-        : await fetchOpenAIResponse({    
-            role: selectedRole,    
-            experienceLevel: experienceLevels.find(level => level.value === experienceLevel).title,    
-            difficulty: difficultyLevels.find(level => level.value === difficulty).title    
-          }, '/api/openai/initial');    
-    
-      if (scenarioData && scenarioData.scenario) {    
-        const titlePrefix = useCustomScenario ? "Custom Scenario: " : "";    
-        scenarioData.scenario.title = `${titlePrefix}${scenarioData.scenario.title}`;    
-        setScenario(scenarioData.scenario);    
-        resetStateVariables();    
-    
-        const imagePrompt = `Illustrate the following scenario: “${scenarioData.scenario.description}”. The illustration should resemble colorful 1990s clip art with simple, clean lines and a focus on clarity. Use basic but colorful vector illustrations of the scenario, without any text. The colors should be vibrant but not overwhelming, ensuring that the images are easily understandable at a glance.`;    
-        await generateImage(imagePrompt);    
-      } else {    
-        throw new Error('Failed to generate scenario');    
-      }    
-    } catch (error) {    
-      console.error('Error starting simulation:', error);    
-    }    
-  };    
-    
-  const resetStateVariables = () => {    
-    setCurrentQuestionIndex(0);    
-    setProgress(0);    
-    setTotalScore(0);    
-    setAnswers([]);    
-    setSimulationComplete(false);    
-    setDebriefing(null);    
-    setCustomAnswers({});    
-  };    
-    
+  
+    try {  
+      const scenarioData = useCustomScenario && customScenarioText  
+        ? await fetchOpenAIResponse({ customScenario: customScenarioText }, '/api/openai/custom_initial')  
+        : await fetchOpenAIResponse({  
+            role: selectedRole,  
+            experienceLevel: experienceLevels.find(level => level.value === experienceLevel).title,  
+            difficulty: difficultyLevels.find(level => level.value === difficulty).title  
+          }, '/api/openai/initial');  
+  
+      if (scenarioData && scenarioData.scenario) {  
+        const titlePrefix = useCustomScenario ? "Custom Scenario: " : "";  
+        scenarioData.scenario.title = `${titlePrefix}${scenarioData.scenario.title}`;  
+        setScenario(scenarioData.scenario);  
+        resetStateVariables();  
+  
+        const imagePrompt = `Illustrate the following scenario: “${scenarioData.scenario.description}”. The illustration should resemble colorful 1990s clip art with simple, clean lines and a focus on clarity. Use basic but colorful vector illustrations of the scenario, without any text. The colors should be vibrant but not overwhelming, ensuring that the images are easily understandable at a glance.`;  
+        await generateImage(imagePrompt);  
+      } else {  
+        throw new Error('Failed to generate scenario');  
+      }  
+    } catch (error) {  
+      console.error('Error starting simulation:', error);  
+      setErrorMessage('Failed to start simulation. Please try again.');  
+    }  
+  };  
+  
+  const resetStateVariables = () => {  
+    setCurrentQuestionIndex(0);  
+    setProgress(0);  
+    setTotalScore(0);  
+    setAnswers([]);  
+    setSimulationComplete(false);  
+    setDebriefing(null);  
+    setCustomAnswers({});  
+  };  
+  
   const handleAnswer = async (answerIndex, customAnswer = null) => {  
     if (customAnswer === null && customAnswers[currentQuestionIndex] === '') {  
       toggleCustomAnswer(currentQuestionIndex);  
       return;  
     }  
-    
+  
     const selectedOption = customAnswer || scenario.options[answerIndex].description;  
-    
+  
     try {  
       const result = await fetchOpenAIResponse({  
         role: role === 'custom' ? customRole : roles.find(r => r.value === role).title,  
@@ -165,94 +168,97 @@ const ExecutiveTrainingSimulator = () => {
         answer: selectedOption,  
         previousAnswers: answers  
       }, '/api/openai/followup');  
-    
+  
       if (result && result.next_question && result.score && result.score.feedback) {  
         const { next_question, score } = result;  
         updateStateWithAnswer(selectedOption, next_question, score);  
-    
+  
         const imagePrompt = `Illustrate the following updated scenario: "${next_question.scenario_description}".`;  
         await generateImage(imagePrompt);  
       } else {  
         console.error('Invalid response format:', result);  
+        setErrorMessage('Failed to process answer. Please try again.');  
       }  
     } catch (error) {  
       console.error('Error handling answer:', error);  
+      setErrorMessage('Failed to handle answer. Please try again.');  
     }  
   };  
-    
-  const updateStateWithAnswer = (selectedOption, nextQuestion, score) => {    
-    setTotalScore(prevScore => prevScore + score.current_score);    
-    setAnswers(prevAnswers => [...prevAnswers, {    
-      question: scenario.initial_question,    
-      answer: { description: selectedOption },    
-      feedback: score.feedback,    
-      score: score.current_score,    
-    }]);    
-    setScenario(prevScenario => ({    
-      ...prevScenario,    
-      description: nextQuestion.scenario_description,    
-      options: nextQuestion.options,    
-      initial_question: nextQuestion.question    
-    }));    
-    setCurrentQuestionIndex(currentQuestionIndex + 1);    
-    setProgress(prevProgress => Math.min(prevProgress + 20, 100));    
-    
-    if (answers.length >= 4) {    
-      setSimulationComplete(true);    
-      generateDebriefing();    
-    }    
-  };    
-    
-  const generateDebriefing = async () => {    
-    try {    
-      const debriefingData = await fetchOpenAIResponse({    
-        scenario: scenario.description,    
-        answers: answers    
-      }, '/api/openai/debriefing');    
-    
-      if (debriefingData && debriefingData.debriefing) {    
-        setDebriefing(debriefingData.debriefing);    
-      } else {    
-        throw new Error('Failed to generate debriefing');    
-      }    
-    } catch (error) {    
-      console.error('Error generating debriefing:', error);    
-    }    
-  };    
-    
-  const resetSimulation = () => {    
-    setScenario(null);    
-    resetStateVariables();    
-    setImagePath(null);    
-    setCustomScenarioText('');    
-  };    
-    
-  const formatTextWithLineBreaks = (text) => {    
-    if (!text) return null;    
-    return text.split(/\.\s+/).map((sentence, index) => (    
-      <p key={index} style={{ marginBottom: '1em' }}>    
-        {sentence.trim()}    
-      </p>    
-    ));    
-  };    
-    
-  const goToPreviousQuestion = () => {    
-    if (currentQuestionIndex > 0) {    
-      setCurrentQuestionIndex(currentQuestionIndex - 1);    
-    } else if (simulationComplete) {    
-      setSimulationComplete(false);    
-      setCurrentQuestionIndex(answers.length - 1);    
-    }    
-  };    
-    
-  const goToNextQuestion = () => {    
-    if (currentQuestionIndex < answers.length) {    
-      setCurrentQuestionIndex(currentQuestionIndex + 1);    
-    } else if (currentQuestionIndex === answers.length && !simulationComplete) {    
-      setSimulationComplete(true);    
-    }    
-  };    
-    
+  
+  const updateStateWithAnswer = (selectedOption, nextQuestion, score) => {  
+    setTotalScore(prevScore => prevScore + score.current_score);  
+    setAnswers(prevAnswers => [...prevAnswers, {  
+      question: scenario.initial_question,  
+      answer: { description: selectedOption },  
+      feedback: score.feedback,  
+      score: score.current_score,  
+    }]);  
+    setScenario(prevScenario => ({  
+      ...prevScenario,  
+      description: nextQuestion.scenario_description,  
+      options: nextQuestion.options,  
+      initial_question: nextQuestion.question  
+    }));  
+    setCurrentQuestionIndex(currentQuestionIndex + 1);  
+    setProgress(prevProgress => Math.min(prevProgress + 20, 100));  
+  
+    if (answers.length >= 4) {  
+      setSimulationComplete(true);  
+      generateDebriefing();  
+    }  
+  };  
+  
+  const generateDebriefing = async () => {  
+    try {  
+      const debriefingData = await fetchOpenAIResponse({  
+        scenario: scenario.description,  
+        answers: answers  
+      }, '/api/openai/debriefing');  
+  
+      if (debriefingData && debriefingData.debriefing) {  
+        setDebriefing(debriefingData.debriefing);  
+      } else {  
+        throw new Error('Failed to generate debriefing');  
+      }  
+    } catch (error) {  
+      console.error('Error generating debriefing:', error);  
+      setErrorMessage('Failed to generate debriefing. Please try again.');  
+    }  
+  };  
+  
+  const resetSimulation = () => {  
+    setScenario(null);  
+    resetStateVariables();  
+    setImagePath(null);  
+    setCustomScenarioText('');  
+  };  
+  
+  const formatTextWithLineBreaks = (text) => {  
+    if (!text) return null;  
+    return text.split(/\.\s+/).map((sentence, index) => (  
+      <p key={index} style={{ marginBottom: '1em' }}>  
+        {sentence.trim()}  
+      </p>  
+    ));  
+  };  
+  
+  const goToPreviousQuestion = () => {  
+    if (currentQuestionIndex > 0) {  
+      setCurrentQuestionIndex(currentQuestionIndex - 1);  
+    } else if (simulationComplete) {  
+      setSimulationComplete(false);  
+      setCurrentQuestionIndex(answers.length - 1);  
+    }  
+  };  
+  
+  const goToNextQuestion = () => {  
+    if (currentQuestionIndex < answers.length) {  
+      setCurrentQuestionIndex(currentQuestionIndex + 1);  
+    } else if (currentQuestionIndex === answers.length && !simulationComplete) {  
+      setSimulationComplete(true);  
+    }  
+  };  
+  
   const toggleCustomAnswer = (index) => {  
     setCustomAnswers(prev => {  
       const updated = { ...prev };  
@@ -263,8 +269,8 @@ const ExecutiveTrainingSimulator = () => {
       }  
       return updated;  
     });  
-  };   
-    
+  };  
+  
   return (  
     <div className="app-container">  
       <header className="app-header">  
@@ -272,7 +278,7 @@ const ExecutiveTrainingSimulator = () => {
           <span className="header-title">Executive Training Simulation</span>  
         </div>  
       </header>  
-    
+  
       <main className="content-grid">  
         <aside className="left-column">  
           {scenario && (  
@@ -311,7 +317,7 @@ const ExecutiveTrainingSimulator = () => {
             </>  
           )}  
         </aside>  
-    
+  
         <section className="main-content">  
           {errorMessage && (  
             <div className="error-box">  
@@ -322,7 +328,7 @@ const ExecutiveTrainingSimulator = () => {
               <p>{errorMessage}</p>  
             </div>  
           )}  
-    
+  
           {!simulationComplete ? (  
             scenario ? (  
               <Card className="scenario-card">  
@@ -490,7 +496,7 @@ const ExecutiveTrainingSimulator = () => {
         </section>  
       </main>  
     </div>  
-  );    
-};    
-    
-export default ExecutiveTrainingSimulator;    
+  );  
+};  
+  
+export default ExecutiveTrainingSimulator;  
