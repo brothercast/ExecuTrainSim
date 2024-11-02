@@ -1,31 +1,42 @@
 require('dotenv').config();  
 const express = require('express');  
 const axios = require('axios');  
-const bodyParser = require('body-parser');  
 const path = require('path');  
 const cors = require('cors');  
   
 const app = express();  
-app.use(cors());  
-app.use(bodyParser.json());  
-
-app.use(express.static(path.join(__dirname, 'build')));  
-
-app.get('*', (req, res) => {  
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));  
-});  
-
-const port = process.env.PORT || 3000;  
-app.listen(port, () => {  
-  console.log(`Server is running on port ${port}`);  
-});  
   
+// CORS Configuration  
+const corsOptions = {  
+  origin: process.env.NODE_ENV === 'production'  
+    ? 'https://executrainsim.azurewebsites.net' // Production frontend URL  
+    : 'http://localhost:3000', // Development frontend URL  
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',  
+  credentials: true // Allow cookies and other credentials  
+};  
+app.use(cors(corsOptions));  
+  
+// Middleware  
+app.use(express.json()); // Express has built-in JSON parsing since v4.16.0  
+  
+// Correctly set the path to the build directory  
+const buildPath = path.join(__dirname, '..', 'executrainsim', 'build');  
+app.use(express.static(buildPath));  
+  
+// Serve the React application  
+app.get('*', (req, res) => {  
+  res.sendFile(path.join(buildPath, 'index.html'));  
+});  
+    
+// External API Endpoints  
 const GPT_PORT = process.env.GPT_PORT || 5000;  
 const DALLE_PORT = process.env.DALLE_PORT || 5001;  
   
-const azureApiKey = process.env["AZURE_OPENAI_API_KEY"];  
-const chatGptEndpoint = `${process.env["AZURE_OPENAI_ENDPOINT"]}/openai/deployments/gpt-4o-mini/chat/completions?api-version=2023-03-15-preview`;  
-const dalleEndpoint = `${process.env["AZURE_OPENAI_ENDPOINT"]}/openai/deployments/Dalle3/images/generations?api-version=2024-05-01-preview`;  
+const azureApiKey = process.env.AZURE_OPENAI_API_KEY;  
+const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;  
+  
+const chatGptEndpoint = `${azureEndpoint}/openai/deployments/gpt-4o-mini/chat/completions?api-version=2023-03-15-preview`;  
+const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=2024-05-01-preview`;   
 
 // Utility function for logging requests  
 const logRequest = (context, data) => {  

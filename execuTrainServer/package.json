@@ -4,7 +4,9 @@
     "description": "Node.js server for ExecuTrainSim",
     "main": "server.js",
     "scripts": {
-      "start": "node server.js",
+      "start": "node server.js",  
+      "build": "react-scripts build",  
+      "deploy": "npm run build && npm prune --production",  
       "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "",

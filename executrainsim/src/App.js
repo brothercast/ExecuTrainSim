@@ -6,6 +6,10 @@ import Select from './components/ui/Select';
 import Progress from './components/ui/Progress';  
 import { Info, Star, ChevronLeft, ChevronRight } from 'lucide-react';  
 import './styles/AppStyles.css';  
+
+const API_BASE_URL = process.env.NODE_ENV === 'development'  
+  ? 'http://localhost:5000'  // Development backend URL  
+  : 'https://executrainsim.azurewebsites.net';
   
 const ExecutiveTrainingSimulator = () => {  
   const [role, setRole] = useState('');  
@@ -53,26 +57,24 @@ const ExecutiveTrainingSimulator = () => {
     localStorage.setItem('totalScore', totalScore);  
   }, [totalScore]);  
   
-  const fetchOpenAIResponse = async (input, endpointPath) => {  
-    try {  
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}${endpointPath}`, input, { headers: { 'Content-Type': 'application/json' } });  
-      return response.data;  
-    } catch (error) {  
-      console.error('Error fetching from OpenAI:', error);  
-      setErrorMessage('Failed to fetch data from the server.');  
-      return null;  
-    }  
+  const fetchOpenAIResponse = async (input, endpointPath) => {      
+    try {      
+      const response = await axios.post(`${API_BASE_URL}${endpointPath}`, input, { headers: { 'Content-Type': 'application/json' } });      
+      return response.data;      
+    } catch (error) {      
+      console.error('Error fetching from OpenAI:', error);      
+      throw new Error(error.response ? error.response.data : error.message);      
+    }      
   };  
   
   const generateImage = async (prompt) => {  
     try {  
-      const response = await axios.post(`${process.env.REACT_APP_IMAGE_API_URL}/api/dalle/image`, { prompt });  
+      const response = await axios.post(`${API_BASE_URL}/api/dalle/image`, { prompt });  
       setImagePath(response.data.imagePath);  
     } catch (error) {  
       console.error('Error generating image:', error.message);  
-      setErrorMessage('Failed to generate image.');  
     }  
-  };  
+  };   
   
   const generateSampleScenario = async () => {  
     const missingFields = [];  
@@ -475,7 +477,7 @@ const ExecutiveTrainingSimulator = () => {
                 <p><strong>Summary:</strong> {debriefing.summary}</p>  
                 <p><strong>Strengths:</strong> {debriefing.strengths ? debriefing.strengths.join(', ') : 'None'}</p>  
                 <p><strong>Areas for Improvement:</strong> {debriefing.areasForImprovement ? debriefing.areasForImprovement.join(', ') : 'None'}</p>  
-                <p><strong>Overall Score:</strong> {debriefing.overallScore}/100</p>  
+                <p><strong>Overall Score:</strong> {debriefing.overallScore}</p>  
                 <p><strong>Letter Grade:</strong> {debriefing.letterGrade}</p>  
                 <div className="stars-container">  
                   {[...Array(debriefing.stars || 0)].map((_, i) => (  
