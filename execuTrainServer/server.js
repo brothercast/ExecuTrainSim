@@ -1,4 +1,3 @@
-require('dotenv').config();  
 const express = require('express');  
 const axios = require('axios');  
 const path = require('path');  
@@ -21,25 +20,24 @@ app.use(cors(corsOptions));
 // Middleware  
 app.use(express.json()); // Express has built-in JSON parsing since v4.16.0  
   
-// Correctly set the path to the build directory  
+// Serve the React application  
 const buildPath = path.join(__dirname, '..', 'executrainsim', 'build');  
 app.use(express.static(buildPath));  
   
-// Serve the React application  
 app.get('*', (req, res) => {  
   res.sendFile(path.join(buildPath, 'index.html'));  
 });  
-    
+  
 // External API Endpoints  
-const GPT_PORT = process.env.GPT_PORT || 5000;  
+const GPT_PORT = process.env.PORT || 5000;  
 const DALLE_PORT = process.env.DALLE_PORT || 5001;  
   
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;  
 const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;  
   
 const chatGptEndpoint = `${azureEndpoint}/openai/deployments/gpt-4o-mini/chat/completions?api-version=2023-03-15-preview`;  
-const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=2024-05-01-preview`;   
-
+const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=2024-05-01-preview`;  
+  
 // Utility function for logging requests  
 const logRequest = (context, data) => {  
   console.log(`Sending request to ${context} with data:`, data);  
@@ -49,7 +47,6 @@ const logRequest = (context, data) => {
 const logError = (context, error) => {  
   console.error(`Error in ${context}:`, error.response ? error.response.data : error.message);  
 };  
-  
   
 // ChatGPT Endpoints  
 app.post('/api/openai/initial', async (req, res) => {  
@@ -99,7 +96,7 @@ app.post('/api/openai/initial', async (req, res) => {
     });  
   }  
 });  
-
+  
 app.post('/api/openai/custom_initial', async (req, res) => {  
   const { role, experienceLevel, difficulty, customScenario } = req.body;  
   const prompt = `Given the custom scenario description: "${customScenario}", generate a title, initial question, and options with consequences suitable for a ${role} with ${experienceLevel} experience at ${difficulty} difficulty. Return a JSON object with: { "scenario": { "title": "Scenario Title", "description": "${customScenario}", "initial_question": "The initial question for the user", "options": [ {"description": "Option 1 description"}, {"description": "Option 2 description"}, {"description": "Option 3 description"}, {"description": "Option 4 description"} ] } }`;  
@@ -140,7 +137,6 @@ app.post('/api/openai/custom_initial', async (req, res) => {
     });  
   }  
 });  
-
   
 app.post('/api/openai/followup', async (req, res) => {  
   const { role, experienceLevel, difficulty, scenario, question, answer, previousAnswers } = req.body;  
@@ -277,7 +273,7 @@ app.post('/api/dalle/image', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate image', details: error.message });  
   }  
 });  
-
+  
 const clientConfig = {  
   auth: {  
     clientId: config.authOptions.clientId,  
@@ -294,29 +290,29 @@ const clientConfig = {
     }  
   }  
 };  
-
+  
 const confidentialClientApplication = new msal.ConfidentialClientApplication(clientConfig);  
-
+  
 // Route to initiate authentication  
 app.get('/', (req, res) => {  
   const authCodeUrlParameters = {  
     scopes: ["user.read"],  
     redirectUri: config.request.authCodeUrlParameters.redirectUri,  
   };  
-
+  
   confidentialClientApplication.getAuthCodeUrl(authCodeUrlParameters).then((response) => {  
     res.redirect(response);  
   }).catch((error) => console.log(JSON.stringify(error)));  
 });  
-
+  
 // Route to handle authentication response  
 app.get('/redirect', (req, res) => {  
   const tokenRequest = {  
     code: req.query.code,  
     scopes: config.request.tokenRequest.scopes,  
     redirectUri: config.request.tokenRequest.redirectUri,  
-  };   
-
+  };  
+  
   confidentialClientApplication.acquireTokenByCode(tokenRequest).then((response) => {  
     console.log("\nResponse: \n:", response);  
     res.sendStatus(200);  
