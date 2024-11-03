@@ -1,0 +1,16 @@
+{  
+  "authOptions": {  
+    "clientId": "fef51106-ad95-4237-8140-dce6e808a49a",  
+    "authority": "https://login.microsoftonline.com/2ae2dbc5-a75a-4fdf-b0f6-bf431a0f8e5d"  
+  },  
+  "request": {  
+    "authCodeUrlParameters": {  
+      "scopes": ["openid", "profile", "email"],  
+      "redirectUri": "http://localhost:3000/redirect"  
+    },  
+    "tokenRequest": {  
+      "redirectUri": "http://localhost:3000/redirect",  
+      "scopes": ["openid", "profile", "email"]  
+    }  
+  }  
+}  

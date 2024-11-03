@@ -27,14 +27,11 @@ jobs:
           npm run build --if-present
           npm run test --if-present
 
-      - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
-
-      - name: Upload artifact for deployment job
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: './build'  # Point to the build directory
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,7 +40,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write
 
     steps:
       - name: Download artifact from build job
@@ -51,21 +48,15 @@ jobs:
         with:
           name: node-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
-      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_B8E9E6374BA94AE1A8A5B9CD96351DF1 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BA8FAF1E10A042E4A2F42989602D18AB }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_68A27ED84C3B49EEA196F0495783FD89 }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}  # Use the single AZURE_CREDENTIALS secret
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'ExecuTrainSim'
           slot-name: 'production'
-          package: .
-          
+          package: './build'  # Use the build directory as the deployment package

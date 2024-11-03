@@ -3,6 +3,8 @@ const express = require('express');
 const axios = require('axios');  
 const path = require('path');  
 const cors = require('cors');  
+const msal = require('@azure/msal-node');  
+const config = require('./config/customConfig.json');  
   
 const app = express();  
   
@@ -276,6 +278,53 @@ app.post('/api/dalle/image', async (req, res) => {
   }  
 });  
 
+const clientConfig = {  
+  auth: {  
+    clientId: config.authOptions.clientId,  
+    authority: config.authOptions.authority,  
+    clientSecret: process.env.CLIENT_SECRET  
+  },  
+  system: {  
+    loggerOptions: {  
+      loggerCallback(loglevel, message, containsPii) {  
+        console.log(message);  
+      },  
+      piiLoggingEnabled: false,  
+      logLevel: msal.LogLevel.Verbose,  
+    }  
+  }  
+};  
+
+const confidentialClientApplication = new msal.ConfidentialClientApplication(clientConfig);  
+
+// Route to initiate authentication  
+app.get('/', (req, res) => {  
+  const authCodeUrlParameters = {  
+    scopes: ["user.read"],  
+    redirectUri: config.request.authCodeUrlParameters.redirectUri,  
+  };  
+
+  confidentialClientApplication.getAuthCodeUrl(authCodeUrlParameters).then((response) => {  
+    res.redirect(response);  
+  }).catch((error) => console.log(JSON.stringify(error)));  
+});  
+
+// Route to handle authentication response  
+app.get('/redirect', (req, res) => {  
+  const tokenRequest = {  
+    code: req.query.code,  
+    scopes: config.request.tokenRequest.scopes,  
+    redirectUri: config.request.tokenRequest.redirectUri,  
+  };   
+
+  confidentialClientApplication.acquireTokenByCode(tokenRequest).then((response) => {  
+    console.log("\nResponse: \n:", response);  
+    res.sendStatus(200);  
+  }).catch((error) => {  
+    console.log(error);  
+    res.status(500).send(error);  
+  });  
+});  
   
 app.listen(GPT_PORT, () => {  
   console.log(`GPT server is running on port ${GPT_PORT}`);  
