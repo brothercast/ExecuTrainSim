@@ -25,7 +25,7 @@ jobs:
         npm run build  
   
     - name: Install dependencies for back-end  
-      working-directory: ./execuTrainServer  
+      working-directory: execuTrainServer  
       run: |  
         npm install  
   
@@ -35,7 +35,7 @@ jobs:
         name: node-app  
         path: |  
           executrainsim/build  
-          ../execuTrainServer  
+          execuTrainServer  
   
   deploy:  
     runs-on: ubuntu-latest  
