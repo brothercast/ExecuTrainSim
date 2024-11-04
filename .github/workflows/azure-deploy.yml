@@ -18,10 +18,14 @@ jobs:
       with:  
         node-version: '18.x'  
   
-    - name: Install dependencies and build front-end  
+    - name: Install dependencies for front-end  
       working-directory: ./executrainsim  
       run: |  
         npm install  
+  
+    - name: Build front-end  
+      working-directory: ./executrainsim  
+      run: |  
         npm run build  
   
     - name: Install dependencies for back-end  
