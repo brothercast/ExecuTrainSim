@@ -1,5 +1,14 @@
-{
-  "dependencies": {
-    "@azure/msal-node": "^2.15.0"
-  }
-}
+{  
+  "name": "executrain",  
+  "version": "1.0.0",  
+  "scripts": {  
+    "start": "concurrently \"npm run start-react --prefix executrainsim\" \"npm run start-server --prefix executrainserver\"",  
+    "start-react": "npm start --prefix executrainsim",  
+    "start-server": "npm start --prefix executrainserver",  
+    "build": "npm run build --prefix executrainsim"  
+  },  
+  "dependencies": {  
+    "@azure/msal-node": "^2.15.0",  
+    "concurrently": "^9.0.1"  
+  }  
+}  
