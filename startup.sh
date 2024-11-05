@@ -1,5 +1,8 @@
 #!/bin/bash  
   
+# Ensure the script itself is executable  
+chmod +x "$0" || { echo "Failed to set executable permissions for the script"; exit 1; }  
+  
 # Ensure working directory is set correctly  
 cd "/home/site/wwwroot" || { echo "Failed to change directory to /home/site/wwwroot"; exit 1; }  
   
@@ -11,22 +14,26 @@ if [ -z "$PORT" ]; then
   export PORT=8080  
 fi  
   
-# Navigate to execuTrainServer, install dependencies, and start the server  
-if [ -d "execuTrainServer" ]; then  
-  cd execuTrainServer || { echo "Failed to change directory to execuTrainServer"; exit 1; }  
-  npm install || { echo "Failed to install npm dependencies in execuTrainServer"; exit 1; }  
-  pm2 start server.js --name "executrain-server" || { echo "Failed to start pm2 process for execuTrainServer"; exit 1; }  
-  cd ..  
-else  
-  echo "Directory execuTrainServer does not exist"; exit 1;  
-fi  
+# Function to install dependencies and start the server for a given directory  
+start_service() {  
+  local service_dir="$1"  
+  local start_command="$2"  
+  local service_name="$3"  
+    
+  if [ -d "$service_dir" ]; then  
+    cd "$service_dir" || { echo "Failed to change directory to $service_dir"; exit 1; }  
+    npm install || { echo "Failed to install npm dependencies in $service_dir"; exit 1; }  
+    eval "$start_command" || { echo "Failed to start $service_name"; exit 1; }  
+    cd - > /dev/null || { echo "Failed to change back to previous directory"; exit 1; }  
+  else  
+    echo "Directory $service_dir does not exist"; exit 1;  
+  fi  
+}  
   
-# Navigate to executrainsim, install dependencies, build the project, and serve it  
-if [ -d "executrainsim" ]; then  
-  cd executrainsim || { echo "Failed to change directory to executrainsim"; exit 1; }  
-  npm install || { echo "Failed to install npm dependencies in executrainsim"; exit 1; }  
-  npm run build || { echo "Failed to build executrainsim"; exit 1; }  
-  pm2 serve build 3000 --name "executrainsim" --spa || { echo "Failed to start pm2 process for executrainsim"; exit 1; }  
-else  
-  echo "Directory executrainsim does not exist"; exit 1;  
-fi  
+# Start execuTrainServer  
+start_service "execuTrainServer" "pm2 start server.js --name 'executrain-server'" "execuTrainServer"  
+  
+# Start executrainsim  
+start_service "executrainsim" "npm run build && pm2 serve build 3000 --name 'executrainsim' --spa" "executrainsim"  
+  
+echo "All services started successfully."  
