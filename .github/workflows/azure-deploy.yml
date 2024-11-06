@@ -19,22 +19,18 @@ jobs:
           cache: 'npm'
 
       - name: Build frontend
+        working-directory: ./executrainsim
         run: |
-          cd executrainsim
-          # Using install instead of ci since lock file needs updating
           npm install
           npm run build
-          cd ..
 
       - name: Build backend
+        working-directory: ./execuTrainServer
         run: |
-          cd execuTrainServer
           npm install
-          cd ..
 
       - name: Prepare deployment package
         run: |
-          # Create deployment directory
           mkdir -p deploy
           
           # Copy frontend build
@@ -92,9 +88,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          # Wait for a few seconds to allow the deployment to stabilize
           sleep 30
-          # Use curl with retry logic
           for i in {1..3}; do
             if curl -f -s -I ${{ steps.deploy-to-webapp.outputs.webapp-url }}; then
               echo "Deployment verified successfully"
