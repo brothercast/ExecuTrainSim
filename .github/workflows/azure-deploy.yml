@@ -23,7 +23,8 @@ jobs:
           npm install --prefix executrainsim  
       - name: Build front-end  
         run: |  
-          npm run build --prefix executrainsim  
+          cd executrainsim  
+          npm run build  
       - name: Install dependencies for back-end  
         run: |  
           npm install --prefix execuTrainServer  
