@@ -25,7 +25,7 @@ jobs:
           npm run build  
       - name: Install dependencies for back-end  
         run: |  
-          cd execuTrainServer  
+          cd ../executrainserver  
           npm install  
       - name: Upload build artifact  
         uses: actions/upload-artifact@v4  
