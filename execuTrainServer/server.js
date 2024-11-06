@@ -280,3 +280,7 @@ const port = process.env.PORT || GPT_PORT;
 app.listen(port, () => {  
   console.log(`Server is running on port ${port}`);  
 });  
+
+app.get('/health', (req, res) => {  
+  res.status(200).send('Healthy');  
+});  
