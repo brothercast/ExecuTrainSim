@@ -21,14 +21,15 @@ jobs:
       - name: Build frontend
         run: |
           cd executrainsim
-          npm ci
+          # Using install instead of ci since lock file needs updating
+          npm install
           npm run build
           cd ..
 
       - name: Build backend
         run: |
           cd execuTrainServer
-          npm ci
+          npm install
           cd ..
 
       - name: Prepare deployment package
@@ -42,9 +43,13 @@ jobs:
           # Copy backend files
           cp -r execuTrainServer deploy/execuTrainServer
           
-          # Copy startup script and other necessary files
+          # Copy startup script and package files
           cp startup.sh deploy/
           cp package.json deploy/
+          
+          # Copy node_modules for both frontend and backend
+          cp -r executrainsim/node_modules deploy/executrainsim/
+          cp -r execuTrainServer/node_modules deploy/execuTrainServer/
           
           # Ensure startup script is executable
           chmod +x deploy/startup.sh
