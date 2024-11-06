@@ -19,7 +19,7 @@ start_service() {
   local service_dir="$1"  
   local start_command="$2"  
   local service_name="$3"  
-    
+  
   if [ -d "$service_dir" ]; then  
     cd "$service_dir" || { echo "Failed to change directory to $service_dir"; exit 1; }  
     npm install || { echo "Failed to install npm dependencies in $service_dir"; exit 1; }  
