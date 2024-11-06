@@ -38,9 +38,6 @@ jobs:
           # Copy startup script and package files  
           cp startup.sh deploy/  
           cp package.json deploy/  
-          # Copy node_modules for both frontend and backend  
-          cp -r executrainsim/node_modules deploy/executrainsim/  
-          cp -r execuTrainServer/node_modules deploy/execuTrainServer/  
           # Ensure startup script is executable  
           chmod +x deploy/startup.sh  
   
