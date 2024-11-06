@@ -2,9 +2,9 @@
   "name": "executrain",  
   "version": "1.0.0",  
   "scripts": {  
-    "start": "concurrently \"npm run start-react --prefix executrainsim\" \"npm run start-server --prefix executrainserver\"",  
+    "start": "concurrently \"npm run start-react --prefix executrainsim\" \"npm run start-server --prefix execuTrainServer\"",  
     "start-react": "npm start --prefix executrainsim",  
-    "start-server": "npm start --prefix executrainserver",  
+    "start-server": "npm start --prefix execuTrainServer",  
     "build": "npm run build --prefix executrainsim"  
   },  
   "dependencies": {  
