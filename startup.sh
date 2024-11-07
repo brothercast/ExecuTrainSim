@@ -1,4 +1,5 @@
 #!/bin/bash  
+  
 # Ensure the script itself is executable  
 chmod +x "$0" || { echo "Failed to set executable permissions for the script"; exit 1; }  
   
