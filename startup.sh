@@ -36,4 +36,4 @@ start_service "execuTrainServer" "pm2 start server.js --name 'executrain-server'
 # Start executrainsim  
 start_service "executrainsim" "npm run build && pm2 serve build 3000 --name 'executrainsim' --spa" "executrainsim"  
   
-echo "All services started successfully."  
+echo "*All* services started successfully."  
