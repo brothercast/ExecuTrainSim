@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_RESOURCE_GROUP: 'rg-ExecuTrainSim'  # Hardcode the resource group name here
+  AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'  # Hardcode the resource group name here
 
 jobs:
   build:
