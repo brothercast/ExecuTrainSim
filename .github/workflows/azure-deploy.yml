@@ -71,15 +71,22 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
+      # Get resource group name from Azure Web App
+      - name: Get Resource Group Name
+        id: get-rg
+        run: |
+          RG_NAME=$(az webapp show --name ExecuTrainSim --query resourceGroup -o tsv)
+          echo "RESOURCE_GROUP=$RG_NAME" >> $GITHUB_ENV
+      
       - name: Stop WebApp
         run: |
-          az webapp stop --name ExecuTrainSim --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          az webapp stop --name ExecuTrainSim --resource-group $RESOURCE_GROUP
           sleep 30
       
       - name: Clean WebApp
         run: |
-          az webapp deployment list --name ExecuTrainSim --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
-          az webapp deployment source delete --name ExecuTrainSim --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          az webapp deployment list --name ExecuTrainSim --resource-group $RESOURCE_GROUP
+          az webapp deployment source delete --name ExecuTrainSim --resource-group $RESOURCE_GROUP
           sleep 30
       
       - name: Deploy to Azure Web App
@@ -92,7 +99,7 @@ jobs:
       
       - name: Start WebApp
         run: |
-          az webapp start --name ExecuTrainSim --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+          az webapp start --name ExecuTrainSim --resource-group $RESOURCE_GROUP
           sleep 30
       
       - name: Verify deployment
