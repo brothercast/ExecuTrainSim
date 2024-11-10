@@ -39,17 +39,21 @@ body {
 }  
   
 .content-grid {  
-  display: grid;  
-  grid-template-columns: 1fr 3fr;  
-  gap: 20px;  
+  display: flex;  
   margin-top: 80px;  
 }  
   
 .left-column {  
-  background-color: #f8f9fa;  
+  width: 25%;  
+  padding: 20px;  
+}  
+  
+.main-content {  
+  width: 75%;  
+  background-color: #ffffff;  
   padding: 20px;  
   border-radius: 8px;  
-  margin-bottom: 20px; /* Add margin at the bottom for spacing between elements */  
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  
 }  
   
 .step-box {  
@@ -65,7 +69,71 @@ body {
   margin-bottom: 20px; /* Ensure space between the card and other elements */  
 }  
   
-
+.modules-grid {  
+  display: flex;  
+  justify-content: space-around;  
+  flex-wrap: wrap;  
+  margin-top: 20px;  
+}  
+  
+.module-card {  
+  background-color: white;  
+  border-radius: 8px;  
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  
+  width: 250px;  
+  padding: 20px;  
+  margin: 10px;  
+  cursor: pointer;  
+  transition: transform 0.2s;  
+  text-align: center;  
+}  
+  
+.module-card:hover {  
+  transform: translateY(-10px);  
+}  
+  
+.module-icon-container {  
+  display: flex;  
+  justify-content: center;  
+  margin-bottom: 15px;  
+}  
+  
+.module-title {  
+  font-size: 18px;  
+  font-weight: bold;  
+  margin-bottom: 10px;  
+  color: #333;  
+}  
+  
+.module-description {  
+  font-size: 14px;  
+  color: #666;  
+}  
+  
+.module-container {  
+  display: flex;  
+}  
+  
+.left-column {  
+  width: 30%;  
+  padding: 20px;  
+  background-color: #f8f9fa;  
+  border-radius: 8px;  
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  
+  margin-right: 20px;  
+}  
+  
+.module-info {  
+  text-align: center;  
+}  
+  
+.main-content {  
+  width: 70%;  
+  background-color: #ffffff;  
+  padding: 20px;  
+  border-radius: 8px;  
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  
+}  
 
 .custom-role-input {  
   margin-top: 10px;  
@@ -208,9 +276,6 @@ body {
 .feedback-title .icon {  
   margin-right: 5px;  
 }  
-
-
- 
 
   
 .scenario-description, .question-title {  
