@@ -1,0 +1,35 @@
+/* src/components/effects/SevenSegmentDisplay.css */  
+  
+/* Style for the container of the seven-segment display */  
+.seven-segment-container {  
+    position: relative;  
+    width: 50px; /* Total width of the display */  
+    height: 90px; /* Total height of the display */  
+    margin: 10px;  
+    background-color: black; /* Background to enhance the glow effect */  
+  }  
+    
+  /* Common style for all segments */  
+  .segment {  
+    position: absolute;  
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;  
+    background-color: transparent;  
+  }  
+    
+  /* Style for horizontal segments (a, d, g) */  
+  .segment-horizontal {  
+    height: 5px;  
+    width: 40px;  
+  }  
+    
+  /* Style for vertical segments (b, c, e, f) */  
+  .segment-vertical {  
+    width: 5px;  
+    height: 40px;  
+  }  
+    
+  /* Active segment style for glowing effect */  
+  .segment-active {  
+    background-color: orange;  
+    box-shadow: 0 0 10px red, 0 0 20px red;  
+  }  

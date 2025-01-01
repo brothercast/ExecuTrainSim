@@ -1,6 +1,8 @@
+// src/components/modules/BCPModule.js  
+  
 import React, { useState } from 'react';  
 import axios from 'axios';  
-import '../styles/AppStyles.css';  
+import '../../styles/AppStyles.css';  
   
 const disasterOptions = [  
   { value: 'earthquake', label: 'Earthquake' },  
@@ -118,6 +120,12 @@ const BCPModule = ({ role, experienceLevel, difficulty }) => {
       )}  
     </div>  
   );  
+};  
+  
+export const metadata = {  
+  title: 'BCP Module',  
+  description: 'Develop and implement effective business continuity plans.',  
+  component: BCPModule,  
 };  
   
 export default BCPModule;  

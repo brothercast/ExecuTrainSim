@@ -1,0 +1,1074 @@
+Welcome to the ExecuTrainSimulator! This cutting-edge React application is crafted to deliver dynamic, multi-modal training simulations tailored for executives at various levels. Leveraging the power of ChatGPT, each module offers a unique, interactive learning experience that adapts to the user's decisions and actions.
+
+The ExecuTrainSimulator encompasses a variety of training modules, each with its bespoke approach to evaluating and enhancing executive skills:
+
+Multiple Choice Quizzes: Designed to test and reinforce knowledge in specific areas.
+Simulations of Real-World Events: Provide immersive scenarios that require strategic decision-making and adaptability.
+Simulated Negotiations: Challenge users to apply negotiation techniques in realistic settings.
+Interview Techniques: Allow users to practice and refine their interviewing skills in a simulated environment.
+
+Each module is crafted to assess the user's strengths and weaknesses, providing personalized feedback that enhances 
+the learning experience. Users receive detailed evaluations upon completion, highlighting areas of strength 
+and opportunities for growth. Furthermore, they can compare their results with peers or revisit scenarios from different roles to gain a broader perspective.
+
+Here's the latest React app we've built so far. The app is stored in the executrainsim folder in the app.js file of a react folder located in C:\Users\Anthonio\Data Science\ExecuTrainSim\executrainsim>
+Here's the structure for the application:
+
+src/  
+  components/  
+    modules/  
+      CybersecurityModule.js  
+      BCPModule.js  
+      NegotiationModule.js  
+      PitchModule.js  
+      InterviewModule.js  
+      CommunicationModule.js  
+      BoardroomModule.js  
+      IndustrySpecificModule.js  
+      RealLifeCasesModule.js  
+  App.js  
+
+The ExecutiveTrainingServer (server.js) is saved in C:\Users\Anthonio\Data Science\ExecuTrainSim\executrainserver>
+
+Each module independently manages its logic and API endpoints, thanks to a modular architecture that ensures scalability 
+and ease of maintenance. This design allows for seamless integration of new features and modules as the simulator evolves.
+
+The core application logic resides in App.js, which serves as the main entry point. The server-side logic, initially centralized 
+in server.js, has been refactored to empower each module to construct and manage its endpoints, enhancing flexibility and reducing complexity.
+
+The project is housed at C:\Users\Anthonio\Data Science\ExecuTrainSim\executrainsim, with the server component located in 
+C:\Users\Anthonio\Data Science\ExecuTrainSim\executrainserver. 
+As the ExecuTrainSimulator continues to develop, it remains committed to offering an engaging, robust, and 
+personalized training platform, equipping executives with the skills needed to navigate the complexities of the corporate world.
+
+🟩 app.js
+import React, { useState } from 'react';  
+import './styles/AppStyles.css';  
+import ModuleCard from './components/ModuleCard';  
+  
+// Dynamically import all module files from the modules directory  
+const moduleContext = require.context('./components/modules', false, /\.js$/);  
+  
+// Extract metadata from each module with error handling  
+const modulesMetadata = moduleContext  
+  .keys()  
+  .map((modulePath) => {  
+    try {  
+      const module = moduleContext(modulePath);  
+      return module.metadata;  
+    } catch (error) {  
+      console.error(`Failed to load metadata from ${modulePath}:`, error);  
+      return null;  
+    }  
+  })  
+  .filter(Boolean); // Remove invalid entries  
+  
+const App = () => {  
+  const [selectedModule, setSelectedModule] = useState(null);  
+  
+  const handleCardClick = (module) => {  
+    // Wrap the component creation in a function to ensure it's a valid component  
+    setSelectedModule(() => () =>  
+      React.createElement(module.component, {  
+        onReturn: handleReturnToLibrary,  
+        role: 'defaultRole', // Ensure a role is always passed  
+        // Add any other required props here  
+      })  
+    );  
+  };  
+  
+  const handleReturnToLibrary = () => {  
+    setSelectedModule(null);  
+  };  
+  
+  return (  
+    <div className="app-container">  
+      <header className="app-header">  
+        <div className="header-box">  
+          <span className="header-title">  
+            {selectedModule ? "Simulation" : "Simulation Library"}  
+          </span>  
+        </div>  
+      </header>  
+      <div className="container">  
+        {selectedModule ? (  
+          React.createElement(selectedModule)  
+        ) : (  
+          <>  
+            <h1 className="title">Simulation Library</h1>  
+            <div className="module-cards-container">  
+              {modulesMetadata.length > 0 ? (  
+                modulesMetadata.map((module, index) => (  
+                  <ModuleCard  
+                    key={index}  
+                    title={module.title}  
+                    description={module.description}  
+                    imageUrl={module.imageUrl}  
+                    onClick={() => handleCardClick(module)}  
+                  />  
+                ))  
+              ) : (  
+                <p>No simulations available at the moment.</p>  
+              )}  
+            </div>  
+          </>  
+        )}  
+      </div>  
+    </div>  
+  );  
+};  
+  
+export default App;  
+
+🟪server.js
+require('dotenv').config();  
+const express = require('express');  
+const axios = require('axios');  
+const cors = require('cors');  
+const { AzureOpenAI } = require('openai');  
+  
+const app = express();  
+  
+const GPT_PORT = process.env.GPT_PORT || 5000;  
+const DALLE_PORT = process.env.DALLE_PORT || 5001;  
+  
+// Load environment variables  
+const azureApiKey = process.env.AZURE_OPENAI_API_KEY;  
+const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;  
+const azureDeploymentName = process.env.AZURE_DEPLOYMENT_NAME;  
+const azureOpenAiAPIVersion = process.env.AZURE_OPENAI_API_VERSION;  
+const azureAssistantAPIVersion = process.env.AZURE_ASSISTANT_API_VERSION;  
+const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;  
+  
+// Define API endpoints  
+const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;  
+const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;  
+  
+// Initialize Azure OpenAI Client  
+const getClient = () => {  
+  console.log('Initializing Azure OpenAI Client');  
+  return new AzureOpenAI({  
+    endpoint: azureEndpoint,  
+    apiVersion: azureAssistantAPIVersion,  
+    apiKey: azureApiKey,  
+  });  
+};  
+  
+const assistantsClient = getClient();  
+  
+app.use(cors());  
+app.use(express.json());  
+  
+// ChatGPT Text Generation Endpoint  
+app.post('/api/generate', async (req, res) => {  
+  const { messages, temperature, max_tokens } = req.body;  
+  
+  console.log('API Generate Request:', JSON.stringify(req.body, null, 2)); // Log request body  
+  
+  try {  
+    const response = await axios.post(chatGptEndpoint, {  
+      model: azureDeploymentName,  
+      messages,  
+      temperature,  
+      max_tokens  
+    }, {  
+      headers: {  
+        'Content-Type': 'application/json',  
+        'api-key': azureApiKey  
+      }  
+    });  
+  
+    console.log('API Generate Response:', JSON.stringify(response.data, null, 2)); // Log response data  
+  
+    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {  
+      let scenarioData = response.data.choices[0].message.content;  
+      scenarioData = scenarioData.replace(/```json|```/g, '');  
+  
+      try {  
+        const parsedScenario = JSON.parse(scenarioData);  
+        res.json(parsedScenario);  
+      } catch (parseError) {  
+        res.status(500).json({  
+          error: 'Failed to parse JSON response',  
+          details: parseError.message  
+        });  
+      }  
+    } else {  
+      throw new Error('Unexpected response structure');  
+    }  
+  } catch (error) {  
+    console.error('API Generate Error:', error);  
+    res.status(500).json({  
+      error: 'Failed to generate scenario',  
+      details: error.response ? error.response.data : error.message  
+    });  
+  }  
+});  
+  
+// DALL-E Image Generation Endpoint  
+app.post('/api/dalle/image', async (req, res) => {  
+  const { prompt } = req.body;  
+  
+  const requestBody = {  
+    prompt,  
+    size: "1024x1024",  
+    n: 1,  
+    quality: "standard",  
+    style: "vivid"  
+  };  
+  
+  try {  
+    const response = await axios.post(dalleEndpoint, requestBody, {  
+      headers: {  
+        'Content-Type': 'application/json',  
+        'api-key': azureApiKey  
+      }  
+    });  
+  
+    if (response.data && response.data.data.length > 0) {  
+      const imageUrl = response.data.data[0].url;  
+      res.json({ imagePath: imageUrl });  
+    } else {  
+      res.status(500).json({ error: 'No images generated.' });  
+    }  
+  } catch (error) {  
+    res.status(500).json({ error: 'Failed to generate image', details: error.message });  
+  }  
+});  
+  
+// Assistant API Respond Endpoint  
+app.post('/api/generate', async (req, res) => {  
+  const { messages, temperature, max_tokens } = req.body;  
+  
+  console.log('API Generate Request:', JSON.stringify(req.body, null, 2)); // Log request body  
+  
+  try {  
+    const response = await axios.post(chatGptEndpoint, {  
+      model: azureDeploymentName,  
+      messages,  
+      temperature,  
+      max_tokens  
+    }, {  
+      headers: {  
+        'Content-Type': 'application/json',  
+        'api-key': azureApiKey  
+      }  
+    });  
+  
+    console.log('API Generate Response:', JSON.stringify(response.data, null, 2)); // Log response data  
+  
+    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {  
+      let scenarioData = response.data.choices[0].message.content;  
+      scenarioData = scenarioData.replace(/```json|```/g, '');  
+  
+      try {  
+        const parsedScenario = JSON.parse(scenarioData);  
+        res.json(parsedScenario);  
+      } catch (parseError) {  
+        res.status(500).json({  
+          error: 'Failed to parse JSON response',  
+          details: parseError.message  
+        });  
+      }  
+    } else {  
+      throw new Error('Unexpected response structure');  
+    }  
+  } catch (error) {  
+    console.error('API Generate Error:', error);  
+    res.status(500).json({  
+      error: 'Failed to generate scenario',  
+      details: error.response ? error.response.data : error.message  
+    });  
+  }  
+});  
+  
+console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);  
+console.log(`DALL-E Endpoint: ${dalleEndpoint}`);  
+  
+app.listen(GPT_PORT, () => {  
+  console.log(`GPT is running on port ${GPT_PORT}`);  
+});  
+  
+app.listen(DALLE_PORT, () => {  
+  console.log(`Dalle is running on port ${DALLE_PORT}`);  
+});  
+
+🧱 NegotiationModule.js
+// NegotiationModule.js
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import Button from '../ui/Button';
+import Progress from '../ui/Progress';
+import Select, { SelectItem } from '../ui/Select';
+import { Info, Star, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
+import '../../styles/AppStyles.css';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const IMAGE_API_URL = process.env.REACT_APP_IMAGE_API_URL || 'http://localhost:5001';
+const ASSISTANT_ID = 'asst_cOZnqlx9UdiZWXtmnPtib5EO';  
+
+const negotiationTypes = [
+  { value: 'contract', title: 'Contract/Service Agreement' },
+  { value: 'credit', title: 'Credit/Lending' },
+  { value: 'divorce', title: 'Divorce/Family Settlement' },
+  { value: 'employment', title: 'Employment/Termination Package' },
+  { value: 'freelance', title: 'Freelance/Independent Contractor' },
+  { value: 'healthcare', title: 'Healthcare/Medical Billing' },
+  { value: 'housing', title: 'Housing/Rental Agreement' },
+  { value: 'intellectual_property', title: 'Intellectual Property' },
+  { value: 'mergers_acquisitions', title: 'Mergers & Acquisitions' },
+  { value: 'partnership', title: 'Partnership/Joint Venture' },
+  { value: 'real_estate', title: 'Real Estate Transactions' },
+  { value: 'supplier', title: 'Supplier/Vendor Agreement' },
+  { value: 'technology', title: 'Technology Licensing' },
+  { value: 'custom', title: 'Custom Area' }
+];
+
+const negotiationSubTypes = {
+  contract: [
+    'Consulting Agreement',
+    'Employment Contract',
+    'Joint Venture Agreement',
+    'Licensing Agreement',
+    'Non-Disclosure Agreement',
+    'Service Level Agreement',
+    'Terms of Service',
+    'Work for Hire Agreement'
+  ],
+  credit: [
+    'Business Loan',
+    'Credit Card Agreement',
+    'Debt Settlement',
+    'Line of Credit',
+    'Mortgage',
+    'Personal Loan'
+  ],
+  divorce: [
+    'Alimony Agreement',
+    'Child Custody',
+    'Child Support',
+    'Mediation Agreements',
+    'Property Division',
+    'Visitation Rights'
+  ],
+  employment: [
+    'Equity Compensation',
+    'Performance Bonus',
+    'Relocation Package',
+    'Remote Work Agreement',
+    'Salary Negotiation',
+    'Termination Settlement'
+  ],
+  freelance: [
+    'Confidentiality Terms',
+    'Copyright Ownership',
+    'Milestone Deadlines',
+    'Payment Terms',
+    'Project Scope',
+    'Retainer Agreements'
+  ],
+  healthcare: [
+    'Billing Dispute',
+    'Insurance Claims',
+    'Medical Debt Forgiveness',
+    'Medical Service Fees',
+    'Out-of-Network Coverage',
+    'Telehealth Policy',
+    'Treatment Authorization'
+  ],
+  housing: [
+    'Lease Renewal',
+    'Maintenance Responsibilities',
+    'Rent Increase',
+    'Security Deposit',
+    'Subletting Agreements',
+    'Tenant Rights'
+  ],
+  intellectual_property: [
+    'Copyright Infringement',
+    'Intellectual Asset Valuation',
+    'Patent Licensing',
+    'Royalty Agreements',
+    'Trade Secret Protection',
+    'Trademark Dispute'
+  ],
+  mergers_acquisitions: [
+    'Anti-Compete Agreements',
+    'Asset Purchase',
+    'Buyout Clauses',
+    'Due Diligence Agreements',
+    'Merger Terms',
+    'Stock Purchase'
+  ],
+  partnership: [
+    'Equity Split',
+    'Exit Strategy',
+    'Partnership Dissolution',
+    'Profit Sharing',
+    'Responsibility Allocation',
+    'Voting Rights'
+  ],
+  real_estate: [
+    'Development Contracts',
+    'Easement Rights',
+    'Lease Agreement',
+    'Mortgage Terms',
+    'Property Sale',
+    'Zoning Disputes'
+  ],
+  supplier: [
+    'Bulk Order',
+    'Delivery Schedule',
+    'Exclusive Supplier Agreements',
+    'Payment Terms',
+    'Quality Standards',
+    'Termination Clauses'
+  ],
+  technology: [
+    'API Access Terms',
+    'AI Model License',
+    'Data Privacy Agreement',
+    'Maintenance and Support',
+    'SaaS Subscription Terms',
+    'Service Contract',
+    'Software License'
+  ],
+  
+};
+  
+let lastTimestamp = new Date();  
+const generateSequentialTimestamp = () => {  
+  const newTimestamp = new Date(lastTimestamp.getTime() + 5 * 60 * 1000);  
+  lastTimestamp = newTimestamp;  
+  const options = { weekday: 'long', hour: 'numeric', minute: 'numeric', hour12: true };  
+  return newTimestamp.toLocaleTimeString('en-US', options);  
+};  
+  
+const NegotiationModule = ({ onReturn }) => {  
+  const [negotiationType, setNegotiationType] = useState('');  
+  const [negotiationSubType, setNegotiationSubType] = useState('');  
+  const [desiredOutcome, setDesiredOutcome] = useState('');  
+  const [scenario, setScenario] = useState(null);  
+  const [roles, setRoles] = useState(['Role 1', 'Role 2']);  
+  const [selectedRole, setSelectedRole] = useState('');  
+  const [chatHistory, setChatHistory] = useState([]);  
+  const [userDraft, setUserDraft] = useState('');  
+  const [progress, setProgress] = useState(0);  
+  const [simulationComplete, setSimulationComplete] = useState(false);  
+  const [debriefing, setDebriefing] = useState(null);  
+  const [errorMessage, setErrorMessage] = useState('');  
+  const [isFetchingOpponent, setIsFetchingOpponent] = useState(false);  
+  const [isFetchingUser, setIsFetchingUser] = useState(false); 
+  const [isFetchingScenario, setIsFetchingScenario] = useState(false);  
+  const [images, setImages] = useState({});  
+  const [responseOptions, setResponseOptions] = useState([]);  
+  const [negotiationStarted, setNegotiationStarted] = useState(false);  
+  const [currentTurnIndex, setCurrentTurnIndex] = useState(1);  
+  const [isUserTurn, setIsUserTurn] = useState(true);  
+  const [isFetching, setIsFetching] = useState(false);
+  const selectedRoleObject = scenario?.roles?.find(role => role.name === selectedRole);    
+  
+  useEffect(() => {  
+    if (chatHistory.length > 0) {  
+      setCurrentTurnIndex(chatHistory.length - 1);  
+    }  
+  }, [chatHistory]);  
+  
+  const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {  
+    if (isUserAction) {  
+      setIsFetchingUser(true);  
+    } else {  
+      setIsFetchingOpponent(true);  
+    }  
+    try {  
+      const endpoint = `${API_BASE_URL}${endpointPath}`;  
+      const response = await axios.post(endpoint, input, {  
+        headers: { 'Content-Type': 'application/json' },  
+      });  
+  
+      console.log('OpenAI Raw Response:', response.data);  
+  
+      return typeof response.data === 'string' ? JSON.parse(response.data) : response.data;  
+    } catch (error) {  
+      console.error('Error fetching from OpenAI:', error.message);  
+      setErrorMessage(  
+        error.response?.data?.details || 'Failed to communicate with the server. Please try again.'  
+      );  
+      return null;  
+    } finally {  
+      if (isUserAction) {  
+        setIsFetchingUser(false);  
+      } else {  
+        setIsFetchingOpponent(false);  
+      }  
+    }  
+  };  
+  
+  const generateScenario = async () => {  
+    setIsFetchingScenario(true); // Start fetching  
+    setErrorMessage('');  
+  
+    try {  
+      const selectedType = negotiationTypes.find((type) => type.value === negotiationType)?.title;  
+      const selectedSubType = negotiationSubTypes[negotiationType]?.find((subType) => subType === negotiationSubType);  
+  
+      if (!selectedType) {  
+        setErrorMessage('Please select a negotiation type.');  
+        setIsFetchingScenario(false);  
+        return;  
+      }  
+  
+      const prompt = `Create a negotiation scenario for a ${selectedType} negotiation${selectedSubType ? ` with a focus on ${selectedSubType}` : ''}. Provide a detailed description of the scenario, including the context, roles with realistic names, and objectives. Ensure that the scenario is returned as strict JSON in the following format: {"scenario": {"title": "string", "context": "string", "roles": [{"name": "string", "role": "string"}], "objective": "string", "desiredOutcomes": ["string"]}}`;  
+  
+      const response = await axios.post(`${API_BASE_URL}/api/generate`, {  
+        messages: [{ role: 'system', content: prompt }],  
+        temperature: 0.7,  
+        max_tokens: 1850,  
+      });  
+  
+      if (response.data?.scenario) {  
+        setScenario(response.data.scenario);  
+      } else {  
+        setErrorMessage('Failed to generate scenario. Please try again.');  
+      }  
+    } catch (error) {  
+      console.error('Error generating scenario:', error);  
+      setErrorMessage('An error occurred while generating the scenario.');  
+    } finally {  
+      setIsFetchingScenario(false); // Stop fetching  
+    }  
+  }; 
+  
+  const generateImage = async (title, context) => {  
+    const prompt = `Illustrate the negotiation scenario titled "${title}" with context: "${context}". The illustration should resemble colorful, diverse 1990s stock art with simple, clean lines and a focus on clarity.`;  
+    try {  
+      const endpoint = `${IMAGE_API_URL}/api/dalle/image`;  
+      const response = await axios.post(endpoint, { prompt });  
+      setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));  
+    } catch (error) {  
+      console.error('Error generating image:', error.message);  
+      setErrorMessage('Failed to generate image. Please try again.');  
+    }  
+  };  
+  
+  const startNegotiation = async () => {  
+    if (!selectedRole || !desiredOutcome) {  
+      setErrorMessage('Please select a role and desired outcome.');  
+      return;  
+    }  
+    setNegotiationStarted(true);  
+  
+    try {  
+      const userRole = scenario.roles.find((r) => r.name === selectedRole);  
+      const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);  
+  
+      const openingPrompt = `Write an opening message for the negotiation titled "${scenario.title}". Address ${userRole.name} personally, considering their role as "${userRole.role}". The message should be from ${opponentRole.name}, in their role as "${opponentRole.role}". Use a familiar, yet professional tone that reflects the context: "${scenario.context}". Ensure the tone and content align with the negotiation's objective and desired outcomes. Return the response in JSON format: { "message": "string" }`;  
+  
+      const response = await fetchOpenAIResponse(  
+        {  
+          messages: [{ role: 'system', content: openingPrompt }],  
+          temperature: 0.7,  
+          max_tokens: 500,  
+        },  
+        '/api/generate'  
+      );  
+  
+      const opponentMessageContent = response?.message || response?.choices?.[0]?.message?.content || 'Unable to fetch opening message.';  
+      addMessageToHistory(opponentMessageContent, 'opponent');  
+      setProgress(20);  
+      generateResponseOptions(scenario?.context);  
+    } catch (error) {  
+      console.error('Error generating opening message:', error);  
+      setErrorMessage('Failed to generate the opponent’s opening message. Please try again.');  
+    }  
+  };  
+  
+  const generateResponseOptions = async (context) => {  
+    if (!selectedRole || !desiredOutcome) return;  
+  
+    const prompt = `Generate four contextual negotiation strategies to be employed in crafting a response to the scenario: ${context}. Provide relevant strategy names and their descriptions based on the negotiation history so far. Return the response in the JSON format: { "options": [{ "name": "string", "description": "string" }] }`;  
+  
+    const response = await fetchOpenAIResponse(  
+      {  
+        messages: [{ role: 'system', content: prompt }],  
+        temperature: 0.7,  
+        max_tokens: 550,  
+      },  
+      '/api/generate'  
+    );  
+  
+    if (response?.options) {  
+      setResponseOptions(response.options);  
+    } else {  
+      setErrorMessage('Failed to generate response options. Please try again.');  
+    }  
+  };  
+  
+  const addMessageToHistory = (content, role) => {  
+    if (!content || typeof content !== 'string') {  
+      console.error('Invalid message content:', content);  
+      return;  
+    }  
+    const roleName = role === 'user' ? selectedRole : scenario?.roles.find(r => r.name !== selectedRole)?.name || 'Unknown';  
+    setChatHistory((prevHistory) => [  
+      ...prevHistory,  
+      { content, role, name: roleName, timestamp: generateSequentialTimestamp() },  
+    ]);  
+  };  
+  
+  const generateOpponentResponse = async (  
+    chatHistory,  
+    context,  
+    userRole,  
+    opponentRole,  
+    negotiationType,  
+    negotiationSubType  
+  ) => {  
+    const promptTemplate = `  
+      You are ${opponentRole.name}, the ${opponentRole.role}.  
+      Your task is to respond to ${userRole.name}, who is the user of this application and playing the role of "${userRole.role}".  
+      Based on the ongoing negotiation context: "${context}", including the negotiation type "${negotiationType}" and subtype "${negotiationSubType}", draft a response for ${userRole.name}.  
+      Use the following conversation transcript:  
+      ${chatHistory.map((msg) => `${msg.name}: ${msg.content}`).join('\n')}  
+      Ensure the response is coherent with the context of the negotiation.  
+    `;  
+    
+    const messages = [{ role: 'system', content: promptTemplate }];  
+    
+    try {  
+      console.log('Request to OpponentAssistant:', { assistantId: ASSISTANT_ID, messages });  
+    
+      const response = await axios.post(  
+        `${API_BASE_URL}/api/assistant/respond`,  
+        {  
+          assistantId: ASSISTANT_ID,  
+          messages,  
+        },  
+        {  
+          headers: { 'Content-Type': 'application/json' },  
+        }  
+      );  
+    
+      console.log('Response from OpponentAssistant:', response.data);  
+    
+      // Check if response body contains valid data  
+      if (response.data && response.data.body && Array.isArray(response.data.body.data)) {  
+        // Try to find the assistant's message  
+        const messageData = response.data.body.data.find(d => d.assistant_id === ASSISTANT_ID);  
+        if (messageData && messageData.content) {  
+          return messageData.content;  
+        } else {  
+          throw new Error('No valid message content found in response.');  
+        }  
+      } else {  
+        throw new Error('Malformed response received from OpponentAssistant.');  
+      }  
+    } catch (error) {  
+      console.error('Error fetching from OpponentAssistant:', error.message);  
+      if (error.response && error.response.data) {  
+        console.error('Detailed error response:', error.response.data);  
+      }  
+      setErrorMessage(  
+        error.response?.data?.details || 'Failed to communicate with the OpponentAssistant. Please try again.'  
+      );  
+      return null;  
+    }  
+  };  
+
+  const generateUserResponse = async (strategyDescription) => {  
+    const userRole = scenario.roles.find((r) => r.name === selectedRole);  
+    const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);     
+    
+    const promptTemplate = `      
+      Draft a response for {userName} to {opponentName}, based on the strategy: "{strategyDescription}".       
+      The message should be professional and directly address the points raised by {opponentName} in the negotiation context: "{context}".       
+      Please return the response in JSON format as shown below:      
+            
+      {      
+        "message": "Your message content here"      
+      }      
+      `;  
+            
+    const prompt = promptTemplate  
+      .replace('{userName}', userRole.name)  
+      .replace('{opponentName}', opponentRole.name)  
+      .replace('{strategyDescription}', strategyDescription)  
+      .replace('{context}', scenario.context);  
+  
+    const response = await fetchOpenAIResponse(  
+      {  
+        messages: [{ role: 'system', content: prompt }],  
+        temperature: 0.7,  
+        max_tokens: 500,  
+      },  
+      '/api/generate'  
+    );  
+  
+    setUserDraft(response?.message || response?.choices?.[0]?.message?.content || '');  
+  };  
+  
+  const sendUserReply = async () => {  
+    // Ensure the input is not just empty spaces  
+    if (!userDraft.trim()) {  
+      setErrorMessage('Please type a reply before sending.');  
+      return;  
+    }  
+    
+    // Add user message to chat history  
+    addMessageToHistory(userDraft, 'user');  
+    
+    // Clear user draft and update progress  
+    setUserDraft('');  
+    setProgress(prevProgress => prevProgress + 20);  
+    setCurrentTurnIndex(prevIndex => prevIndex + 1);  
+    
+    // Toggle user turn  
+    setIsUserTurn(false);  
+    
+    try {  
+      setIsFetching(true);  
+    
+      // Retrieve user and opponent roles  
+      const userRole = scenario.roles.find(r => r.name === selectedRole);  
+      const opponentRole = scenario.roles.find(r => r.name !== selectedRole);  
+    
+      // Generate opponent response  
+      const opponentResponse = await generateOpponentResponse(  
+        chatHistory,  
+        scenario.context,  
+        userRole,  
+        opponentRole,  
+        negotiationType,  
+        negotiationSubType  
+      );  
+    
+      let opponentMessageContent = 'No response received.';  
+    
+      if (opponentResponse) {  
+        opponentMessageContent = opponentResponse;  
+      }  
+    
+      // Add opponent message to chat history  
+      addMessageToHistory(opponentMessageContent, 'opponent');  
+    
+      // Toggle turn back to user  
+      setIsUserTurn(true);  
+    
+      // Check if simulation is complete  
+      if (progress >= 100) {  
+        finalizeSimulation();  
+      }  
+    } catch (error) {  
+      console.error('Error getting opponent response:', error);  
+      setErrorMessage('Failed to get opponent response. Please try again.');  
+    } finally {  
+      setIsFetching(false);  
+    }  
+  };  
+    
+  
+  const finalizeSimulation = () => {  
+    setSimulationComplete(true);  
+    setDebriefing({  
+      summary: "You successfully navigated the negotiation process.",  
+      strengths: ["Good communication", "Strategic thinking"],  
+      areasForImprovement: ["Be more concise"],  
+      overallScore: 85,  
+      letterGrade: "B+",  
+      advice: "Consider practicing active listening to improve outcomes.",  
+    });  
+  };  
+  
+  const resetNegotiation = () => {  
+    setScenario(null);  
+    setRoles([]);  
+    setSelectedRole('');  
+    setChatHistory([]);  
+    setUserDraft('');  
+    setProgress(0);  
+    setSimulationComplete(false);  
+    setDebriefing(null);  
+    setErrorMessage('');  
+    setImages({});  
+    setNegotiationStarted(false);  
+  };  
+  
+  return (  
+    <div className="app-container">  
+      <header className="app-header">  
+        <div className="header-box">  
+          <span className="header-title">Negotiation Challenge</span>  
+        </div>  
+      </header>  
+  
+      <main className="content-grid">  
+        <aside className="left-column">  
+          <Card className="details-card">  
+            <CardContent>  
+              {negotiationStarted && scenario ? (  
+                <div>  
+                  <div className="step-box">  
+                    <span>Turn {currentTurnIndex}</span>  
+                  </div>  
+                  <div className="scenario-info">  
+                    <h3>{scenario.title}</h3>  
+                    <p>{scenario.context}</p>  
+  
+                    <div className="role-info">  
+                      <strong>Your Role:</strong>  
+                      <div className="role-details">  
+                        {selectedRoleObject ? `${selectedRoleObject.name} - ${selectedRoleObject.role}` : "Role not selected"}  
+                      </div>  
+                    </div>  
+  
+                    <p>  
+                      <strong>Desired Outcome:</strong> {desiredOutcome}  
+                    </p>  
+                  </div>  
+                </div>  
+              ) : (  
+                <div className="step-box">  
+                  <span>Negotiation Setup</span>  
+                </div>  
+              )}  
+              {scenario && images[0] ? (  
+                <img src={images[0]} alt="Scenario Illustration" className="scenario-image" />  
+              ) : (  
+                <img src="../images/NegotiationModule.png" alt="Scenario Illustration" className="scenario-image" />  
+              )}  
+              {scenario && !negotiationStarted && (  
+                <div className="roles-customization">  
+                  <strong>Customize Roles:</strong>  
+                  {roles.map((role, index) => (  
+                    <input  
+                      key={index}  
+                      type="text"  
+                      className="editable-role"  
+                      value={role}  
+                      onChange={(e) => {  
+                        const newRoles = [...roles];  
+                        newRoles[index] = e.target.value;  
+                        setRoles(newRoles);  
+                      }}  
+                    />  
+                  ))}  
+                </div>  
+              )}  
+            </CardContent>  
+          </Card>  
+        </aside>  
+  
+        <section className="main-content">  
+          {errorMessage && (  
+            <div className="error-box">  
+              <h4 className="error-title">Error</h4>  
+              <p>{errorMessage}</p>  
+            </div>  
+          )}  
+  
+          {!simulationComplete ? (  
+            scenario ? (  
+              <Card className="scenario-card">  
+                {negotiationStarted ? (  
+                  <>  
+                    <CardContent className="chat-history">  
+                      {chatHistory.map((msg, index) => (  
+                        <div key={index} className={`chat-message ${msg.role}`} style={{ display: 'block' }}>  
+                          <div><strong>Sender:</strong> {msg.name}</div>  
+                          <div><strong>Time:</strong> {msg.timestamp}</div>  
+                          <div>  
+                            {msg.content.split('\n').map((line, i) => (  
+                              <p key={i}>{line}</p>  
+                            ))}  
+                          </div>  
+                        </div>  
+                      ))}  
+                      {isFetchingOpponent && <BeatLoader color="#0073e6" size={8} />}  
+                    </CardContent>  
+  
+                    <div className="message-input-container">  
+                      <div className="response-options">  
+                        {responseOptions.map((option, index) => (  
+                          <Button key={index} onClick={() => generateUserResponse(option.description)}>  
+                            {option.name}  
+                          </Button>  
+                        ))}  
+                      </div>  
+                      {isFetchingUser && <BarLoader color="#0073e6" width="100%" />}  
+  
+                      <textarea  
+                        value={userDraft}  
+                        onChange={(e) => setUserDraft(e.target.value)}  
+                        className="user-draft-textarea"  
+                        placeholder="Type your reply here or select an option above..."  
+                      />  
+                      <Button onClick={sendUserReply} className="send-button">Send</Button>  
+                    </div>  
+                  </>  
+                ) : (  
+                  <>  
+                    <CardHeader>  
+                      <div className="scenario-title-container">  
+                        <CardTitle>{scenario.title}</CardTitle>  
+                        <p>{scenario.context}</p>  
+                      </div>  
+                      <div className="spinner-container">  
+                        <Progress color="#0073e6" loading={isFetchingUser} width="100%" />  
+                      </div>  
+                    </CardHeader>  
+                    <CardContent>  
+                      <div>  
+                        <div className="form-group">  
+                          <label>Select your role</label>  
+                          <div className="radio-group">  
+                            {scenario.roles.map((role, index) => (  
+                              <label key={index} className="radio-label">  
+                                <input  
+                                  type="radio"  
+                                  value={role.name}  
+                                  checked={selectedRole === role.name}  
+                                  onChange={() => setSelectedRole(role.name)}  
+                                />  
+                                {`${role.name} - ${role.role}`}  
+                              </label>  
+                            ))}  
+                          </div>  
+                        </div>  
+                        <div className="form-group">  
+                          <label>Select your desired outcome</label>  
+                          <select  
+                            onChange={(e) => setDesiredOutcome(e.target.value)}  
+                            value={desiredOutcome}  
+                          >  
+                            <option value="">Choose outcome</option>  
+                            {scenario.desiredOutcomes.map((outcome, index) => (  
+                              <option key={index} value={outcome}>  
+                                {outcome}  
+                              </option>  
+                            ))}  
+                            <option value="custom">Custom</option>  
+                          </select>  
+                        </div>  
+                        {desiredOutcome === "custom" && (  
+                          <div className="form-group">  
+                            <label>Specify Custom Outcome</label>  
+                            <input  
+                              type="text"  
+                              value={desiredOutcome}  
+                              onChange={(e) => setDesiredOutcome(e.target.value)}  
+                              className="editable-textarea"  
+                            />  
+                          </div>  
+                        )}  
+                        <Button onClick={startNegotiation} className="start-button">  
+                          Start Negotiation  
+                        </Button>  
+                      </div>  
+                    </CardContent>  
+                  </>  
+                )}  
+              </Card>  
+            ) : (  
+              <Card className="setup-card">  
+                 <CardHeader>  
+                  <CardTitle className="header-title">Setup Your Negotiation</CardTitle>  
+                  <div className="spinner-container">  
+                    {isFetchingScenario && <BarLoader color="#0073e6" width="100%" />}  
+                  </div>  
+                </CardHeader>     
+                <CardContent>  
+                  <div className="form-group">  
+                    <label>Select negotiation type</label>  
+                    <select  
+                      onChange={(e) => setNegotiationType(e.target.value)}  
+                      value={negotiationType}  
+                    >  
+                      <option value="">Choose negotiation type</option>  
+                      {negotiationTypes.map((type) => (  
+                        <option key={type.value} value={type.value}>  
+                          {type.title}  
+                        </option>  
+                      ))}  
+                    </select>  
+                  </div>  
+                  {negotiationSubTypes[negotiationType] && (  
+                    <div className="form-group">  
+                      <label>Select negotiation subtype</label>  
+                      <select  
+                        onChange={(e) => setNegotiationSubType(e.target.value)}  
+                        value={negotiationSubType}  
+                      >  
+                        <option value="">Choose negotiation subtype</option>  
+                        {negotiationSubTypes[negotiationType].map((subType, index) => (  
+                          <option key={index} value={subType}>  
+                            {subType}  
+                          </option>  
+                        ))}  
+                      </select>  
+                    </div>  
+                  )}  
+                  <Button onClick={generateScenario}>Generate Scenario</Button>  
+                </CardContent>  
+              </Card>  
+            )  
+          ) : (  
+            debriefing && (  
+              <div className="debriefing-section">  
+                <h4 className="debriefing-title">Simulation Debriefing</h4>  
+                <p>  
+                  <strong>Summary:</strong> {debriefing.summary}  
+                </p>  
+                <p>  
+                  <strong>Strengths:</strong>{' '}  
+                  {debriefing.strengths ? debriefing.strengths.join(', ') : 'None'}  
+                </p>  
+                <p>  
+                  <strong>Areas for Improvement:</strong>{' '}  
+                  {debriefing.areasForImprovement  
+                    ? debriefing.areasForImprovement.join(', ')  
+                    : 'None'}  
+                </p>  
+                <p>  
+                  <strong>Overall Score:</strong> {debriefing.overallScore}  
+                </p>  
+                <p>  
+                  <strong>Letter Grade:</strong> {debriefing.letterGrade}  
+                </p>  
+                <p>  
+                  <strong>Recommendations:</strong> {debriefing.advice}  
+                </p>  
+                <div className="action-buttons">  
+                  <Button onClick={() => setSimulationComplete(false)}>  
+                    Try Different Choices  
+                  </Button>  
+                  <Button onClick={resetNegotiation}>Run as Different Type</Button>  
+                </div>  
+              </div>  
+            )  
+          )}  
+        </section>  
+      </main>  
+    </div>  
+  );  
+};  
+  
+export const metadata = {  
+  title: 'Negotiation Simulator',  
+  description: 'Flex your negotiation skills against a skilled opponent.',  
+  imageUrl: '../images/NegotiationModule.png',  
+  instructions: `  
+    <h2>Gameplay Overview</h2>  
+    <p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>  
+    <h3>Simulation Mechanism</h3>  
+    <p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>  
+    <p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>  
+    <h3>Outcome and Debriefing</h3>  
+    <p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>  
+  `,  
+  component: NegotiationModule,  
+};  
+  
+export default NegotiationModule;  

@@ -1,242 +1,110 @@
-require('dotenv').config();  // Add this line at the top  
-  
+require('dotenv').config();  
 const express = require('express');  
 const axios = require('axios');  
-const path = require('path');  
 const cors = require('cors');  
-const msal = require('@azure/msal-node');  
-const config = require('./config/customConfig.json');  
+const { AzureOpenAI } = require('openai'); 
+const readline = require('readline');   
   
 const app = express();  
   
-// CORS Configuration  
-const corsOptions = {  
-  origin: process.env.NODE_ENV === 'production'  
-    ? 'https://executrainsim.azurewebsites.net' // Production frontend URL  
-    : 'http://localhost:3000', // Development frontend URL  
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',  
-  credentials: true // Allow cookies and other credentials  
-};  
-app.use(cors(corsOptions));  
-  
-// Middleware  
-app.use(express.json()); // Express has built-in JSON parsing since v4.16.0  
-  
-// Serve the React application  
-const buildPath = path.join(__dirname, '..', 'executrainsim', 'build');  
-app.use(express.static(buildPath));  
-  
-app.get('*', (req, res) => {  
-  res.sendFile(path.join(buildPath, 'index.html'));  
-});  
-  
-// External API Endpoints  
-const GPT_PORT = process.env.PORT || 5000;  
+const GPT_PORT = process.env.GPT_PORT || 5000;  
 const DALLE_PORT = process.env.DALLE_PORT || 5001;  
   
+// Load environment variables  
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;  
 const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;  
+const azureDeploymentName = process.env.AZURE_DEPLOYMENT_NAME;  
+const azureOpenAiAPIVersion = process.env.AZURE_OPENAI_API_VERSION;  
+const azureAssistantAPIVersion = process.env.AZURE_ASSISTANT_API_VERSION;  
+const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;  
   
-const chatGptEndpoint = `${azureEndpoint}/openai/deployments/gpt-4o-mini/chat/completions?api-version=2023-03-15-preview`;  
-const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=2024-05-01-preview`;  
+// Define API endpoints  
+const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;  
+const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;  
   
-// Utility function for logging requests  
-const logRequest = (context, data) => {  
-  console.log(`Sending request to ${context} with data:`, data);  
+// Initialize Azure OpenAI Client  
+const getClient = () => {  
+  console.log('Initializing Azure OpenAI Client');  
+  return new AzureOpenAI({  
+    endpoint: azureEndpoint,  
+    apiVersion: azureAssistantAPIVersion,  
+    apiKey: azureApiKey,  
+  });  
 };  
   
-// Utility function for logging errors  
-const logError = (context, error) => {  
-  console.error(`Error in ${context}:`, error.response ? error.response.data : error.message);  
+const assistantsClient = getClient();  
+  
+app.use(cors());  
+app.use(express.json());  
+
+// Function to clear the console  
+const clearConsole = () => {  
+  process.stdout.write('\x1Bc');  
 };  
   
-// ChatGPT Endpoints  
-app.post('/api/openai/initial', async (req, res) => {  
-  const { role, experienceLevel, difficulty } = req.body;  
-  const prompt = `Generate an engaging business scenario for a ${role} with ${experienceLevel} experience at ${difficulty} difficulty. Create the initial question, scenario description, and several options with potential consequences for each choice. Return a JSON object with: { "scenario": { "title": "Scenario Title", "description": "Detailed scenario description", "initial_question": "The initial question for the user", "options": [ {"description": "Option 1 description"}, {"description": "Option 2 description"}, {"description": "Option 3 description"}, {"description": "Option 4 description"} ] } }`;  
+// Setup readline to listen for keypress events  
+readline.emitKeypressEvents(process.stdin);  
+if (process.stdin.isTTY) {  
+  process.stdin.setRawMode(true);  
+}  
   
-  logRequest('Azure OpenAI', prompt);  
+// Listen for keypresses  
+process.stdin.on('keypress', (str, key) => {  
+  if (key.ctrl && key.name === 'l') {  
+    clearConsole();  
+  } else if (key.ctrl && key.name === 'c') {  
+    console.log('Terminating the server...');  
+    process.exit(); // Manually exit the process  
+  }  
+});  
+  
+// ChatGPT Text Generation Endpoint  
+app.post('/api/generate', async (req, res) => {  
+  const { messages, temperature, max_tokens } = req.body;  
+  
+  console.log('API Generate Request:', JSON.stringify(req.body, null, 2)); // Log request body  
   
   try {  
-    const response = await axios.post(  
-      chatGptEndpoint,  
-      {  
-        model: 'gpt-4o-mini',  
-        messages: [  
-          { role: "system", content: "You are a helpful assistant that responds in JSON format." },  
-          { role: "user", content: prompt }  
-        ],  
-        temperature: 0.75,  
-        max_tokens: 1800  
-      },  
-      {  
-        headers: {  
-          'Content-Type': 'application/json',  
-          'api-key': azureApiKey  
-        }  
+    const response = await axios.post(chatGptEndpoint, {  
+      model: azureDeploymentName,  
+      messages,  
+      temperature,  
+      max_tokens  
+    }, {  
+      headers: {  
+        'Content-Type': 'application/json',  
+        'api-key': azureApiKey  
       }  
-    );  
+    });  
   
-    console.log('Received response from Azure OpenAI');  
-    let content = response.data.choices[0].message.content;  
-    console.log('Raw content:', content);  
+    console.log('API Generate Response:', JSON.stringify(response.data, null, 2)); // Log response data  
   
-    content = content.replace(/```json|```/g, '').trim();  
+    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {  
+      let scenarioData = response.data.choices[0].message.content;  
+      scenarioData = scenarioData.replace(/```json|```/g, '');  
   
-    try {  
-      const parsedContent = JSON.parse(content);  
-      res.json(parsedContent);  
-    } catch (parseError) {  
-      console.error('Error parsing JSON:', parseError);  
-      res.status(500).json({ error: 'Failed to parse JSON response', details: parseError.message });  
+      try {  
+        const parsedScenario = JSON.parse(scenarioData);  
+        res.json(parsedScenario);  
+      } catch (parseError) {  
+        res.status(500).json({  
+          error: 'Failed to parse JSON response',  
+          details: parseError.message  
+        });  
+      }  
+    } else {  
+      throw new Error('Unexpected response structure');  
     }  
   } catch (error) {  
-    console.error('Error in OpenAI request:', error);  
+    console.error('API Generate Error:', error);  
     res.status(500).json({  
-      error: 'Failed to generate initial scenario',  
+      error: 'Failed to generate scenario',  
       details: error.response ? error.response.data : error.message  
     });  
   }  
 });  
   
-app.post('/api/openai/custom_initial', async (req, res) => {  
-  const { role, experienceLevel, difficulty, customScenario } = req.body;  
-  const prompt = `Given the custom scenario description: "${customScenario}", generate a title, initial question, and options with consequences suitable for a ${role} with ${experienceLevel} experience at ${difficulty} difficulty. Return a JSON object with: { "scenario": { "title": "Scenario Title", "description": "${customScenario}", "initial_question": "The initial question for the user", "options": [ {"description": "Option 1 description"}, {"description": "Option 2 description"}, {"description": "Option 3 description"}, {"description": "Option 4 description"} ] } }`;  
-  
-  try {  
-    const response = await axios.post(  
-      chatGptEndpoint,  
-      {  
-        model: 'gpt-4o-mini',  
-        messages: [  
-          { role: "system", content: "You are a helpful assistant that responds in JSON format." },  
-          { role: "user", content: prompt }  
-        ],  
-        temperature: 0.75,  
-        max_tokens: 1800  
-      },  
-      {  
-        headers: {  
-          'Content-Type': 'application/json',  
-          'api-key': azureApiKey  
-        }  
-      }  
-    );  
-  
-    let content = response.data.choices[0].message.content;  
-    content = content.replace(/```json|```/g, '').trim();  
-  
-    try {  
-      const parsedContent = JSON.parse(content);  
-      res.json(parsedContent);  
-    } catch (parseError) {  
-      res.status(500).json({ error: 'Failed to parse JSON response', details: parseError.message });  
-    }  
-  } catch (error) {  
-    res.status(500).json({  
-      error: 'Failed to generate custom initial scenario',  
-      details: error.response ? error.response.data : error.message  
-    });  
-  }  
-});  
-  
-app.post('/api/openai/followup', async (req, res) => {  
-  const { role, experienceLevel, difficulty, scenario, question, answer, previousAnswers } = req.body;  
-  const prompt = `Given the scenario: "${scenario}", and the question: "${question}", you answered: "${answer}". Based on this, generate the next question and update the scenario by introducing new elements, challenges, or twists. The updated scenario should reflect changes or consequences of the previous decision, and introduce fresh dynamics that keep the user engaged. Provide feedback and a score for the chosen answer. Return a JSON object with: { "next_question": { "question": "Next question for the user", "scenario_description": "Updated scenario description introducing new dynamics", "options": [ {"description": "Option 1 description"}, {"description": "Option 2 description"}, {"description": "Option 3 description"}, {"description": "Option 4 description"} ] }, "score": { "current_score": (score), "feedback": "Detailed feedback on how the user's choice impacted the scenario" } }`;  
-  
-  console.log('Sending follow-up request to Azure OpenAI with prompt:', prompt);  
-  
-  try {  
-    const response = await axios.post(  
-      chatGptEndpoint,  
-      {  
-        model: 'gpt-4o-mini',  
-        messages: [  
-          { role: "system", content: "You are a helpful assistant that responds in JSON format." },  
-          { role: "user", content: prompt }  
-        ],  
-        temperature: 0.85,  
-        max_tokens: 1800  
-      },  
-      {  
-        headers: {  
-          'Content-Type': 'application/json',  
-          'api-key': azureApiKey  
-        }  
-      }  
-    );  
-  
-    console.log('Received response from Azure OpenAI for follow-up');  
-    let content = response.data.choices[0].message.content;  
-    console.log('Raw content:', content);  
-  
-    content = content.replace(/```json|```/g, '').trim();  
-  
-    try {  
-      const parsedContent = JSON.parse(content);  
-      res.json(parsedContent);  
-    } catch (parseError) {  
-      console.error('Error parsing JSON:', parseError);  
-      res.status(500).json({ error: 'Failed to parse JSON response', details: parseError.message });  
-    }  
-  } catch (error) {  
-    console.error('Error in OpenAI follow-up request:', error);  
-    res.status(500).json({  
-      error: 'Failed to generate follow-up scenario',  
-      details: error.response ? error.response.data : error.message  
-    });  
-  }  
-});  
-  
-app.post('/api/openai/debriefing', async (req, res) => {  
-  const { scenario, answers } = req.body;  
-  const prompt = `Provide a detailed debriefing summary for the scenario: "${scenario}" based on your answers: ${JSON.stringify(answers)}. Include strengths, areas for improvement, overall score, letter grade, and advice. Return a JSON object with: { "debriefing": { "summary": "Summary of the simulation", "strengths": ["Strength 1", "Strength 2"], "areasForImprovement": ["Improvement 1", "Improvement 2"], "overallScore": (X/150), "letterGrade": "(A-F)", "stars": (1-5), "advice": "Recommendations" } }`;  
-  
-  console.log('Sending debriefing request to Azure OpenAI with prompt:', prompt);  
-  
-  try {  
-    const response = await axios.post(  
-      chatGptEndpoint,  
-      {  
-        model: 'gpt-4o-mini',  
-        messages: [  
-          { role: "system", content: "You are a helpful assistant that responds in JSON format." },  
-          { role: "user", content: prompt }  
-        ],  
-        temperature: 0.75,  
-        max_tokens: 1800  
-      },  
-      {  
-        headers: {  
-          'Content-Type': 'application/json',  
-          'api-key': azureApiKey  
-        }  
-      }  
-    );  
-  
-    console.log('Received response from Azure OpenAI for debriefing');  
-    let content = response.data.choices[0].message.content;  
-    console.log('Raw content:', content);  
-  
-    content = content.replace(/```json|```/g, '').trim();  
-  
-    try {  
-      const parsedContent = JSON.parse(content);  
-      res.json(parsedContent);  
-    } catch (parseError) {  
-      console.error('Error parsing JSON:', parseError);  
-      res.status(500).json({ error: 'Failed to parse JSON response', details: parseError.message });  
-    }  
-  } catch (error) {  
-    console.error('Error in OpenAI debriefing request:', error);  
-    res.status(500).json({  
-      error: 'Failed to generate debriefing',  
-      details: error.response ? error.response.data : error.message  
-    });  
-  }  
-});  
-  
-// DALL-E Endpoint  
+// DALL-E Image Generation Endpoint  
 app.post('/api/dalle/image', async (req, res) => {  
   const { prompt } = req.body;  
   
@@ -248,21 +116,13 @@ app.post('/api/dalle/image', async (req, res) => {
     style: "vivid"  
   };  
   
-  logRequest('DALL-E', requestBody);  
-  
   try {  
-    const response = await axios.post(  
-      dalleEndpoint,  
-      requestBody,  
-      {  
-        headers: {  
-          'Content-Type': 'application/json',  
-          'api-key': azureApiKey  
-        }  
+    const response = await axios.post(dalleEndpoint, requestBody, {  
+      headers: {  
+        'Content-Type': 'application/json',  
+        'api-key': azureApiKey  
       }  
-    );  
-  
-    console.log('Received response from DALL-E');  
+    });  
   
     if (response.data && response.data.data.length > 0) {  
       const imageUrl = response.data.data[0].url;  
@@ -271,16 +131,65 @@ app.post('/api/dalle/image', async (req, res) => {
       res.status(500).json({ error: 'No images generated.' });  
     }  
   } catch (error) {  
-    logError('DALL-E Request', error);  
     res.status(500).json({ error: 'Failed to generate image', details: error.message });  
   }  
 });  
   
-const port = process.env.PORT || GPT_PORT;  
-app.listen(port, () => {  
-  console.log(`Server is running on port ${port}`);  
+// Assistant API Respond Endpoint  
+app.post('/api/generate', async (req, res) => {  
+  const { messages, temperature, max_tokens } = req.body;  
+  
+  console.log('API Generate Request:', JSON.stringify(req.body, null, 2)); // Log request body  
+  
+  try {  
+    const response = await axios.post(chatGptEndpoint, {  
+      model: azureDeploymentName,  
+      messages,  
+      temperature,  
+      max_tokens  
+    }, {  
+      headers: {  
+        'Content-Type': 'application/json',  
+        'api-key': azureApiKey  
+      }  
+    });  
+  
+    console.log('API Generate Response:', JSON.stringify(response.data, null, 2)); // Log response data  
+  
+    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {  
+      let scenarioData = response.data.choices[0].message.content;  
+      scenarioData = scenarioData.replace(/```json|```/g, '');  
+  
+      try {  
+        const parsedScenario = JSON.parse(scenarioData);  
+        res.json(parsedScenario);  
+      } catch (parseError) {  
+        res.status(500).json({  
+          error: 'Failed to parse JSON response',  
+          details: parseError.message  
+        });  
+      }  
+    } else {  
+      throw new Error('Unexpected response structure');  
+    }  
+  } catch (error) {  
+    console.error('API Generate Error:', error);  
+    res.status(500).json({  
+      error: 'Failed to generate scenario',  
+      details: error.response ? error.response.data : error.message  
+    });  
+  }  
+});  
+  
+console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);  
+console.log(`DALL-E Endpoint: ${dalleEndpoint}`);  
+  
+app.listen(GPT_PORT, () => {  
+  console.log(`GPT is running on port ${GPT_PORT}`);  
+});  
+  
+app.listen(DALLE_PORT, () => {  
+  console.log(`Dalle is running on port ${DALLE_PORT}`);  
 });  
 
-app.get('/health', (req, res) => {  
-  res.status(200).send('Healthy');  
-});  
+console.log(`Press "CTRL + L" to clear Log.`); 
