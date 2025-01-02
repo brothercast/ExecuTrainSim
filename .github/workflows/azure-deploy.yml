@@ -20,11 +20,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-      - name: Clean Install Frontend Dependencies
+      - name: Install Frontend Dependencies
         working-directory: ./executrainsim
-        run: |
-          rm -rf node_modules
-          npm ci
+        run: npm ci
       - name: Build frontend
         working-directory: ./executrainsim
         run: npm run build
@@ -32,10 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: |
-            executrainsim/build
-            executrainsim/package.json
-            .github/workflows/azure-deploy.yml
+          path: executrainsim/build
 
   build_backend:
     runs-on: ubuntu-latest
@@ -53,10 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-build
-          path: |
-            execuTrainServer/node_modules
-            execuTrainServer/server.js
-            execuTrainServer/package.json
+          path: execuTrainServer/node_modules
   deploy_frontend:
       runs-on: ubuntu-latest
       needs: build_frontend
@@ -68,7 +60,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: frontend-build
-            path: deploy/
+            path: deploy/executrainsim
         - name: Login to Azure
           uses: azure/login@v2
           with:
@@ -79,7 +71,7 @@ jobs:
           with:
             app-name: 'ExecuTrainSim-Frontend'
             slot-name: 'production'
-            package: deploy/executrainsim/build
+            package: deploy/executrainsim
         - name: Verify frontend deployment
           run: |
             for i in {1..3}; do
@@ -102,7 +94,9 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: backend-build
-            path: deploy/
+            path: deploy/execuTrainServer
+        - name: Copy server file
+          run: cp execuTrainServer/server.js deploy/execuTrainServer
         - name: Login to Azure
           uses: azure/login@v2
           with:
