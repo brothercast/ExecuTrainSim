@@ -1,4 +1,4 @@
-name: Build and Deploy Frontend to Azure Web App - ExecuTrainSim
+name: Build and deploy Node.js app to Azure Web App - ExecuTrainSim
 
 on:
   push:
@@ -7,86 +7,62 @@ on:
   workflow_dispatch:
 
 env:
+  AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'
   NODE_VERSION: '20.x'
-  AZURE_WEBAPP_NAME: 'ExecuTrainSim-Frontend' # Replace with your actual Azure Web App name
-  AZURE_HEALTH_ENDPOINT: 'https://ExecuTrainSim-Frontend.azurewebsites.net/health' # Replace with your actual health endpoint
 
 jobs:
-  build_frontend:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout the repository
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      # 2. Set up Node.js environment
+      - uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-
-      # 3. Install Frontend Dependencies
       - name: Install Frontend Dependencies
         working-directory: ./executrainsim
         run: npm ci
-
-      # 4. Build the Frontend
       - name: Build Frontend
         working-directory: ./executrainsim
         run: npm run build
-
-      # 5. Upload Frontend Build Artifact
-      - name: Upload Frontend Artifact
+      - name: Install Backend Dependencies
+        working-directory: ./execuTrainServer
+        run: npm ci
+      - name: Upload build and backend
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-build
-          path: executrainsim/build
-
-  deploy_frontend:
-    runs-on: ubuntu-latest
-    needs: build_frontend
-    environment:
-      name: 'Production'
-    steps:
-      # 1. Download Frontend Artifact
-      - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: deploy/frontend
-
-      # 2. Login to Azure using Azure Credentials
+           name: app-build
+           path: |
+              executrainsim/build
+              execuTrainServer
       - name: Login to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # 3. Deploy Frontend to Azure Web App
-      - name: Deploy Frontend to Azure Web App
-        id: deploy-frontend-webapp
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}   # Ensure this matches your Azure Web App name
-          slot-name: 'production'                  # Typically 'production' unless using deployment slots
-          package: deploy/frontend
-
-      # 4. Verify Frontend Deployment
-      - name: Verify Frontend Deployment
+          app-name: 'ExecuTrainSim'
+          slot-name: 'production'
+          package: deploy
+          app-settings: |
+            AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
+            AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+            AZURE_DEPLOYMENT_NAME=${{ secrets.AZURE_DEPLOYMENT_NAME }}
+            AZURE_OPENAI_API_VERSION=${{ secrets.AZURE_OPENAI_API_VERSION }}
+            AZURE_ASSISTANT_API_VERSION=${{ secrets.AZURE_ASSISTANT_API_VERSION }}
+            AZURE_DALLE_API_VERSION=${{ secrets.AZURE_DALLE_API_VERSION }}
+      - name: Verify deployment
         run: |
-          FRONTEND_URL="${{ env.AZURE_HEALTH_ENDPOINT }}"
-          MAX_RETRIES=3
-          RETRY_DELAY=10
-          
-          for attempt in $(seq 1 $MAX_RETRIES); do
-            echo "Attempt $attempt: Checking frontend deployment at $FRONTEND_URL"
-            if curl -f -s -I "$FRONTEND_URL"; then
-              echo "Frontend deployment verified successfully."
+          for i in {1..3}; do
+            if curl -f -s -I ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health; then
+              echo "Deployment verified successfully"
               exit 0
             fi
-            echo "Attempt $attempt failed. Retrying in $RETRY_DELAY seconds..."
-            sleep $RETRY_DELAY
+            echo "Attempt $i failed, retrying..."
+            sleep 10
           done
-          
-          echo "Frontend deployment verification failed after $MAX_RETRIES attempts."
+          echo "Deployment verification failed after 3 attempts"
           exit 1
