@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '20.x'
 
       - name: npm install, build, and test
         run: |
@@ -68,4 +68,10 @@ jobs:
           app-name: 'ExecuTrainSim'
           slot-name: 'Production'
           package: .
-          
+          app-settings: |
+            AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}
+            AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}
+            AZURE_DEPLOYMENT_NAME=${{ secrets.AZURE_DEPLOYMENT_NAME }}
+            AZURE_OPENAI_API_VERSION=${{ secrets.AZURE_OPENAI_API_VERSION }}
+            AZURE_ASSISTANT_API_VERSION=${{ secrets.AZURE_ASSISTANT_API_VERSION }}
+            AZURE_DALLE_API_VERSION=${{ secrets.AZURE_DALLE_API_VERSION }}

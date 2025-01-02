@@ -20,15 +20,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
+      - name: Install Dependencies
+        run: npm install
       - name: Install Frontend Dependencies
         working-directory: ./executrainsim
-        run: npm ci
+        run: npm install
       - name: Build Frontend
         working-directory: ./executrainsim
         run: npm run build
       - name: Install Backend Dependencies
         working-directory: ./execuTrainServer
-        run: npm ci
+        run: npm install
       - name: Upload build and backend
         uses: actions/upload-artifact@v4
         with:
