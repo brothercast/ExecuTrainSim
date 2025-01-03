@@ -7,22 +7,20 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'  # Hardcode the resource group name here
-  FRONTEND_WEBAPP_NAME: 'ExecuTrainSim-Frontend' # Replace with your frontend web app name
-  BACKEND_WEBAPP_NAME: 'ExecuTrainSim-Backend' # Replace with your backend web app name
+  AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'
+  FRONTEND_WEBAPP_NAME: 'ExecuTrainSim-Frontend'
+  BACKEND_WEBAPP_NAME: 'ExecuTrainSim-Backend'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x' # Using 20.x for consistency
+          node-version: '20.x'
           cache: 'npm'
-
       - name: Build frontend
         working-directory: ./executrainsim
         run: |
@@ -38,11 +36,11 @@ jobs:
           mkdir -p deploy
           # Copy frontend build
           cp -r executrainsim/build deploy/frontend
-          # Copy backend files
+           # Copy backend files
           cp -r execuTrainServer/dist deploy/backend
           # Copy startup script and package files
-          cp startup.sh deploy/
-          cp package.json deploy/
+          cp startup.sh deploy
+          cp package.json deploy
           # Ensure startup script is executable
           chmod +x deploy/startup.sh
       - name: Upload artifact

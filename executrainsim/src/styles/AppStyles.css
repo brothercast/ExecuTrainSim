@@ -313,6 +313,28 @@ body {
   border: 1px solid #0073e6;
 }
 
+.hidden-feedback {
+  opacity: 0.5;
+}
+.feedback-box.hidden {
+    display: none;
+}
+.feedback-icon.hidden-feedback{
+    opacity: 0.5;
+}
+.dismiss-button {
+  background: #f5c6cb;
+    color: #c0392b;
+    border: 1px solid #c0392b;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: .8em;
+}
+.dismiss-button:hover{
+  background: #f0b8be;
+}
+
 .feedback-title {
   font-weight: bold;
   color: #0073e6;
@@ -321,7 +343,7 @@ body {
   position: absolute;
   top: -44px;
   left: 16px;
-  background-color: #e0f7fa;
+  background-color: #f0e68c;
   padding: 4px 10px;
   border-radius: 5px 5px 0 0;
   box-shadow: 0 -1px 0 #0073e6, 1px 0 0 #0073e6, -1px 0 0;
@@ -657,10 +679,14 @@ body {
     width: 16px;
     height: 16px;
 }
+.chat-message .feedback-icon.feedback-active {
+    color: #ff9800; /* Darker gold on active */
+}
 
 .chat-message .feedback-icon:hover {
     color: #ff9800; /* Darker gold on hover */
 }
+
 
 .feedback-bubble {
     position: relative;
@@ -715,7 +741,7 @@ body {
  left: 15px;
     width: 15px;
     height: 15px;
- background-color: #fdecea;
+ background-color: #f0e68c;
 }
 
  .chat-message.feedback .feedback-bubble .info-icon-container{
@@ -724,7 +750,7 @@ body {
     position: absolute;
     top: -35px;
     left: 16px;
-    background-color: #fdecea;
+    background-color: #f0e68c;
     padding: 4px 10px;
     border-radius: 5px 5px 0 0;
     box-shadow: 0 -1px 0 #f5c6cb, 1px 0 0 #f5c6cb, -1px 0 0 #f5c6cb;
