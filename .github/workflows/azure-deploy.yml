@@ -10,6 +10,7 @@ env:
   AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'
   FRONTEND_WEBAPP_NAME: 'ExecuTrainSim-Frontend' # Replace with your frontend web app name
   BACKEND_WEBAPP_NAME: 'ExecuTrainSim-Backend' # Replace with your backend web app name
+
 jobs:
   build_frontend:
     runs-on: ubuntu-latest
@@ -20,7 +21,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: Build frontend
+      - name: Install dependencies and build frontend
         working-directory: ./executrainsim
         run: |
           npm ci
@@ -40,7 +41,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: Build backend
+      - name: Install dependencies and build backend
         working-directory: ./execuTrainServer
         run: |
           npm ci
@@ -50,6 +51,7 @@ jobs:
         with:
           name: backend
           path: execuTrainServer/dist
+
   deploy_frontend:
     runs-on: ubuntu-latest
     needs: build_frontend
@@ -71,15 +73,20 @@ jobs:
         with:
           app-name: ${{ env.FRONTEND_WEBAPP_NAME }}
           slot-name: 'production'
-          package: deploy/frontend
+          package: deploy/frontend/build
       - name: Verify frontend deployment
         run: |
           for i in {1..3}; do
             response=$(curl -f -s -I ${{ steps.deploy-to-frontend.outputs.webapp-url }}/health)
             status_code=$(echo "$response" | grep "HTTP/" | awk '{print $2}')
             if [[ "$status_code" == "200" ]]; then
-              echo "Deployment verified successfully"
-              exit 0
+              response_body=$(curl -f -s  ${{ steps.deploy-to-frontend.outputs.webapp-url }}/health)
+              if [[ "$response_body" == "OK" ]]; then
+                  echo "Deployment verified successfully"
+                  exit 0
+              else
+                echo "Health endpoint did not return 'OK'."
+              fi
             fi
             retry_after=$(echo "$response" | grep "Retry-After:" | awk '{print $2}')
             if [[ -n "$retry_after" ]]; then
@@ -108,35 +115,35 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Set backend app settings
-        uses: azure/CLI@v1
-        with:
-          azcliversion: '2.55.0'
-          inlineScript: |
-            az webapp config appsettings set \
-              --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
-              --name "${{ env.BACKEND_WEBAPP_NAME }}" \
-              --settings AZURE_OPENAI_API_KEY="${{ secrets.AZURE_OPENAI_API_KEY }}" \
-              AZURE_OPENAI_ENDPOINT="${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
-              AZURE_DEPLOYMENT_NAME="${{ secrets.AZURE_DEPLOYMENT_NAME }}" \
-              AZURE_OPENAI_API_VERSION="${{ secrets.AZURE_OPENAI_API_VERSION }}" \
-              AZURE_ASSISTANT_API_VERSION="${{ secrets.AZURE_ASSISTANT_API_VERSION }}" \
-              AZURE_DALLE_API_VERSION="${{ secrets.AZURE_DALLE_API_VERSION }}"
       - name: Deploy backend to Azure Web App
         id: deploy-to-backend
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.BACKEND_WEBAPP_NAME }}
           slot-name: 'production'
-          package: deploy/backend
+          package: deploy/backend/dist
+          app-settings-json: |
+            {
+              "AZURE_OPENAI_API_KEY": "${{ secrets.AZURE_OPENAI_API_KEY }}",
+              "AZURE_OPENAI_ENDPOINT": "${{ secrets.AZURE_OPENAI_ENDPOINT }}",
+              "AZURE_DEPLOYMENT_NAME": "${{ secrets.AZURE_DEPLOYMENT_NAME }}",
+              "AZURE_OPENAI_API_VERSION": "${{ secrets.AZURE_OPENAI_API_VERSION }}",
+              "AZURE_ASSISTANT_API_VERSION": "${{ secrets.AZURE_ASSISTANT_API_VERSION }}",
+               "AZURE_DALLE_API_VERSION": "${{ secrets.AZURE_DALLE_API_VERSION }}"
+             }
       - name: Verify backend deployment
         run: |
           for i in {1..3}; do
             response=$(curl -f -s -I ${{ steps.deploy-to-backend.outputs.webapp-url }}/health)
             status_code=$(echo "$response" | grep "HTTP/" | awk '{print $2}')
             if [[ "$status_code" == "200" ]]; then
-              echo "Deployment verified successfully"
-              exit 0
+              response_body=$(curl -f -s  ${{ steps.deploy-to-backend.outputs.webapp-url }}/health)
+               if [[ "$response_body" == "OK" ]]; then
+                   echo "Deployment verified successfully"
+                   exit 0
+               else
+                 echo "Health endpoint did not return 'OK'."
+              fi
             fi
             retry_after=$(echo "$response" | grep "Retry-After:" | awk '{print $2}')
             if [[ -n "$retry_after" ]]; then
