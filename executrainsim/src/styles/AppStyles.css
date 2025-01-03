@@ -618,6 +618,7 @@ body {
   line-height: 1.4;
   font-size: 0.9em;
   margin-bottom: 12px;
+  position: relative; /* To position the feedback icon correctly */
 }
 
 .chat-message.user {
@@ -636,104 +637,198 @@ body {
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Response Options */
-.response-options {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
+.chat-message.feedback {
+  background-color: #f0e68c; /* Soft yellow for feedback */
+  color: black;
+  align-self: flex-start;
+  text-align: left;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+  position: relative; /* To position the feedback icon correctly */
 }
 
-.response-button {
-  flex-grow: 1;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background-color: #ffffff;
-  color: #007bff;
-  border: none;
-  outline: 1px solid #007bff;
-  text-align: center;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+.chat-message .feedback-icon{
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    cursor: pointer;
+    color: #ffd700; /* Gold color for feedback */
+    width: 16px;
+    height: 16px;
 }
 
-.response-button:hover {
-  background-color: #e6f0ff;
-  color: #0056b3;
+.chat-message .feedback-icon:hover {
+    color: #ff9800; /* Darker gold on hover */
 }
 
-.response-button.loading {
-  pointer-events: none;
-  opacity: 0.6;
+.feedback-bubble {
+    position: relative;
+   left: -10px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+   border: 1px solid #007bff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 10; /* Ensure it appears above other elements */
+    width: max-content;
+    max-width: 90%; /* Prevent overflow */
+    font-size: 0.8em;
+    margin-top: 5px;
+     margin-bottom: 10px;
+
 }
 
-/* New addition for sender name */
+.chat-message.user .feedback-bubble {
+    right: 0px;
+     left: auto;
+}
+
+
+/* Mimic error box styling */
+.chat-message.feedback .feedback-bubble{
+    background-color: #fdecea;
+    padding: 0px 20px 0px;
+    border-radius: 8px;
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #f5c6cb;
+}
+
+.chat-message.feedback .feedback-bubble:before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 15px; /* Adjust left position for the corner tab */
+  width: 15px; /* Adjust width for the tab */
+  height: 15px; /* Adjust height for the tab */
+  border-top-left-radius: 5px;
+  border-top: 1px solid #f5c6cb; /* Tab border */
+  border-left: 1px solid #f5c6cb; /* Tab border */
+}
+
+.chat-message.feedback .feedback-bubble:after{
+ content: '';
+ position: absolute;
+    top: -1px;
+ left: 15px;
+    width: 15px;
+    height: 15px;
+ background-color: #fdecea;
+}
+
+ .chat-message.feedback .feedback-bubble .info-icon-container{
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: -35px;
+    left: 16px;
+    background-color: #fdecea;
+    padding: 4px 10px;
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 -1px 0 #f5c6cb, 1px 0 0 #f5c6cb, -1px 0 0 #f5c6cb;
+    border-bottom: 0px solid #f5c6cb;
+}
+
+.info-icon-container .icon {
+ margin-right: 5px;
+    color: #c0392b;
+    margin-bottom: -1px;
+
+}
+
 .sender-name, .message-timestamp {
-  font-weight: bold;
-  margin-bottom: 5px;
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
 .user-input-container {
-  display: flex;
-  align-items: stretch;
-  margin-top: 10px;
+    display: flex;
+    align-items: stretch;
+    margin-top: 10px;
 }
 
 .user-draft-textarea {
-  flex-grow: 1;
-  width: 100%;
-  resize: vertical;
-  min-height: calc(1.5em * 6);
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
-  box-sizing: border-box;
+    flex-grow: 1;
+    width: 100%;
+    resize: vertical;
+    min-height: calc(1.5em * 6);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.feedback-toggle-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 0px;
+        margin-bottom: 10px;
+     justify-content: flex-end;
+}
+.feedback-checkbox-label {
+    display: flex;
+    align-items: center;
+     margin-top: 10px;
+     font-size: 0.9em;
+
+}
+.feedback-checkbox-label input {
+    margin-right: 5px; /* Adjust spacing as needed */
+}
+.checkbox-icon-filled{
+      color: #007bff;
+    width: 16px;
+    height: 16px;
+}
+.checkbox-icon-empty{
+      color: #ccc;
+    width: 16px;
+    height: 16px;
 }
 
 .send-button {
-  padding: 10px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1em;
-  transition: background-color 0.3s ease;
+    padding: 10px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
 }
 
 .send-button:hover {
-  background-color: #0056b3;
+    background-color: #0056b3;
 }
 
 .message-input-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 10px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #ffffff;
-  border-radius: 8px;
-  z-index: 10;
-  margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    z-index: 10;
+    margin-top: auto;
 }
 
 .chat-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin-right: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
 }
 
 .send-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-left: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 10px;
 }
