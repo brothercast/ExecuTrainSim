@@ -8,7 +8,8 @@ on:
 
 env:
   AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'
-
+  FRONTEND_WEBAPP_NAME: 'ExecuTrainSim-Frontend' # Replace with your frontend web app name
+  BACKEND_WEBAPP_NAME: 'ExecuTrainSim-Backend' # Replace with your backend web app name
 jobs:
   build_frontend:
     runs-on: ubuntu-latest
@@ -49,10 +50,9 @@ jobs:
         with:
           name: backend
           path: execuTrainServer/dist
-
-  deploy:
+  deploy_frontend:
     runs-on: ubuntu-latest
-    needs: [build_frontend, build_backend]
+    needs: build_frontend
     environment:
       name: 'Production'
     steps:
@@ -60,42 +60,79 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend
-          path: deploy/executrainsim
-      - name: Download backend artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend
-          path: deploy/execuTrainServer
+          path: deploy/frontend
       - name: Login to Azure
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Set app settings
+      - name: Deploy to Azure Web App
+        id: deploy-to-frontend
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.FRONTEND_WEBAPP_NAME }}
+          slot-name: 'production'
+          package: deploy/frontend
+      - name: Verify frontend deployment
+        run: |
+          for i in {1..3}; do
+            response=$(curl -f -s -I ${{ steps.deploy-to-frontend.outputs.webapp-url }}/health)
+            status_code=$(echo "$response" | grep "HTTP/" | awk '{print $2}')
+            if [[ "$status_code" == "200" ]]; then
+              echo "Deployment verified successfully"
+              exit 0
+            fi
+            retry_after=$(echo "$response" | grep "Retry-After:" | awk '{print $2}')
+            if [[ -n "$retry_after" ]]; then
+              echo "Server returned a Retry-After: $retry_after"
+              sleep "$retry_after"
+            else
+              sleep 10
+            fi
+            echo "Attempt $i failed, retrying..."
+          done
+          echo "Deployment verification failed after 3 attempts"
+          exit 1
+
+  deploy_backend:
+    runs-on: ubuntu-latest
+    needs: build_backend
+    environment:
+      name: 'Production'
+    steps:
+      - name: Download backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend
+          path: deploy/backend
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Set backend app settings
         uses: azure/CLI@v1
         with:
           azcliversion: '2.55.0'
           inlineScript: |
             az webapp config appsettings set \
               --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
-              --name "ExecuTrainSim" \
+              --name "${{ env.BACKEND_WEBAPP_NAME }}" \
               --settings AZURE_OPENAI_API_KEY="${{ secrets.AZURE_OPENAI_API_KEY }}" \
               AZURE_OPENAI_ENDPOINT="${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
               AZURE_DEPLOYMENT_NAME="${{ secrets.AZURE_DEPLOYMENT_NAME }}" \
               AZURE_OPENAI_API_VERSION="${{ secrets.AZURE_OPENAI_API_VERSION }}" \
               AZURE_ASSISTANT_API_VERSION="${{ secrets.AZURE_ASSISTANT_API_VERSION }}" \
               AZURE_DALLE_API_VERSION="${{ secrets.AZURE_DALLE_API_VERSION }}"
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
+      - name: Deploy backend to Azure Web App
+        id: deploy-to-backend
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'ExecuTrainSim'
+          app-name: ${{ env.BACKEND_WEBAPP_NAME }}
           slot-name: 'production'
-          package: deploy
-          root-path: deploy
-      - name: Verify deployment
+          package: deploy/backend
+      - name: Verify backend deployment
         run: |
           for i in {1..3}; do
-            response=$(curl -f -s -I ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health)
+            response=$(curl -f -s -I ${{ steps.deploy-to-backend.outputs.webapp-url }}/health)
             status_code=$(echo "$response" | grep "HTTP/" | awk '{print $2}')
             if [[ "$status_code" == "200" ]]; then
               echo "Deployment verified successfully"
