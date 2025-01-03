@@ -221,9 +221,12 @@ const NegotiationModule = ({ onReturn }) => {
   
   const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);  
   
+  const chatHistoryContainerRef = useRef(null);
+
   const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+        chatHistoryContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    };
+
 
   useEffect(() => {
     if (chatHistory.length > 0) {
@@ -669,8 +672,7 @@ const handleResponseOptions = (rawResponse) => {
     };
   
   const getRandomDelay = () => Math.floor(Math.random() * (9000 - 4000 + 1)) + 4000;  
-  
-  const chatEndRef = useRef(null);
+
 
   const sendUserReply = async () => {
     if (!userDraft.trim()) {
@@ -855,7 +857,7 @@ const finalizeSimulation = async () => {
        await analyzeNegotiation()
 
 
-      const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
+       const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
         if (msg.role === 'user') {
             return acc + 1;
         }
@@ -1063,7 +1065,7 @@ return (
             <Card className="scenario-card">
               {negotiationStarted ? (
                 <div className="chat-area">
-                  <CardContent className="chat-history-container">
+                  <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                   <div className="chat-history">
                     {chatHistory.map((msg, index) => (
                       <div
@@ -1124,7 +1126,7 @@ return (
                         )}
                       </div>
                     ))}
-                <div ref={chatEndRef} />
+                <div />
             </div>
                     {isFetchingOpponent && (
                       <div className="spinner-container">
