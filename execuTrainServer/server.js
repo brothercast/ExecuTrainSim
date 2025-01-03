@@ -193,3 +193,7 @@ app.listen(DALLE_PORT, () => {
 });  
 
 console.log(`Press "CTRL + L" to clear Log.`); 
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
