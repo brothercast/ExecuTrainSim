@@ -153,23 +153,24 @@ const generateSequentialTimestamp = () => {
 const getRandomDelay = () => Math.floor(Math.random() * (9000 - 4000 + 1)) + 4000;
 
 
-const parseAiJson = (apiResponse) => {  
-  if (!apiResponse) {  
-    throw new Error('No response data to parse.');  
-  }  
-  
-  try {  
-    if (apiResponse.choices && apiResponse.choices[0]?.message?.content) {  
-      const raw = apiResponse.choices[0].message.content;  
-      const cleaned = raw.replace(/```json|```/g, '').trim();  
-      return JSON.parse(cleaned);  
-    }  
-    return apiResponse; // Assume it's already parsed  
-  } catch (err) {  
-    console.error('Failed to parse AI JSON:', err, apiResponse);  
-    return {};  
-  }  
-};  
+const parseAiJson = (apiResponse) => {
+  if (!apiResponse) {
+    console.error('parseAiJson: No response data to parse.');
+    return null; // Return null if no response
+  }
+
+  try {
+      if (apiResponse.choices && apiResponse.choices[0]?.message?.content) {
+         const raw = apiResponse.choices[0].message.content;
+        const cleaned = raw.replace(/```json|```/g, '').trim();
+         return JSON.parse(cleaned);
+    }
+      return apiResponse; // Assume it's already parsed
+  } catch (err) {
+      console.error('Failed to parse AI JSON:', err, apiResponse);
+      return null; // Return null if parsing fails
+   }
+};
 
 const NegotiationModule = ({ onReturn }) => {  
   const [negotiationType, setNegotiationType] = useState('');  
@@ -231,36 +232,39 @@ const NegotiationModule = ({ onReturn }) => {
   }, [chatHistory]);
  
   
-  const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {  
-    setIsFetching(true);  
+  const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {
+    setIsFetching(true);
      if(isUserAction){
         setIsUserReplyLoading(true)
     } else {
          setIsFetchingOpponent(true);
     }
-  
-    try {  
-      const endpoint = `${API_BASE_URL}${endpointPath}`;  
-      console.log('Requesting:', endpoint, 'with payload:', input);  
-      const response = await axios.post(endpoint, input, {  
-        headers: { 'Content-Type': 'application/json' },  
-      });  
-      console.log('Response received:', response.data);  
-      return response.data;  
-    } catch (error) {  
-      console.error('Error fetching from OpenAI:', error.message);  
-      setErrorMessage('Failed to communicate with the server. Please try again.');  
-      return null;  
-    } finally {  
-      if(isUserAction){
-        setIsUserReplyLoading(false)
-      } else{
-        setIsFetchingOpponent(false);
-      }
-     
-      setIsFetching(false);  
-    }  
-  };  
+    
+    try {
+        const endpoint = `${API_BASE_URL}${endpointPath}`;
+        console.log('Requesting:', endpoint, 'with payload:', input);
+        const response = await axios.post(endpoint, input, {
+            headers: { 'Content-Type': 'application/json' },
+         });
+        console.log('Response received:', response.data);
+        return response.data;
+      } catch (error) {
+          console.error('Error fetching from OpenAI:', error.message);
+          if(error.response) {
+              console.error('API Error Details:', error.response.data);
+          }
+        setErrorMessage('Failed to communicate with the server. Please check the console for details.');
+        return null;
+     } finally {
+       if(isUserAction){
+            setIsUserReplyLoading(false)
+        } else{
+            setIsFetchingOpponent(false);
+        }
+    
+      setIsFetching(false);
+        }
+    };
   
   const generateScenario = async () => {  
     try {  
@@ -560,23 +564,24 @@ const NegotiationModule = ({ onReturn }) => {
     }
 `;
   
-  const handleResponseOptions = (rawResponse) => {  
-    if (!rawResponse) {  
-      console.error('Received empty response from API.');  
-      setErrorMessage('Failed to generate response options. Please try again.');  
-      return;  
-    }  
+const handleResponseOptions = (rawResponse) => {
+  if (!rawResponse) {
+      console.error('Received empty response from API.');
+      setErrorMessage('Failed to generate response options. Please try again.');
+      return;
+  }
   
-    const parsed = parseAiJson(rawResponse);  
-    if (parsed?.options) {  
-      console.log('Generated response options:', parsed.options);  
+  const parsed = parseAiJson(rawResponse);
+  if (parsed?.options) {
+      console.log('Generated response options:', parsed.options);
       setResponseOptions(parsed.options);
-        setButtonRevealComplete(false);
-    } else {  
-      console.error('Invalid response structure:', parsed);  
-      setErrorMessage('Failed to generate response options. Please try again.');  
-    }  
-  };  
+         setButtonRevealComplete(false);
+        setIsSpinning(false); // Added line to turn off the spinning state
+   } else {
+       console.error('Invalid response structure:', parsed);
+      setErrorMessage('Failed to generate response options. Please try again.');
+    }
+  };
   
   const handleUserResponse = (rawResponse) => {  
     const parsed = parseAiJson(rawResponse);  
@@ -716,9 +721,12 @@ const NegotiationModule = ({ onReturn }) => {
     // Send Response
     setTimeout(async () => {
       const opponentMessageContent = await generateOpponentResponse();
-      if (opponentMessageContent) {
-        addMessageToHistory(opponentMessageContent, 'opponent');
-      }
+        if (opponentMessageContent) {
+            addMessageToHistory(opponentMessageContent, 'opponent');
+        } else {
+            console.error("Opponent message is null or undefined.");
+            setErrorMessage('Failed to generate opponent message.');
+        }
       setIsUserTurn(true);
       setIsFetchingOpponent(false);
         await generateResponseOptions(scenario?.context) // Regenerate response options here
@@ -728,6 +736,7 @@ const NegotiationModule = ({ onReturn }) => {
       setIsFetching(false);
     }, delay);
   };
+
   const dismissFeedback = (messageId) => {
     setChatHistory((prevHistory) =>
       prevHistory.map((msg) =>
@@ -757,30 +766,38 @@ const NegotiationModule = ({ onReturn }) => {
        }
   };
 
-   const assessNegotiationOutcome = () => {
-       const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
-        const desiredOutcome = scenario?.desiredOutcomes?.find(outcome => outcome === desiredOutcome)
+  const assessNegotiationOutcome = async () => {
+    const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
+    const desiredOutcome = scenario?.desiredOutcomes?.find(outcome => outcome === desiredOutcome);
 
-        if(!desiredOutcome) {
-            return 'Draw';
-        }
-         const outcomeCheckPrompt = `
-        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${desiredOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
-       {
-            "outcome": "win" | "lose" | "draw",
-            "reason": "Your short justification here"
-        }
-        `;
-    return fetchOpenAIResponse({ messages: [{ role: 'system', content: outcomeCheckPrompt }] }, '/api/generate')
-        .then(rawResponse => {
-            const parsedResponse = parseAiJson(rawResponse);
-            return parsedResponse?.outcome || 'draw';
-        })
-        .catch(error => {
-            console.error('Failed to assess negotiation outcome', error);
-            return 'draw';
-        })
-    }
+
+     if(!desiredOutcome) {
+         return 'Draw';
+     }
+ 
+      const outcomeCheckPrompt = `
+     Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${desiredOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
+    {
+         "outcome": "win" | "lose" | "draw",
+         "reason": "Your short justification here"
+     }
+     `;
+      try {
+         const rawResponse = await fetchOpenAIResponse(
+           { messages: [{ role: 'system', content: outcomeCheckPrompt }] },
+           '/api/generate'
+         );
+           if (!rawResponse) {
+             throw new Error("Received empty response from server.");
+           }
+         const parsedResponse = parseAiJson(rawResponse);
+         return parsedResponse?.outcome || 'draw';
+     }
+      catch (error) {
+         console.error('Failed to assess negotiation outcome', error);
+         return 'draw';
+     }
+ }
 
    const analyzeNegotiation = async () => {
         const analysisPrompt = `

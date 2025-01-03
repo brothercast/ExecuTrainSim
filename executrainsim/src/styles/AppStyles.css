@@ -858,10 +858,10 @@ body {
   gap: 10px;
   justify-content: center;
   margin-top: 10px;
+  flex-wrap: wrap; /* Allow buttons to wrap */
 }
 
 .response-button {
-  flex-grow: 1;
   padding: 8px 12px;
   border-radius: 8px;
   background-color: #ffffff;
@@ -876,9 +876,11 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
     min-height: 50px; /* Enforce a consistent height */
-    max-height: 60px; /* Ensure a maximum height to prevent overflowing */
-    min-width: fit-content; /* make sure the buttons are at least as wide as needed*/
-        }
+     max-height: 60px;
+     flex: 1 1 auto; /* Added for more flexible width */
+     min-width: 0; /* Remove default min-width */
+      margin-bottom: 5px;
+}
 
 .response-button:hover {
   background-color: #e6f0ff;
