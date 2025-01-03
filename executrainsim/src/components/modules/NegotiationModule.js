@@ -206,7 +206,7 @@ const NegotiationModule = ({ onReturn }) => {
   
   // NEW STATE VARIABLE
   const [scenarioGenerated, setScenarioGenerated] = useState(false);
-  const [buttonRevealComplete, setButtonRevealComplete] = useState(true);
+   const [buttonRevealComplete, setButtonRevealComplete] = useState(true);
 
   
   const MAX_TOTAL_TOKENS = 4096;  
@@ -529,13 +529,15 @@ const NegotiationModule = ({ onReturn }) => {
     `;
   
     const createUserResponsePrompt = (strategyDescription, userRole, opponentRole) => `
-        Draft a concise and professional response for ${userRole.name} to ${opponentRole.name}, based on the strategy: "${strategyDescription}". 
-        The message should be direct and relevant to the negotiation context: "${scenario.context}".
-        Please return the response in JSON format as shown below:
-        {
-            "message": "Your message content here"
-        }
-    `;
+    As ${userRole.name}, respond to ${opponentRole.name} using the strategy: "${strategyDescription}". 
+    In the context of the negotiation: "${scenario.context}", provide a short, direct, and professional message, appropriate for a chat interface (like Teams or Slack).
+    Focus on moving the negotiation forward.
+    Avoid overly formal language, filler, or unnecessary greetings.
+    Return the response in JSON format:
+    {
+        "message": "Your concise message here"
+    }
+`;
   
   const handleResponseOptions = (rawResponse) => {  
     if (!rawResponse) {  
@@ -661,7 +663,7 @@ const NegotiationModule = ({ onReturn }) => {
       }, delay);
     };
     
-    const handleButtonAnimationComplete = () => {
+      const handleButtonAnimationComplete = () => {
         setButtonRevealComplete(true);
     };
   
@@ -694,121 +696,121 @@ const NegotiationModule = ({ onReturn }) => {
             const parsedAnalysis = parseAiJson(rawAnalysisResponse);
 
             if (parsedAnalysis) {
-                console.log('Parsed Analysis:', parsedAnalysis)
-                setDebriefing((prev) => ({
-                    ...prev,
-                    summary: parsedAnalysis.summary,
-                }));
-                
-                const radarData = Object.entries(parsedAnalysis.tactics).map(([name, score]) => ({
-                    skill: name,
-                    score: score
-                }));
+              console.log('Parsed Analysis:', parsedAnalysis)
+              setDebriefing((prev) => ({
+                  ...prev,
+                  summary: parsedAnalysis.summary,
+              }));
+              
+              const radarData = Object.entries(parsedAnalysis.tactics).map(([name, score]) => ({
+                  skill: name,
+                  score: score
+              }));
 
-                setRadarData(radarData)
-            } else {
-               setErrorMessage('Failed to analyze negotiation. Please try again.');
-            }
+              setRadarData(radarData)
+          } else {
+             setErrorMessage('Failed to analyze negotiation. Please try again.');
+          }
 
-        } catch (error) {
-             setErrorMessage('Failed to analyzenegotiation. Please try again.');
-            console.error('Error analyzing negotiation:', error);
-            return null;
-        }
-    };
+      } catch (error) {
+           setErrorMessage('Failed to analyze negotiation. Please try again.');
+          console.error('Error analyzing negotiation:', error);
+          return null;
+      }
+  };
 
-  
-  const finalizeSimulation = async () => {
-        await analyzeNegotiation()
-        const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
-            if (msg.role === 'user') {
-                return acc + 1;
-            }
-            return acc;
-        }, 0);
 
-        const totalMessages = chatHistory.length;
-        const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
-        let outcome = 'Draw';
+const finalizeSimulation = async () => {
+      await analyzeNegotiation()
+      const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
+          if (msg.role === 'user') {
+              return acc + 1;
+          }
+          return acc;
+      }, 0);
 
-        if (effectivenessScore > 70) {
-            outcome = 'Win';
-        } else if (effectivenessScore < 30) {
-            outcome = 'Lose';
-        }
-          setDebriefing((prev) => ({
-            ...prev,
-            strengths: userStrategyEffectiveness > 0 ? ['Adaptability', 'Persistence'] : ['Quick Adaptation'],
-            areasForImprovement: ['Clarity', 'Conciseness'],
-            overallScore: Math.round(effectivenessScore),
-             letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
-             advice: outcome === 'Win' ? 'Continue refining your strategies.' : 'Consider revising your approach for better results.',
-               transcript: chatHistory,
-               outcome: outcome
-        }));
+      const totalMessages = chatHistory.length;
+      const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
+      let outcome = 'Draw';
 
-        setSimulationComplete(true);
-    };
-  
-  const resetNegotiation = () => {  
-    setScenario(null);  
-    setRoles(['Role 1', 'Role 2']);  
-    setSelectedRole('');  
-    setChatHistory([]);  
-    setUserDraft('');  
-    setProgress(0);  
-    setSimulationComplete(false);  
-    setDebriefing(null);  
-    setErrorMessage('');  
-    setImages({});  
-    setNegotiationStarted(false);
-     setScenarioGenerated(false); // Reset the scenario generated flag
-     setCurrentTurnIndex(1);
-      setRadarData(null)
-       setResponseOptions([]);
-         setButtonRevealComplete(true)
-  };  
+      if (effectivenessScore > 70) {
+          outcome = 'Win';
+      } else if (effectivenessScore < 30) {
+          outcome = 'Lose';
+      }
+        setDebriefing((prev) => ({
+          ...prev,
+          strengths: userStrategyEffectiveness > 0 ? ['Adaptability', 'Persistence'] : ['Quick Adaptation'],
+          areasForImprovement: ['Clarity', 'Conciseness'],
+          overallScore: Math.round(effectivenessScore),
+           letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
+           advice: outcome === 'Win' ? 'Continue refining your strategies.' : 'Consider revising your approach for better results.',
+             transcript: chatHistory,
+             outcome: outcome
+      }));
 
-  const goToPreviousTurn = () => {
-    if (currentTurnIndex > 1 && simulationComplete) {
-        setCurrentTurnIndex(prevIndex => prevIndex - 1);
-    }
+      setSimulationComplete(true);
+  };
+
+const resetNegotiation = () => {  
+  setScenario(null);  
+  setRoles(['Role 1', 'Role 2']);  
+  setSelectedRole('');  
+  setChatHistory([]);  
+  setUserDraft('');  
+  setProgress(0);  
+  setSimulationComplete(false);  
+  setDebriefing(null);  
+  setErrorMessage('');  
+  setImages({});  
+  setNegotiationStarted(false);
+   setScenarioGenerated(false); // Reset the scenario generated flag
+   setCurrentTurnIndex(1);
+    setRadarData(null)
+     setResponseOptions([]);
+       setButtonRevealComplete(true)
+};  
+
+const goToPreviousTurn = () => {
+  if (currentTurnIndex > 1 && simulationComplete) {
+      setCurrentTurnIndex(prevIndex => prevIndex - 1);
+  }
 };
 
 const goToNextTurn = () => {
-  const totalTurns = Math.ceil(chatHistory.length / 2);
-    if (currentTurnIndex < totalTurns && simulationComplete) {
-        setCurrentTurnIndex(prevIndex => prevIndex + 1);
-    }
+const totalTurns = Math.ceil(chatHistory.length / 2);
+  if (currentTurnIndex < totalTurns && simulationComplete) {
+      setCurrentTurnIndex(prevIndex => prevIndex + 1);
+  }
 };
-  
-return (
-  <div className="app-container">
-    <header className="app-header">
-      <div className="header-box">
-        <span className="header-title">Negotiation Challenge</span>
-      </div>
-    </header>
 
-    <main className="content-grid">
-      <aside className="left-column">
-        {/* CONDITIONAL RENDERING OF STEP BOX HERE */}
-        {scenario && (
-          <div className="step-box">
-            <ChevronLeft
-              onClick={goToPreviousTurn}
-              className={`nav-arrow ${
-                currentTurnIndex <= 1 && simulationComplete ? 'disabled' : ''
-              }`}
-              title="Previous Turn"
-            />
-            <span className="step-text">
-              {negotiationStarted ? (
-                simulationComplete ?
+return (
+<div className="app-container">
+  <header className="app-header">
+    <div className="header-box">
+      <span className="header-title">Negotiation Challenge</span>
+    </div>
+  </header>
+
+  <main className="content-grid">
+    <aside className="left-column">
+      {/* CONDITIONAL RENDERING OF STEP BOX HERE */}
+      {scenario && (
+        <div className="step-box">
+          <ChevronLeft
+            onClick={goToPreviousTurn}
+            className={`nav-arrow ${
+              currentTurnIndex <= 1 && simulationComplete ? 'disabled' : ''
+            }`}
+            title="Previous Turn"
+          />
+          <span className="step-text">
+            {negotiationStarted ? (
+              simulationComplete ?
 (
-  <span>Negotiation Complete</span>
+<span>Negotiation Complete</span>
 ) : (
-  <span>Turn {currentTurnIndex}</span>
+<span>Turn {currentTurnIndex}</span>
 )
 ) : (
 <span>Negotiation Setup</span>
@@ -818,10 +820,10 @@ return (
 <ChevronRight
 onClick={goToNextTurn}
 className={`nav-arrow ${
-  simulationComplete &&
-  currentTurnIndex >= Math.ceil(chatHistory.length / 2)
-    ? 'disabled'
-    : ''
+simulationComplete &&
+currentTurnIndex >= Math.ceil(chatHistory.length / 2)
+  ? 'disabled'
+  : ''
 }`}
 title="Next Turn"
 />
@@ -833,71 +835,71 @@ title="Next Turn"
 {negotiationStarted && scenario ? (
 <div>
 <div className="scenario-info">
-  <h3>{scenario.title}</h3>
-  <div>
-    {scenario.context.split('\n').map((line, i) => (
-      <p key={i}>{line}</p>
-    ))}
+<h3>{scenario.title}</h3>
+<div>
+  {scenario.context.split('\n').map((line, i) => (
+    <p key={i}>{line}</p>
+  ))}
+</div>
+<div className="role-info">
+  <strong>Your Role:</strong>
+  <div className="role-details">
+    {selectedRoleObject
+      ? `${selectedRoleObject.name} - ${selectedRoleObject.role}`
+      : 'Role not selected'}
   </div>
-  <div className="role-info">
-    <strong>Your Role:</strong>
-    <div className="role-details">
-      {selectedRoleObject
-        ? `${selectedRoleObject.name} - ${selectedRoleObject.role}`
-        : 'Role not selected'}
-    </div>
-  </div>
-  <p>
-    <strong>Desired Outcome:</strong> {desiredOutcome}
-  </p>
-  {scenario && images[0] && (
-    <img
-      src={images[0]}
-      alt="Scenario Illustration"
-      className="scenario-image"
-      style={{ marginTop: '10px', width: '100%' }}
-    />
-  )}
+</div>
+<p>
+  <strong>Desired Outcome:</strong> {desiredOutcome}
+</p>
+{scenario && images[0] && (
+  <img
+    src={images[0]}
+    alt="Scenario Illustration"
+    className="scenario-image"
+    style={{ marginTop: '10px', width: '100%' }}
+  />
+)}
 </div>
 </div>
 ) : (
 <>
 {scenario && images[0] ? (
-  <img
-    src={images[0]}
-    alt="Scenario Illustration"
-    className="scenario-image"
-  />
+<img
+  src={images[0]}
+  alt="Scenario Illustration"
+  className="scenario-image"
+/>
 ) : (
-  <img
-    src="../images/NegotiationModule.png"
-    alt="Scenario Illustration"
-    className="scenario-image"
-  />
+<img
+  src="../images/NegotiationModule.png"
+  alt="Scenario Illustration"
+  className="scenario-image"
+/>
 )}
 {!scenario && (
-  <div className="module-description">
-    <h2>Negotiation Simulator</h2>
-    <p>
-      Welcome to the Negotiation Simulator, where you will engage
-      in a strategic battle of wits against an intelligent
-      opponent. Your objective is to navigate the negotiation
-      process and achieve your desired outcome while considering
-      the goals of the other party.
-    </p>
-    <Button
-      onClick={() => setShowInstructions(!showInstructions)}
-    >
-      {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
-    </Button>
-    {showInstructions && (
-      <div>
-        {metadata.instructions.split('\n').map((line, i) => (
-          <p key={i}>{line}</p>
-        ))}
-      </div>
-    )}
-  </div>
+<div className="module-description">
+  <h2>Negotiation Simulator</h2>
+  <p>
+    Welcome to the Negotiation Simulator, where you will engage
+    in a strategic battle of wits against an intelligent
+    opponent. Your objective is to navigate the negotiation
+    process and achieve your desired outcome while considering
+    the goals of the other party.
+  </p>
+  <Button
+    onClick={() => setShowInstructions(!showInstructions)}
+  >
+    {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+  </Button>
+  {showInstructions && (
+    <div>
+      {metadata.instructions.split('\n').map((line, i) => (
+        <p key={i}>{line}</p>
+      ))}
+    </div>
+  )}
+</div>
 )}
 </>
 )}
@@ -905,13 +907,13 @@ title="Next Turn"
 <div className="roles-customization">
 <strong>Customize Roles:</strong>
 {roles.map((role, index) => (
-  <input
-    key={index}
-    type="text"
-    className="editable-role"
-    value={role}
-    onChange={(e) => updateRoles(e.target.value, index)}
-  />
+<input
+  key={index}
+  type="text"
+  className="editable-role"
+  value={role}
+  onChange={(e) => updateRoles(e.target.value, index)}
+/>
 ))}
 </div>
 )}
@@ -920,298 +922,298 @@ title="Next Turn"
 </aside>
 
 <section className="main-content">
-    <div className="main-content-flex">
-            {errorMessage && (
-              <div className="error-box">
-                <h4 className="error-title">Error</h4>
-                <p>{errorMessage}</p>
-              </div>
-            )}
-            {!simulationComplete ? (
-            scenario ? (
-               <Card className="scenario-card">
-                {negotiationStarted ? (
-                 <div className="chat-area">
-                  <CardContent className="chat-history-container">
-                    <div className="chat-history">
-                      {chatHistory.map((msg, index) => (
-                        <div
-                          key={index}
-                          className={`chat-message ${msg.role}`}
-                          style={{ display: 'block' }}
-                        >
-                          <div>
-                            <strong className="sender-name">Sender:</strong>{' '}
-                            {msg.name}
-                          </div>
-                          <div>
-                            <strong className="message-timestamp">
-                              Time:
-                            </strong>{' '}
-                            {msg.timestamp}
-                          </div>
-                          <div>
-                            {msg.content.split('\n').map((line, i) => (
-                              <p key={i}>{line}</p>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                      <div ref={chatEndRef} />
-                    </div>
-                    {isFetchingOpponent && (
-                      <div className="spinner-container">
-                        <BeatLoader color="#0073e6" size={8} />
-                      </div>
-                    )}
-                  </CardContent>
-                  <div className="message-input-container">
-                     <div className="response-options-container">
-                       <div className="response-buttons">
-                        {responseOptions.map((option, index) => (
-                             <Button
-                                key={index}
-                                onClick={() => generateUserResponse(option.description)}
-                                disabled={isResponseLoading || !buttonRevealComplete}
-                                className={`response-button ${
-                                    isResponseLoading ? 'loading' : ''
-                                }`}
-                            >
-                              <SlotMachineText
-                                  text={option.name}
-                                  isSpinning={isResponseLoading}
-                                    revealSpeed={50}
-                                  standardizedSize={true}
-                                    onComplete={handleButtonAnimationComplete}
-                                />
-                            </Button>
-                        ))}
-                    </div>
-                    </div>
-                    {isResponseLoading && (
-                      <div className="spinner-container">
-                      </div>
-                      )}
-
-                      <div className="user-input-container">
-                        <textarea
-                          value={userDraft}
-                          onChange={(e) => setUserDraft(e.target.value)}
-                          className="user-draft-textarea"
-                          placeholder="Type your reply here or select an option above..."
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault(); // Prevent newline
-                              sendUserReply();
-                            }
-                          }}
-                        />
-                        <Button onClick={sendUserReply} className="send-button">
-                            Send <SendHorizontal style={{ marginLeft: '8px' }} />
-                        </Button>
-                     </div>
-                       {isUserReplyLoading && (
-                           <div className="spinner-container">
-                           <BarLoader color="#0073e6" width="100%" />
-                           </div>
-                          )}
-                     </div>
-                     </div>
-                 ) : (
-                <>
-                  <CardHeader>
-                    <div className="scenario-title-container">
-                      <CardTitle>{scenario.title}</CardTitle>
-                      <div className="spinner-container">
-                        {isFetching && (
-                          <BarLoader color="#0073e6" width="100%" />
-                        )}
-                      </div>
-                      <div>
-                        {scenario.context.split('\n').map((line, i) => (
-                          <p key={i}>{line}</p>
-                        ))}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div>
-                      <div className="form-group">
-                        <label>Select your role</label>
-                        <div className="radio-group">
-                          {roles.map((role, index) => (
-                            <label key={index} className="radio-label">
-                              <input
-                                type="radio"
-                                value={role}
-                                checked={selectedRole === role}
-                                onChange={() => setSelectedRole(role)}
-                              />
-                                {`${role} - ${scenario.roles[index].role}`}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label>Select your desired outcome</label>
-                        <select
-                          onChange={(e) => setDesiredOutcome(e.target.value)}
-                          value={desiredOutcome}
-                        >
-                          <option value="">Choose outcome</option>
-                          {scenario.desiredOutcomes.map((outcome, index) => (
-                            <option key={index} value={outcome}>
-                              {outcome}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="form-group">
-                        <label>Select opponent difficulty level</label>
-                        <select
-                          onChange={(e) =>
-                            setOpponentDifficulty(e.target.value)
-                          }
-                          value={opponentDifficulty}
-                        >
-                          <option value="easy">Easy</option>
-                          <option value="medium">Medium</option>
-                          <option value="hard">Hard</option>
-                          <option value="expert">Expert</option>
-                        </select>
-                      </div>
-                      <Button
-                        onClick={() => {
-                          startNegotiation();
-                          setShowInstructions(false);
-                        }}
-                        className="start-button"
+  <div className="main-content-flex">
+          {errorMessage && (
+            <div className="error-box">
+              <h4 className="error-title">Error</h4>
+              <p>{errorMessage}</p>
+            </div>
+          )}
+          {!simulationComplete ? (
+          scenario ? (
+             <Card className="scenario-card">
+              {negotiationStarted ? (
+               <div className="chat-area">
+                <CardContent className="chat-history-container">
+                  <div className="chat-history">
+                    {chatHistory.map((msg, index) => (
+                      <div
+                        key={index}
+                        className={`chat-message ${msg.role}`}
+                        style={{ display: 'block' }}
                       >
-                        Start Negotiation
-                      </Button>
-                    </div>
-                  </CardContent>
-                </>
-                )}
-              </Card>
-             ) : (
-            <Card className="setup-card">
-              <CardHeader>
-                <CardTitle className="header-title">
-                  Setup Your Simulation
-                </CardTitle>
-                <div className="spinner-container">
-                  {isFetching && <BarLoader color="#0073e6" width="100%" />}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="form-group">
-                  <label>Select negotiation type</label>
-                  <select
-                    onChange={(e) => setNegotiationType(e.target.value)}
-                    value={negotiationType}
-                  >
-                    <option value="">Choose negotiation type</option>
-                    {negotiationTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.title}
-                      </option>
+                        <div>
+                          <strong className="sender-name">Sender:</strong>{' '}
+                          {msg.name}
+                        </div>
+                        <div>
+                          <strong className="message-timestamp">
+                            Time:
+                          </strong>{' '}
+                          {msg.timestamp}
+                        </div>
+                        <div>
+                          {msg.content.split('\n').map((line, i) => (
+                            <p key={i}>{line}</p>
+                          ))}
+                        </div>
+                      </div>
                     ))}
+                    <div ref={chatEndRef} />
+                  </div>
+                  {isFetchingOpponent && (
+                    <div className="spinner-container">
+                      <BeatLoader color="#0073e6" size={8} />
+                    </div>
+                  )}
+                </CardContent>
+                <div className="message-input-container">
+                   <div className="response-options-container">
+                     <div className="response-buttons">
+                      {responseOptions.map((option, index) => (
+                           <Button
+                              key={index}
+                              onClick={() => generateUserResponse(option.description)}
+                              disabled={isResponseLoading || !buttonRevealComplete}
+                              className={`response-button ${
+                                  isResponseLoading ? 'loading' : ''
+                              }`}
+                          >
+                            <SlotMachineText
+                                text={option.name}
+                                isSpinning={isResponseLoading}
+                                  revealSpeed={100}
+                                standardizedSize={true}
+                                  onComplete={handleButtonAnimationComplete}
+                              />
+                          </Button>
+                      ))}
+                  </div>
+                  </div>
+                  {isResponseLoading && (
+                    <div className="spinner-container">
+                    </div>
+                    )}
+
+                    <div className="user-input-container">
+                      <textarea
+                        value={userDraft}
+                        onChange={(e) => setUserDraft(e.target.value)}
+                        className="user-draft-textarea"
+                        placeholder="Type your reply here or select an option above..."
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault(); // Prevent newline
+                            sendUserReply();
+                          }
+                        }}
+                      />
+                      <Button onClick={sendUserReply} className="send-button">
+                          Send <SendHorizontal style={{ marginLeft: '8px' }} />
+                      </Button>
+                   </div>
+                     {isUserReplyLoading && (
+                         <div className="spinner-container">
+                         <BarLoader color="#0073e6" width="100%" />
+                         </div>
+                        )}
+                   </div>
+                   </div>
+               ) : (
+              <>
+                <CardHeader>
+                  <div className="scenario-title-container">
+                    <CardTitle>{scenario.title}</CardTitle>
+                    <div className="spinner-container">
+                      {isFetching && (
+                        <BarLoader color="#0073e6" width="100%" />
+                      )}
+                    </div>
+                    <div>
+                      {scenario.context.split('\n').map((line, i) => (
+                        <p key={i}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div>
+                    <div className="form-group">
+                      <label>Select your role</label>
+                      <div className="radio-group">
+                        {roles.map((role, index) => (
+                          <label key={index} className="radio-label">
+                            <input
+                              type="radio"
+                              value={role}
+                              checked={selectedRole === role}
+                              onChange={() => setSelectedRole(role)}
+                            />
+                              {`${role} - ${scenario.roles[index].role}`}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="form-group">
+                      <label>Select your desired outcome</label>
+                      <select
+                        onChange={(e) => setDesiredOutcome(e.target.value)}
+                        value={desiredOutcome}
+                      >
+                        <option value="">Choose outcome</option>
+                        {scenario.desiredOutcomes.map((outcome, index) => (
+                          <option key={index} value={outcome}>
+                            {outcome}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Select opponent difficulty level</label>
+                      <select
+                        onChange={(e) =>
+                          setOpponentDifficulty(e.target.value)
+                        }
+                        value={opponentDifficulty}
+                      >
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
+                      </select>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        startNegotiation();
+                        setShowInstructions(false);
+                      }}
+                      className="start-button"
+                    >
+                      Start Negotiation
+                    </Button>
+                  </div>
+                </CardContent>
+              </>
+              )}
+            </Card>
+           ) : (
+          <Card className="setup-card">
+            <CardHeader>
+              <CardTitle className="header-title">
+                Setup Your Simulation
+              </CardTitle>
+              <div className="spinner-container">
+                {isFetching && <BarLoader color="#0073e6" width="100%" />}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="form-group">
+                <label>Select negotiation type</label>
+                <select
+                  onChange={(e) => setNegotiationType(e.target.value)}
+                  value={negotiationType}
+                >
+                  <option value="">Choose negotiation type</option>
+                  {negotiationTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {negotiationSubTypes[negotiationType] && (
+                <div className="form-group">
+                  <label>Select negotiation subtype</label>
+                  <select
+                    onChange={(e) => setNegotiationSubType(e.target.value)}
+                    value={negotiationSubType}
+                  >
+                    <option value="">Choose negotiation subtype</option>
+                    {negotiationSubTypes[negotiationType].map(
+                      (subType, index) => (
+                        <option key={index} value={subType}>
+                          {subType}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
-                {negotiationSubTypes[negotiationType] && (
-                  <div className="form-group">
-                    <label>Select negotiation subtype</label>
-                    <select
-                      onChange={(e) => setNegotiationSubType(e.target.value)}
-                      value={negotiationSubType}
-                    >
-                      <option value="">Choose negotiation subtype</option>
-                      {negotiationSubTypes[negotiationType].map(
-                        (subType, index) => (
-                          <option key={index} value={subType}>
-                            {subType}
-                          </option>
-                        )
-                      )}
-                    </select>
-                  </div>
+              )}
+              <Button onClick={generateScenario}>Generate Scenario</Button>
+            </CardContent>
+          </Card>
+        )
+         ) : (
+          debriefing && (
+          <div className="debriefing-section">
+            <h4 className="debriefing-title">Simulation Debriefing</h4>
+              {radarData && (
+                  <div style={{width: '100%', height: 300}}>
+                      <ResponsiveContainer>
+                          <RadarChart data={radarData}>
+                              <PolarGrid />
+                              <PolarAngleAxis dataKey="skill" />
+                              <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                              <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                          </RadarChart>
+                          </ResponsiveContainer>
+                   </div>
                 )}
-                <Button onClick={generateScenario}>Generate Scenario</Button>
-              </CardContent>
-            </Card>
-          )
-           ) : (
-            debriefing && (
-            <div className="debriefing-section">
-              <h4 className="debriefing-title">Simulation Debriefing</h4>
-                {radarData && (
-                    <div style={{width: '100%', height: 300}}>
-                        <ResponsiveContainer>
-                            <RadarChart data={radarData}>
-                                <PolarGrid />
-                                <PolarAngleAxis dataKey="skill" />
-                                <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                                <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                            </RadarChart>
-                            </ResponsiveContainer>
+            <p>
+              <strong>Summary:</strong>
+              {debriefing.summary.split('\n').map((line, i) => (
+                  <p key={i}>{line}</p>
+              ))}
+          </p>
+           <p>
+                  <strong>Outcome:</strong> {debriefing.outcome}
+            </p>
+           <p>
+              <strong>Strengths:</strong>{' '}
+              {debriefing.strengths
+              ? debriefing.strengths.join(', ')
+              : 'None'}
+           </p>
+          <p>
+              <strong>Areas for Improvement:</strong>{' '}
+              {debriefing.areasForImprovement
+              ? debriefing.areasForImprovement.join(', ')
+              : 'None'}
+          </p>
+          <p>
+              <strong>Overall Score:</strong> {debriefing.overallScore}
+          </p>
+           <p>
+              <strong>Letter Grade:</strong> {debriefing.letterGrade}
+           </p>
+          <p>
+              <strong>Recommendations:</strong> {debriefing.advice}
+          </p>
+              <Button onClick={() => setShowTranscript(!showTranscript)}>
+                {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
+              </Button>
+                {showTranscript && (<div className="transcript">
+                    <h5>Full Transcript:</h5>
+                      {debriefing.transcript.map((msg, index) => (
+                       <div key={index}>
+                          <strong>{msg.name}:</strong> {msg.content}
+                        </div>
+                        ))}
                      </div>
                   )}
-              <p>
-                <strong>Summary:</strong>
-                {debriefing.summary.split('\n').map((line, i) => (
-                    <p key={i}>{line}</p>
-                ))}
-            </p>
-             <p>
-                    <strong>Outcome:</strong> {debriefing.outcome}
-              </p>
-             <p>
-                <strong>Strengths:</strong>{' '}
-                {debriefing.strengths
-                ? debriefing.strengths.join(', ')
-                : 'None'}
-             </p>
-            <p>
-                <strong>Areas for Improvement:</strong>{' '}
-                {debriefing.areasForImprovement
-                ? debriefing.areasForImprovement.join(', ')
-                : 'None'}
-            </p>
-            <p>
-                <strong>Overall Score:</strong> {debriefing.overallScore}
-            </p>
-             <p>
-                <strong>Letter Grade:</strong> {debriefing.letterGrade}
-             </p>
-            <p>
-                <strong>Recommendations:</strong> {debriefing.advice}
-            </p>
-                <Button onClick={() => setShowTranscript(!showTranscript)}>
-                  {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
-                </Button>
-                  {showTranscript && (<div className="transcript">
-                      <h5>Full Transcript:</h5>
-                        {debriefing.transcript.map((msg, index) => (
-                         <div key={index}>
-                            <strong>{msg.name}:</strong> {msg.content}
-                          </div>
-                          ))}
-                       </div>
-                    )}
-            
-              <div className="action-buttons">
-                <Button onClick={() => setSimulationComplete(false)}>
-                  Try Different Choices
-                </Button>
-                <Button onClick={resetNegotiation}>
-                  Run as Different Type
-                </Button>
-              </div>
+          
+            <div className="action-buttons">
+              <Button onClick={() => setSimulationComplete(false)}>
+                Try Different Choices
+              </Button>
+              <Button onClick={resetNegotiation}>
+                Run as Different Type
+              </Button>
             </div>
-           )
-          )}
-     </div>
+          </div>
+         )
+        )}
+   </div>
 </section>
 </main>
 </div>
