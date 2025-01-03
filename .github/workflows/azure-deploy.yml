@@ -94,8 +94,11 @@ jobs:
         run: |
           sleep 30
           for i in {1..3}; do
+              echo "Attempt $i"
             response=$(curl -f -s -I ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health)
+            echo "Response Headers: $response"
             status_code=$(echo "$response" | grep "HTTP/" | awk '{print $2}')
+              echo "Status code: $status_code"
             if [[ "$status_code" == "200" ]]; then
                  response_body=$(curl -f -s  ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health)
                 if [[ "$response_body" == "OK" ]]; then

@@ -753,6 +753,7 @@ body {
   flex-grow: 1;
   align-items: center;
 }
+
 .user-draft-textarea {
   flex-grow: 1;
   width: 100%;
@@ -806,8 +807,9 @@ body {
   transition: background-color 0.3s ease;
    height: 100%;
   margin-left: 10px;
-   width: 18%;
-    white-space: nowrap; /* Prevent text wrapping */
+   width: 18%; /* Adjust width as needed */
+    white-space: nowrap;
+  min-height: calc(1.5em * 6);  /* Ensure the send button matches the textarea's min-height */
 }
 
 .send-button:hover {
@@ -874,7 +876,9 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
     min-height: 50px; /* Enforce a consistent height */
-}
+    max-height: 60px; /* Ensure a maximum height to prevent overflowing */
+    min-width: fit-content; /* make sure the buttons are at least as wide as needed*/
+        }
 
 .response-button:hover {
   background-color: #e6f0ff;
