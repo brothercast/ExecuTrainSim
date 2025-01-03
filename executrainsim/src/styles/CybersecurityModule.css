@@ -1,43 +1,27 @@
 /* src/styles/CybersecurityStyles.css */
-
 /* Overall Layout */
-.app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    font-family: sans-serif;
-    background-color: #f0f0f0; /* Light gray background */
-    overflow: hidden;
-}
 
-.app-header {
+
+.cybersecurity-module .app-header {
   background-color: #FF6B00;
-    padding: 1rem;
-    display: flex;
-  align-items: center; /* Vertically align items */
-    justify-content: space-between; /* Push items to the edges */
-   color: white; /* Text color */
+  color: white; /* Text color */
 }
 
-.header-box {
-    display: flex;
-    align-items: center; /* Align items in the box */
-}
-
-.header-title {
+.cybersecurity-module .header-title {
     font-size: 2.2rem; /* Larger font size */
-  font-weight: bold; /* Make it bold */
-  text-transform: uppercase; /* Transform text to uppercase */
-  letter-spacing: 1.5px;
+    font-weight: bold; /* Make it bold */
+    text-transform: uppercase; /* Transform text to uppercase */
+    letter-spacing: 1.5px;
 }
-.hamburger-icon {
+
+.cybersecurity-module .hamburger-icon {
    color:white;
     cursor: pointer;
     font-size: 2.2rem;
     margin-right: 0.3rem;
     height: auto;
 }
- .dropdown-menu {
+.cybersecurity-module .dropdown-menu {
      position: absolute;
      top: 100%;
      left: 0;
@@ -51,7 +35,7 @@
       padding: 2rem;
 
 }
-  .dropdown-menu div {
+  .cybersecurity-module .dropdown-menu div {
     cursor: pointer;
     color: #fff;
     text-decoration: none;
@@ -61,60 +45,33 @@
 
 
 /* Main Content Layout */
-.content-grid {
-    flex: 1; /* Take up available space */
-    display: flex;
-     overflow: hidden;
-}
 
-.left-column {
-    width: 30%;
-     padding: 1.5rem;
-  display: flex;
-   flex-direction: column; /* Stack elements vertically */
-    align-items: flex-start; /* Align to the start (left side) */
-    justify-content: flex-start;
-    gap: 1rem;
-  overflow-y: auto; /* Add scroll if needed */
-}
-
- .left-column img{
+ .cybersecurity-module .left-column img{
     max-width: 100%;
     height: auto;
     align-self: center;
     margin-bottom: 1rem;
   }
 
-.main-content {
-    flex: 1; /* Take up remaining space */
-    padding: 1.5rem;
-    display: flex;
-     flex-direction: column;
-      overflow: auto;
-    position: relative;
-     gap: 1rem;
-}
-
-
-.dashboard {
+.cybersecurity-module .dashboard {
       flex: 1;
   display: flex;
   flex-direction: column;
 }
- .dashboard-grid {
+.cybersecurity-module  .dashboard-grid {
     display: flex;
       gap: 1rem;
       flex-grow: 1;
  }
 
-.dashboard-grid > * {
+.cybersecurity-module .dashboard-grid > * {
    width: 33%;
     overflow-y: auto;
 }
 
-.alerts-card,
-.options-card,
-.logs-card {
+.cybersecurity-module .alerts-card,
+.cybersecurity-module .options-card,
+.cybersecurity-module .logs-card {
     display: flex;
     flex-direction: column;
      border-radius: 8px;
@@ -122,21 +79,21 @@
      background-color: #fff;
   overflow: auto;
 }
- .alerts-card .card-title,
-    .options-card .card-title,
-    .logs-card .card-title{
+ .cybersecurity-module  .alerts-card .card-title,
+    .cybersecurity-module .options-card .card-title,
+   .cybersecurity-module .logs-card .card-title{
    font-size: 1.2rem;
    color: blue;
   }
-  .alerts-card .card-header,
-.options-card .card-header,
-.logs-card .card-header {
+  .cybersecurity-module .alerts-card .card-header,
+   .cybersecurity-module .options-card .card-header,
+    .cybersecurity-module .logs-card .card-header {
   padding: 1rem;
     border-bottom: 1px solid #ccc;
 }
 
 /* Style for individual alert items */
-.alert-item {
+.cybersecurity-module .alert-item {
     padding: 0.8rem;
       border-bottom: 1px solid #f0f0f0;
   color: black;
@@ -149,32 +106,32 @@
     justify-content: flex-start;
 
 }
- .alert-item:hover {
+ .cybersecurity-module .alert-item:hover {
     background-color: #f0f0f0; /* Lighter gray on hover */
 }
 
 
-.alert-item .icon {
+.cybersecurity-module .alert-item .icon {
   margin-right: 0.8rem;
     color: orange;
     min-width: 24px;
 }
 
 
- .alert-item.selected {
+ .cybersecurity-module  .alert-item.selected {
         background-color: #e0f7fa; /* Lighter blue when selected */
        border: 1px solid #81D4FA;
     }
 
 
   /* Style the options container */
-.options-container {
+ .cybersecurity-module .options-container {
       padding: 0.5rem;
    display: flex;
      flex-direction: column;
       gap: 0.5rem;
 }
- .option-button {
+ .cybersecurity-module .option-button {
     display: block; /* Make button fill its container width */
      padding: 0.8rem;
   border: none;
@@ -186,24 +143,24 @@
       color: black;
 }
 
-.option-button:hover {
+.cybersecurity-module .option-button:hover {
       background-color: #c2e0ef;
      border-color: #81D4FA;
 }
 
 /* Style for log items */
-.logs-container {
+.cybersecurity-module .logs-container {
     padding: 0.5rem;
   display: flex;
    flex-direction: column;
   overflow: auto; /* Add scroll if logs overflow */
 }
 
-.logs-scroll {
+.cybersecurity-module .logs-scroll {
     overflow-y: auto; /* Add scroll if logs overflow */
   height: 100%;
 }
- .log-item {
+.cybersecurity-module  .log-item {
    display: flex;
   align-items: center;
     justify-content: space-between;
@@ -212,16 +169,16 @@
     color: #333;
 
 }
-.log-item .log-message {
+.cybersecurity-module .log-item .log-message {
      font-size: 0.9rem;
      flex: 1;
 }
-.log-item .log-timestamp {
+.cybersecurity-module .log-item .log-timestamp {
     font-size: 0.8rem; /* Smaller font for timestamp */
   color: #999;
    margin-left: 1rem;
 }
-.notifications {
+.cybersecurity-module  .notifications {
     background-color: #ddd;
     padding: 0.5rem;
   text-align: left;
@@ -232,7 +189,7 @@
  }
 
 
-.status-indicators {
+.cybersecurity-module  .status-indicators {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Create responsive grid */
   gap: 1rem;
@@ -241,30 +198,9 @@
 }
 
 
- .indicator {
+ .cybersecurity-module .indicator {
   display: flex;
    flex-direction: column;
     align-items: center;
    gap: 0.3rem;
   }
-
-    /* Responsive styles for tablets and larger screens */
-    @media (min-width: 768px) {
-      .left-column {
-          padding: 2rem;
-      }
-
-      .main-content {
-        padding: 2rem;
-       }
-
-        .app-header {
-           padding: 2rem;
-        }
-
-      .alerts-card,
-      .options-card,
-        .logs-card {
-             overflow: hidden;
-        }
-    }

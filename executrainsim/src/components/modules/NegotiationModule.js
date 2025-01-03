@@ -1,4 +1,3 @@
-// NegotiationModule.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
@@ -8,6 +7,7 @@ import Select, { SelectItem } from '../ui/Select';
 import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal  } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
+//import '../../styles/NegotiationModule.css';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -149,7 +149,9 @@ const generateSequentialTimestamp = () => {
   const options = { weekday: 'long', hour: 'numeric', minute: 'numeric', hour12: true };  
   return newTimestamp.toLocaleTimeString('en-US', options);  
 };  
-  
+
+const getRandomDelay = () => Math.floor(Math.random() * (9000 - 4000 + 1)) + 4000;
+
 
 const parseAiJson = (apiResponse) => {  
   if (!apiResponse) {  
@@ -193,16 +195,18 @@ const NegotiationModule = ({ onReturn }) => {
   const [isFetching, setIsFetching] = useState(false);  
   const [isUserTurn, setIsUserTurn] = useState(true);  
   const [showInstructions, setShowInstructions] = useState(false);
-      const [showTranscript, setShowTranscript] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
   const [imageStatus, setImageStatus] = useState('idle');  
   const [isUserReplyLoading, setIsUserReplyLoading] = useState(false);  
   const [isSpinning, setIsSpinning] = useState(false);  
   const [isResponseLoading, setIsResponseLoading] = useState(false);  
-    const [radarData, setRadarData] = useState(null);
+  const [radarData, setRadarData] = useState(null);
+
 
   
   // NEW STATE VARIABLE
   const [scenarioGenerated, setScenarioGenerated] = useState(false);
+  const [buttonRevealComplete, setButtonRevealComplete] = useState(true);
 
   
   const MAX_TOTAL_TOKENS = 4096;  
@@ -210,23 +214,16 @@ const NegotiationModule = ({ onReturn }) => {
   
   const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);  
   
-  useEffect(() => {  
-    if (chatHistory.length > 0) {  
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (chatHistory.length > 0) {
       setCurrentTurnIndex(Math.floor(chatHistory.length / 2) + 1);
-    }  
-  }, [chatHistory]);  
-  
-  const chatEndRef = useRef(null);  
-  
-  const scrollToBottom = () => {  
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });  
-  };  
-  
-  useEffect(() => {  
-    if (negotiationStarted) {  
-      scrollToBottom();  
-    }  
-  }, [chatHistory]);  
+    }
+  }, [chatHistory]);
+ 
   
   const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {  
     setIsFetching(true);  
@@ -498,21 +495,22 @@ const NegotiationModule = ({ onReturn }) => {
     } 
   };  
   
-  const addMessageToHistory = (content, role) => {  
-    if (!content || typeof content !== 'string') {  
-      console.error('Invalid message content:', content);  
-      return;  
-    }  
-    const roleName =  
-      role === 'user'  
-        ? selectedRole  
-        : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';  
-  
-    setChatHistory((prevHistory) => [  
-      ...prevHistory,  
-      { content, role, name: roleName, timestamp: generateSequentialTimestamp() },  
-    ]);  
-  };  
+  const addMessageToHistory = (content, role) => {
+    if (!content || typeof content !== 'string') {
+      console.error('Invalid message content:', content);
+      return;
+    }
+    const roleName =
+      role === 'user'
+        ? selectedRole
+        : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+
+    setChatHistory((prevHistory) => [
+      ...prevHistory,
+      { content, role, name: roleName, timestamp: generateSequentialTimestamp() },
+    ]);
+    scrollToBottom(); 
+  };
   
   const getLatestMessage = (role) => {  
     return chatHistory.filter((msg) => msg.role === role).slice(-1)[0]?.content || '';  
@@ -523,8 +521,7 @@ const NegotiationModule = ({ onReturn }) => {
         consider the latest opponent message: "${latestOpponentMessage}"  
         and the user's previous message: "${previousUserMessage}".  
         Generate four strategic response options that the user could employ.  
-        Each option should include a strategy name and a description of how it could be used  
-        in the context of the current negotiation trajectory.  
+        Each option should describe a strategic approach or tactic the user could take.  
         Return the response in the JSON format:  
         {  
             "options": [{ "name": "string", "description": "string" }]  
@@ -550,7 +547,8 @@ const NegotiationModule = ({ onReturn }) => {
     const parsed = parseAiJson(rawResponse);  
     if (parsed?.options) {  
       console.log('Generated response options:', parsed.options);  
-      setResponseOptions(parsed.options);  
+      setResponseOptions(parsed.options);
+        setButtonRevealComplete(false);
     } else {  
       console.error('Invalid response structure:', parsed);  
       setErrorMessage('Failed to generate response options. Please try again.');  
@@ -621,33 +619,51 @@ const NegotiationModule = ({ onReturn }) => {
   
   const getRandomDelay = () => Math.floor(Math.random() * (9000 - 4000 + 1)) + 4000;  
   
-  const sendUserReply = async () => {  
-    if (!userDraft.trim()) {  
-      setErrorMessage('Please type a reply before sending.');  
-      return;  
-    }  
-  
-    setErrorMessage('');  
-    addMessageToHistory(userDraft, 'user');  
-    setUserDraft('');  
-    setProgress((prev) => prev + 20);  
-    setCurrentTurnIndex(prev => prev + 1);
-  
-    setIsUserTurn(false);  
-    setIsFetching(true);  
-  
-    setTimeout(async () => {  
-      const opponentMessageContent = await generateOpponentResponse();  
-      if (opponentMessageContent) {  
-        addMessageToHistory(opponentMessageContent, 'opponent');  
-      }  
-      setIsUserTurn(true);  
-      if (progress >= 100) {  
-        finalizeSimulation();  
-      }  
-      setIsFetching(false);  
-    }, getRandomDelay());  
-  };  
+  const chatEndRef = useRef(null);
+
+  const sendUserReply = async () => {
+      if (!userDraft.trim()) {
+        setErrorMessage('Please type a reply before sending.');
+        return;
+      }
+
+      setErrorMessage('');
+      addMessageToHistory(userDraft, 'user');
+      setUserDraft('');
+      setProgress((prev) => prev + 20);
+      setCurrentTurnIndex((prev) => prev + 1);
+
+      setIsUserTurn(false);
+      setIsFetching(true);
+
+      // Get the delay time
+      const delay = getRandomDelay();
+      const animationDelay = delay * 0.25;
+
+      // Start loader animation
+      setTimeout(() => {
+        setIsFetchingOpponent(true);
+      }, animationDelay);
+
+      // Send Response
+      setTimeout(async () => {
+        const opponentMessageContent = await generateOpponentResponse();
+        if (opponentMessageContent) {
+          addMessageToHistory(opponentMessageContent, 'opponent');
+        }
+        setIsUserTurn(true);
+        setIsFetchingOpponent(false);
+          await generateResponseOptions(scenario?.context) // Regenerate response options here
+        if (progress >= 100) {
+          finalizeSimulation();
+        }
+        setIsFetching(false);
+      }, delay);
+    };
+    
+    const handleButtonAnimationComplete = () => {
+        setButtonRevealComplete(true);
+    };
   
    const analyzeNegotiation = async () => {
         const analysisPrompt = `
@@ -695,7 +711,7 @@ const NegotiationModule = ({ onReturn }) => {
             }
 
         } catch (error) {
-             setErrorMessage('Failed to analyze negotiation. Please try again.');
+             setErrorMessage('Failed to analyzenegotiation. Please try again.');
             console.error('Error analyzing negotiation:', error);
             return null;
         }
@@ -749,6 +765,8 @@ const NegotiationModule = ({ onReturn }) => {
      setScenarioGenerated(false); // Reset the scenario generated flag
      setCurrentTurnIndex(1);
       setRadarData(null)
+       setResponseOptions([]);
+         setButtonRevealComplete(true)
   };  
 
   const goToPreviousTurn = () => {
@@ -951,26 +969,27 @@ title="Next Turn"
                      <div className="response-options-container">
                        <div className="response-buttons">
                         {responseOptions.map((option, index) => (
-                          <Button
-                            key={index}
-                            onClick={() => generateUserResponse(option.description)}
-                            disabled={isResponseLoading}
-                            className={`response-button ${
-                              isResponseLoading ? 'loading' : ''
-                            }`}
-                          >
-                            <SlotMachineText
-                              text={option.name}
-                              isSpinning={isResponseLoading}
-                              revealSpeed={500}
-                            />
-                          </Button>
+                             <Button
+                                key={index}
+                                onClick={() => generateUserResponse(option.description)}
+                                disabled={isResponseLoading || !buttonRevealComplete}
+                                className={`response-button ${
+                                    isResponseLoading ? 'loading' : ''
+                                }`}
+                            >
+                              <SlotMachineText
+                                  text={option.name}
+                                  isSpinning={isResponseLoading}
+                                    revealSpeed={50}
+                                  standardizedSize={true}
+                                    onComplete={handleButtonAnimationComplete}
+                                />
+                            </Button>
                         ))}
-                      </div>
+                    </div>
                     </div>
                     {isResponseLoading && (
                       <div className="spinner-container">
-                       <BarLoader color="#0073e6" width="100%" />
                       </div>
                       )}
 

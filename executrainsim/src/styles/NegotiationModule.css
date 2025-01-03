@@ -1,0 +1,394 @@
+/* src/styles/NegotiationModule.css */
+
+
+.negotiation-module .scenario-card {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .negotiation-module .scenario-title, .negotiation-module .scenario-info h3 {
+    display: flex;
+    align-items: center;
+    color: #28a745; /* A shade of green for negotiation */
+    font-weight: bold;
+    font-size: 20px;
+    text-transform: uppercase;
+    font-family: 'Jura', sans-serif;
+    margin-bottom: 10px;
+  }
+  
+  .negotiation-module .scenario-context {
+    white-space: pre-wrap; /* Ensures line breaks are preserved */
+    word-wrap: break-word; /* Ensures long words break properly */
+  }
+  
+  .negotiation-module .Card-title, .negotiation-module .debriefing-title {
+    text-transform: uppercase;
+    font-size: 32px;
+      color: #28a745; /* A shade of green for negotiation */
+    font-family: 'Jura', sans-serif;
+  }
+  
+  .negotiation-module  .chevron-marker {
+    width: 20px;
+    height: 20px;
+    background-color: #28a745; /* A shade of green for negotiation */
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    margin-right: 10px;
+  }
+  
+  .negotiation-module .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .negotiation-module .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .negotiation-module .your-answer {
+    top: -15px;
+    margin-bottom: 40px;
+  }
+  
+  .negotiation-module .feedback-section {
+    margin-top: 10px;
+  }
+  
+  .negotiation-module  .feedback {
+    background-color: #d4edda; /* Light green for feedback */
+    padding: 20px 20px 0px;
+    padding-top: 1px;
+    border-radius: 8px;
+    position: relative;
+    margin-top: 10px;
+    border: 1px solid #28a745;
+  }
+  
+  .negotiation-module .feedback-title {
+    font-weight: bold;
+    color: #28a745; /* A shade of green for negotiation */
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: -44px;
+    left: 16px;
+    background-color: #d4edda;
+    padding: 4px 10px;
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 -1px 0 #28a745, 1px 0 0 #28a745, -1px 0 0 #28a745;
+    border-bottom: 0px solid #d4edda;
+  }
+  
+  .negotiation-module .feedback-title .icon {
+    margin-right: 5px;
+  }
+  
+  .negotiation-module .scenario-description, .negotiation-module .question-title {
+    margin-bottom: 15px;
+  }
+  
+  .negotiation-module .options-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .negotiation-module .option-button {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .negotiation-module .Button {
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  
+  .negotiation-module .restart-button {
+    display: block;
+    margin: 20px auto;
+    background-color: red;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .negotiation-module .restart-button:hover {
+    background-color: darkred;
+  }
+  
+  .negotiation-module .custom-answer-section {
+    margin-top: 15px;
+  }
+  
+  .negotiation-module  .custom-answer-label {
+    display: flex;
+    align-items: center;
+  }
+  
+  .negotiation-module .custom-answer-form {
+    margin-top: 10px;
+  }
+  
+  .negotiation-module  .custom-answer-textarea {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    resize: vertical;
+  }
+  
+  .negotiation-module  .debriefing-section {
+    margin-top: 10px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .negotiation-module  .stars-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .negotiation-module .star {
+    width: 24px;
+    height: 24px;
+    margin-right: 5px;
+    color: #ccc;
+  }
+  
+  .negotiation-module  .star.filled {
+    color: #ffd700;
+  }
+  
+  .negotiation-module  .action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .negotiation-module  .icon {
+    margin-right: 5px;
+  }
+  
+  .negotiation-module  .image-container img,
+  .negotiation-module  .image-placeholder,
+  .negotiation-module  .scenario-image {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      object-fit: contain;
+  }
+  
+  .negotiation-module .image-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    border: 1px solid #e0f7fa;
+  }
+  
+  .negotiation-module .scenario-image {
+    border: 2px solid #ccc;
+  }
+  
+  
+  .negotiation-module .editable-role {
+    margin-bottom: 2.5px;
+    margin-top: 2.5px;
+    width: 90%;
+    display: block; /* Ensure each role is on a separate line */
+  }
+  
+  /* Chat Styling */
+  .negotiation-module .chat-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid #e0e0e0; /* Subtle border */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f7f9fc; /* Light background */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  }
+  
+  .negotiation-module .editable-textarea {
+    width: 100%;
+    resize: none;
+    box-sizing: border-box; /* Ensures padding and border are included in the width */
+    font-size: 1em; /* Adjust font size as needed */
+    padding: 8px; /* Add padding for better usability */
+    border: 1px solid #ccc; /* Subtle border for structure */
+    border-radius: 4px; /* Rounded corners for a polished look */
+    background-color: #ffffff; /* Clean white background */
+  }
+  
+  .negotiation-module .radio-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    gap: 5px; /* Use gap for consistent spacing */
+  }
+  
+  .negotiation-module .radio-label {
+    font-size: 1em;
+    color: #333; /* Standard text color for readability */
+  }
+  
+  /* Chat History */
+  .negotiation-module .chat-history-container {
+    flex-grow: 1;
+    max-height: 60vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  
+  .negotiation-module  .chat-history {
+    max-height: 500px; /* Adjust the height as needed */
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 0px solid #e0e0e0;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.0);
+  }
+  
+  
+  /* Chat Message */
+  .negotiation-module .chat-message {
+    display: inline-block;
+    padding: 10px 12px;
+    border-radius: 12px;
+    max-width: 70%;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 0.9em;
+    margin-bottom: 12px;
+  }
+  
+  .negotiation-module .chat-message.user {
+    background-color: #007bff;
+    color: white;
+    margin-left: auto;
+    text-align: left;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .negotiation-module  .chat-message.opponent {
+    background-color: #e0e0e0;
+    color: black;
+    align-self: flex-start;
+    text-align: left;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Response Options */
+  .negotiation-module .response-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .negotiation-module .response-button {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #007bff;
+    border: none;
+    outline: 1px solid #007bff;
+    text-align: center;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .negotiation-module .response-button:hover {
+    background-color: #e6f0ff;
+    color: #0056b3;
+  }
+  
+  .negotiation-module  .response-button.loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  
+  
+  /* New addition for sender name */
+  .negotiation-module  .sender-name, .negotiation-module .message-timestamp {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  
+  .negotiation-module .user-input-container {
+    display: flex;
+    align-items: stretch;
+    margin-top: 10px;
+  }
+  
+  .negotiation-module .user-draft-textarea {
+    flex-grow: 1;
+    width: 100%;
+    resize: vertical;
+    min-height: calc(1.5em * 6);
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  
+  .negotiation-module .send-button {
+    padding: 10px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+  }
+  
+  .negotiation-module  .send-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .negotiation-module  .message-input-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    z-index: 10;
+      margin-top: auto;
+  }
+  
+  .negotiation-module .chat-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .negotiation-module  .send-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 10px;
+  }

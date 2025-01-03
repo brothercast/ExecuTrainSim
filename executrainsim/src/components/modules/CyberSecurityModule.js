@@ -8,7 +8,8 @@ import Progress from '../ui/Progress';
 import SevenSegmentDisplay from '../effects/SevenSegmentDisplay';
 import { BarLoader, BeatLoader } from 'react-spinners';
 import { AlertTriangle, CheckCircle, Edit, Menu, ArrowUp, ArrowDown } from 'lucide-react';
-import '../../styles/CybersecurityStyles.css';
+import '../../styles/AppStyles.css';
+import '../../styles/CybersecurityModule.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
