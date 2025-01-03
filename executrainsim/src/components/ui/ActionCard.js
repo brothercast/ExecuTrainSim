@@ -2,7 +2,7 @@ import React from 'react';
 import Button from './Button';
 import './ActionCard.css'; // Make sure to create this CSS file
 import { Tooltip } from 'react-tooltip';
-import 'react-tooltip/dist/react-tooltip.css'
+import 'react-tooltip/dist/react-tooltip.css' 
 
 const ActionCard = ({ card, onClick, disabled, loading }) => {
     console.log('ActionCard render - props:', card);
