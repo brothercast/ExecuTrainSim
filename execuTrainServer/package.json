@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "",
+    "build": "mkdir -p dist ; cp server.js dist ; cp package.json dist ; cp .env dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
