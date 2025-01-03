@@ -46,21 +46,16 @@ const SlotMachineText = ({
         .slot-machine-container {
             display: flex;
             flex-wrap: wrap;
-          gap: 0.15em;
-            font-family: monospace;
+             gap: 0.15em;
             width: 100%;
-          line-height: 1.2;
+            line-height: 1.2;
         }
-         .slot-machine-container.standard-size {
-            justify-content: space-between; /* Evenly space items */
-           align-items: stretch;  /* Ensure items stretch to fill the height */
-         }
+
          .slot-machine-container.standard-size button{
-             width: calc(100%/4 - 0.15em);
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            min-height: 50px;
+            display: flex;
+             align-items: center;
+             justify-content: center;
+            text-align: center;
          }
         .slot-machine-text {
             display: inline-block;
@@ -68,6 +63,8 @@ const SlotMachineText = ({
             position: relative;
             white-space: normal;
              word-break: break-word;
+              font-family: 'Arial', sans-serif;
+           text-align: center;
         }
         .slot-machine-text.spinning {
            filter: blur(2px);
@@ -121,21 +118,15 @@ const SlotMachineText = ({
 
     }, [isSpinning, text, revealSpeed, onComplete]);
 
-
-
   return (
       <div className={`slot-machine-container ${standardizedSize ? 'standard-size' : ''}`}>
         {text.split(/(\s+)/).map((word, index) =>
-            word.match(/^\s+$/) ? (
-               <span key={index} style={{ width: '0.25em' }}></span>
-           ) : (
                 <SpinningUnit
                     key={index}
                     content={word}
                     isRevealed={revealed}
                     characterSet={characterSet}
                 />
-            )
         )}
       </div>
   );

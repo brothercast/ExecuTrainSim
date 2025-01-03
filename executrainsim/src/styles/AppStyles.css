@@ -109,6 +109,8 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow to grow to fill the space in main-content */
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 100%); /* Gradient */
+     
 }
 
 .module-description {
@@ -643,7 +645,7 @@ body {
   align-self: flex-start;
   text-align: left;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
-  position: relative; /* To position the feedback icon correctly */
+    position: relative; /* To position the feedback icon correctly */
 }
 
 .chat-message .feedback-icon{
@@ -742,22 +744,27 @@ body {
 }
 
 .user-input-container {
-    display: flex;
-    align-items: stretch;
-    margin-top: 10px;
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+.user-input-container > div {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+}
+.user-draft-textarea {
+  flex-grow: 1;
+  width: 100%;
+  resize: vertical;
+  min-height: calc(1.5em * 6);
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box;
 }
 
-.user-draft-textarea {
-    flex-grow: 1;
-    width: 100%;
-    resize: vertical;
-    min-height: calc(1.5em * 6);
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    box-sizing: border-box;
-}
 
 .feedback-toggle-container {
     display: flex;
@@ -789,14 +796,18 @@ body {
 }
 
 .send-button {
-    padding: 10px 16px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease;
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+   height: 100%;
+  margin-left: 10px;
+   width: 18%;
+    white-space: nowrap; /* Prevent text wrapping */
 }
 
 .send-button:hover {
@@ -831,4 +842,46 @@ body {
     cursor: pointer;
     font-weight: bold;
     margin-left: 10px;
+}
+/* Response Options */
+.response-options-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  padding: 0px 10px;
+}
+
+.response-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.response-button {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #007bff;
+  border: none;
+  outline: 1px solid #007bff;
+  text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 50px; /* Enforce a consistent height */
+}
+
+.response-button:hover {
+  background-color: #e6f0ff;
+  color: #0056b3;
+}
+
+.response-button.loading {
+  pointer-events: none;
+  opacity: 0.6;
 }
