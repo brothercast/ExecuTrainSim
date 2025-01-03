@@ -8,8 +8,8 @@ on:
 
 env:
   AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup'
-  FRONTEND_WEBAPP_NAME: 'ExecuTrainSim-Frontend' # Replace with your frontend web app name
-  BACKEND_WEBAPP_NAME: 'ExecuTrainSim-Backend' # Replace with your backend web app name
+  FRONTEND_WEBAPP_NAME: 'ExecuTrainSim-Frontend'
+  BACKEND_WEBAPP_NAME: 'ExecuTrainSim-Backend'
 
 jobs:
   build_frontend:
@@ -122,15 +122,13 @@ jobs:
           app-name: ${{ env.BACKEND_WEBAPP_NAME }}
           slot-name: 'production'
           package: deploy/backend/dist
-          app-settings-json: |
-            {
-              "AZURE_OPENAI_API_KEY": "${{ secrets.AZURE_OPENAI_API_KEY }}",
-              "AZURE_OPENAI_ENDPOINT": "${{ secrets.AZURE_OPENAI_ENDPOINT }}",
-              "AZURE_DEPLOYMENT_NAME": "${{ secrets.AZURE_DEPLOYMENT_NAME }}",
-              "AZURE_OPENAI_API_VERSION": "${{ secrets.AZURE_OPENAI_API_VERSION }}",
-              "AZURE_ASSISTANT_API_VERSION": "${{ secrets.AZURE_ASSISTANT_API_VERSION }}",
-               "AZURE_DALLE_API_VERSION": "${{ secrets.AZURE_DALLE_API_VERSION }}"
-             }
+          app-settings: |
+            AZURE_OPENAI_API_KEY="${{ secrets.AZURE_OPENAI_API_KEY }}"
+            AZURE_OPENAI_ENDPOINT="${{ secrets.AZURE_OPENAI_ENDPOINT }}"
+            AZURE_DEPLOYMENT_NAME="${{ secrets.AZURE_DEPLOYMENT_NAME }}"
+            AZURE_OPENAI_API_VERSION="${{ secrets.AZURE_OPENAI_API_VERSION }}"
+            AZURE_ASSISTANT_API_VERSION="${{ secrets.AZURE_ASSISTANT_API_VERSION }}"
+            AZURE_DALLE_API_VERSION="${{ secrets.AZURE_DALLE_API_VERSION }}"
       - name: Verify backend deployment
         run: |
           for i in {1..3}; do
