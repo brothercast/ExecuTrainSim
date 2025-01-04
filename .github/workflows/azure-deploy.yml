@@ -50,7 +50,7 @@ jobs:
           cp -r execuTrainServer/dist deploy/backend
           echo "Copying startup script..."
           cp startup.sh deploy
-          echo "Copying package.json..."
+           echo "Copying package.json..."
           cp package.json deploy
           echo "Setting startup script as executable..."
           chmod +x deploy/startup.sh
@@ -88,7 +88,6 @@ jobs:
           echo "Stopping WebApp..."
           az webapp stop --name ExecuTrainSim --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
           sleep 30
-
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
