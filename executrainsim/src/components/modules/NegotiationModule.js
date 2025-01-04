@@ -338,19 +338,32 @@ const NegotiationModule = ({ onReturn }) => {
     try {  
       const endpoint = `${IMAGE_API_URL}/api/dalle/image`;  
       const response = await axios.post(endpoint, { prompt });  
-      setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));  
-      setImageStatus('success');  
+      if(response?.data?.imagePath){
+        setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));  
+        setImageStatus('success');
+      }
+        else {
+             setImageStatus('failed');
+             setErrorMessage(  
+              <span>  
+                Failed to generate image: Empty response data.  
+               <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
+              </span>  
+            ); 
+           console.error('API Error Details:', response);
+        }
+       
     } catch (error) {  
-      console.error('Error generating image:', error.message);  
+        setImageStatus('failed');
+        console.error('Error generating image:', error);
       setErrorMessage(  
         <span>  
           Failed to generate image. Please try again.  
           <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
         </span>  
-      );  
-      setImageStatus('failed');  
+      );   
     }  
-  };  
+  };
   
   const retryImageGeneration = (title, context) => {  
     setErrorMessage(''); // Clear the error message  
