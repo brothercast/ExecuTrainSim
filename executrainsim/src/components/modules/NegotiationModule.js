@@ -160,11 +160,10 @@ const parseAiJson = (apiResponse) => {
   }
 
   try {
-      if (apiResponse.choices && apiResponse.choices[0]?.message?.content) {
-         const raw = apiResponse.choices[0].message.content;
-        const cleaned = raw.replace(/```json|```/g, '').trim();
-         return JSON.parse(cleaned);
-    }
+      if (typeof apiResponse === 'string') {
+          const cleaned = apiResponse.replace(/```json|```/g, '').trim();
+          return JSON.parse(cleaned);
+      }
       return apiResponse; // Assume it's already parsed
   } catch (err) {
       console.error('Failed to parse AI JSON:', err, apiResponse);
@@ -332,6 +331,7 @@ const NegotiationModule = ({ onReturn }) => {
   };  
   
   const generateImage = async (title, context) => {  
+    console.log("generateImage function called with title:", title, "and context:", context)
     setImageStatus('loading');  
     const prompt = `Illustrate the negotiation scenario titled "${title}" with context: "${context}". The illustration should resemble colorful, writing-free, diverse universal stock art from the 1990s with simple, clean lines and a focus on clarity.`;  
   
