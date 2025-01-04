@@ -274,96 +274,108 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
   
-  const generateScenario = async () => {  
-    try {  
-      const selectedType = negotiationTypes.find((type) => type.value === negotiationType)?.title;  
-      const selectedSubType = negotiationSubTypes[negotiationType]?.find(  
-        (subType) => subType === negotiationSubType  
-      );  
-  
-      if (!selectedType) {  
-        setErrorMessage('Please select a negotiation type.');  
-        return;  
-      }  
-  
-      setErrorMessage('');  
-  
-      const prompt = `  
-        Create a ${selectedType} negotiation scenario${selectedSubType ? ` with a focus on ${selectedSubType}` : ''}.  
-        Provide a detailed description of the scenario, including the context,  
-        two distinct roles with realistic names, and their respective objectives.  
-        Ensure that the roles have conflicting objectives to drive negotiation dynamics.  
-        Include potential challenges each role might face.  
-        Generate 4-6 role-agnostic desired outcomes based on the context.  
-        Respond empathetically and adaptively to user tone and style.  
-        Return the scenario as JSON with the format:  
-        {  
-          "scenario": {  
-            "title": "string",  
-            "context": "string",  
-            "roles": [  
-              { "name": "string", "role": "string", "objective": "string" }  
-            ],  
-            "desiredOutcomes": ["string"]  
-          }  
+    const generateScenario = async () => {  
+      try {  
+        const selectedType = negotiationTypes.find((type) => type.value === negotiationType)?.title;  
+        const selectedSubType = negotiationSubTypes[negotiationType]?.find(  
+          (subType) => subType === negotiationSubType  
+        );  
+    
+        if (!selectedType) {  
+          setErrorMessage('Please select a negotiation type.');  
+          return;  
         }  
-      `;  
-  
-      const rawScenarioData = await fetchOpenAIResponse(  
-        { messages: [{ role: 'system', content: prompt }] },  
-        '/api/generate'  
-      );  
-  
-      const parsedScenario = parseAiJson(rawScenarioData);  
-  
-      if (parsedScenario?.scenario) {  
-        setScenario(parsedScenario.scenario);  
-        setRoles(parsedScenario.scenario.roles.map((r) => r.name));  
-        setSimulationComplete(false);
-        setScenarioGenerated(true); // Set the scenario generated flag
-        await generateImage(parsedScenario.scenario.title, parsedScenario.scenario.context);  
-      } else {  
-        setErrorMessage('Failed to generate scenario. Please try again.');  
+    
+        setErrorMessage('');  
+    
+        const prompt = `  
+          Create a ${selectedType} negotiation scenario${selectedSubType ? ` with a focus on ${selectedSubType}` : ''}.  
+          Provide a detailed description of the scenario, including the context,  
+          two distinct roles with realistic names, and their respective objectives.  
+          Ensure that the roles have conflicting objectives to drive negotiation dynamics.  
+          Include potential challenges each role might face.  
+          Generate 4-6 role-agnostic desired outcomes based on the context.  
+          Respond empathetically and adaptively to user tone and style.  
+          Return the scenario as JSON with the format:  
+          {  
+            "scenario": {  
+              "title": "string",  
+              "context": "string",  
+              "roles": [  
+                { "name": "string", "role": "string", "objective": "string" }  
+              ],  
+              "desiredOutcomes": ["string"]  
+            }  
+          }  
+        `;  
+    
+        const rawScenarioData = await fetchOpenAIResponse(  
+          { messages: [{ role: 'system', content: prompt }] },  
+          '/api/generate'  
+        );  
+    
+        const parsedScenario = parseAiJson(rawScenarioData);  
+    
+        if (parsedScenario?.scenario) {  
+          setScenario(parsedScenario.scenario);  
+          setRoles(parsedScenario.scenario.roles.map((r) => r.name));  
+          setSimulationComplete(false);
+          setScenarioGenerated(true); // Set the scenario generated flag
+         console.log("generateScenario: About to call generateImage:", parsedScenario.scenario.title, parsedScenario.scenario.context)
+          await generateImage(parsedScenario.scenario.title, parsedScenario.scenario.context);  
+        } else {  
+          setErrorMessage('Failed to generate scenario. Please try again.');  
+        }  
+      } catch (error) {  
+        setErrorMessage('An error occurred while generating the scenario.');  
       }  
-    } catch (error) {  
-      setErrorMessage('An error occurred while generating the scenario.');  
-    }  
-  };  
+    };
   
-  const generateImage = async (title, context) => {  
-    console.log("generateImage function called with title:", title, "and context:", context)
-    setImageStatus('loading');  
-    const prompt = `Illustrate the negotiation scenario titled "${title}" with context: "${context}". The illustration should resemble colorful, writing-free, diverse universal stock art from the 1990s with simple, clean lines and a focus on clarity.`;  
-  
-    try {  
-      const endpoint = `${IMAGE_API_URL}/api/dalle/image`;  
-      const response = await axios.post(endpoint, { prompt });  
-      if(response?.data?.imagePath){
-        setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));  
-        setImageStatus('success');
-      }
-        else {
-             setImageStatus('failed');
-             setErrorMessage(  
-              <span>  
-                Failed to generate image: Empty response data.  
-               <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
-              </span>  
-            ); 
-           console.error('API Error Details:', response);
+    const generateImage = async (title, context) => {  
+      console.log("generateImage function called with title:", title, "and context:", context)
+      setImageStatus('loading');  
+      const prompt = `Illustrate the negotiation scenario titled "${title}" with context: "${context}". The illustration should resemble colorful, writing-free, diverse universal stock art from the 1990s with simple, clean lines and a focus on clarity.`;  
+    
+      try {  
+        const endpoint = `${IMAGE_API_URL}/api/dalle/image`;  
+        const response = await axios.post(endpoint, { prompt });  
+        if(response?.data?.imagePath){
+            try {
+                setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));
+                setImageStatus('success');
+              } catch(setImagesError){
+               setImageStatus('failed');
+                  console.error('Error setting image state:', setImagesError);
+                   setErrorMessage(  
+                      <span>  
+                           Failed to generate image: Could not set state.  
+                          <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
+                     </span>  
+                  ); 
+              }
         }
-       
-    } catch (error) {  
-        setImageStatus('failed');
-        console.error('Error generating image:', error);
-      setErrorMessage(  
-        <span>  
-          Failed to generate image. Please try again.  
-          <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
-        </span>  
-      );   
-    }  
-  };
+          else {
+               setImageStatus('failed');
+               setErrorMessage(  
+                <span>  
+                  Failed to generate image: Empty response data.  
+                 <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
+                </span>  
+              ); 
+             console.error('API Error Details:', response);
+          }
+         
+      } catch (error) {  
+          setImageStatus('failed');
+          console.error('Error generating image:', error);
+        setErrorMessage(  
+          <span>  
+            Failed to generate image. Please try again.  
+            <RefreshCw className="reload-icon" onClick={() => retryImageGeneration(title, context)} />  
+          </span>  
+        );   
+      }  
+    };
   
   const retryImageGeneration = (title, context) => {  
     setErrorMessage(''); // Clear the error message  
