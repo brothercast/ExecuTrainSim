@@ -1,7 +1,7 @@
 // src/components/ModuleCard.js  
   
 import React from 'react';  
-import '../styles/ModuleCards.scss'; // Import the CSS file  
+import '../styles/ModuleCards.css'; // Import the CSS file  
   
 const ModuleCard = ({ title, description, imageUrl, onClick }) => {  
   return (  
