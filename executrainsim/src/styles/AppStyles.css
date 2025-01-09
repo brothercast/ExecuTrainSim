@@ -688,6 +688,11 @@ flex-direction: column;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
+.chat-message.user-message-align {
+  align-self: flex-end;
+  text-align: right;
+}
+
 .chat-message.opponent {
   background-color: #e0e0e0;
   color: black;

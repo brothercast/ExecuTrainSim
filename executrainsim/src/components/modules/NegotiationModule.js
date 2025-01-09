@@ -182,6 +182,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [negotiationType, setNegotiationType] = useState('');
     const [negotiationSubType, setNegotiationSubType] = useState('');
     const [desiredOutcome, setDesiredOutcome] = useState('');
+       const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     const [opponentDifficulty, setOpponentDifficulty] = useState('medium');
     const [scenario, setScenario] = useState(null);
     const [roles, setRoles] = useState(['Role 1', 'Role 2']);
@@ -218,7 +219,6 @@ const NegotiationModule = ({ onReturn }) => {
     const [isCustomInputMode, setIsCustomInputMode] = useState(false);
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
-    const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
@@ -437,6 +437,10 @@ const NegotiationModule = ({ onReturn }) => {
             setErrorMessage('Please select a role and desired outcome.');
             return;
         }
+          if(desiredOutcome === 'custom' && !customOutcomeInput.trim()){
+            setErrorMessage("Please enter a custom outcome")
+            return
+        }
         setNegotiationStarted(true);
         setErrorMessage('');
 
@@ -600,7 +604,7 @@ const NegotiationModule = ({ onReturn }) => {
         `;
         }
 
-    // Updated addMessageToHistory function
+   // Updated addMessageToHistory function
 const addMessageToHistory = (content, role) => {
     const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
     const newMessage = {
@@ -788,7 +792,8 @@ const sendUserReply = async () => {
         if (progress >= 100) {
             finalizeSimulation();
         }
-    }, delay);};
+    }, delay);
+};
 
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
@@ -824,12 +829,16 @@ const sendUserReply = async () => {
     };
     // Assess the final outcome of the negotiation
     const assessNegotiationOutcome = async () => {
-        if(!desiredOutcome) {
-            return { outcome: 'Draw', reason: 'No desired outcome was selected.' };
-        }
+       let finalOutcome = desiredOutcome;
+        if (desiredOutcome === 'custom') {
+           if (!customOutcomeInput.trim()) {
+               return { outcome: 'Draw', reason: 'No custom desired outcome was entered.' };
+           }
+            finalOutcome = customOutcomeInput
+         }
         const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
         const outcomeCheckPrompt = `
-        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${desiredOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
+        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
         {
             "outcome": "Win" | "Lose" | "Draw",
             "reason": "Your objective justification."
@@ -988,7 +997,7 @@ const sendUserReply = async () => {
             setShowFeedback(false); // Also reset the feedback toggle
              setIsScenarioEditable(false); // Reset scenario edit state
             setEditableScenario(null)
-            setCustomOutcomeInput('')
+            setCustomOutcomeInput('');
         };
         // Function to go to previous turn
         const goToPreviousTurn = () => {
@@ -1084,7 +1093,7 @@ const sendUserReply = async () => {
                                                       {scenario.context.split('\n').map((line, i) => (
                                                           <p key={i}>{line}</p>
                                                       ))}
-                                                         {negotiationType === 'custom' && !negotiationStarted &&(
+                                                        {negotiationType === 'custom' && !negotiationStarted &&(
                                                             <Edit
                                                                 className="scenario-edit-icon"
                                                                  onClick={handleScenarioEditToggle}
@@ -1109,7 +1118,7 @@ const sendUserReply = async () => {
                                                 </div>
                                             </div>
                                             <p>
-                                                <strong>Desired Outcome:</strong> {desiredOutcome}
+                                                <strong>Desired Outcome:</strong> {desiredOutcome === 'custom' ? customOutcomeInput : desiredOutcome}
                                             </p>
                                             {scenario && images[0] && (
                                                 <img
@@ -1196,7 +1205,7 @@ const sendUserReply = async () => {
                                                 <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                     <div className="chat-history">
                                                     {chatHistory.map((msg) => (
-                                                        <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
+                                                            <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
                                                                 {msg.role === 'feedback' && (
                                                                     <div className="feedback-box">
                                                                         <h4 className="feedback-title">
@@ -1342,7 +1351,12 @@ const sendUserReply = async () => {
                                                         <div className="form-group">
                                                             <label>Select your desired outcome</label>
                                                             <select
-                                                                onChange={(e) => setDesiredOutcome(e.target.value)}
+                                                                onChange={(e) => {
+                                                                     setDesiredOutcome(e.target.value);
+                                                                     if(e.target.value !== 'custom'){
+                                                                        setCustomOutcomeInput('')
+                                                                      }
+                                                                }}
                                                                 value={desiredOutcome}
                                                             >
                                                                 <option value="">Choose outcome</option>
@@ -1353,7 +1367,7 @@ const sendUserReply = async () => {
                                                                 ))}
                                                                 <option value="custom">Custom Outcome</option>
                                                             </select>
-                                                                 {desiredOutcome === 'custom' && (
+                                                             {desiredOutcome === 'custom' && (
                                                                     <textarea
                                                                         value={customOutcomeInput}
                                                                         onChange={(e) => setCustomOutcomeInput(e.target.value)}

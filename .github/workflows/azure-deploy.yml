@@ -45,9 +45,9 @@ jobs:
           echo "Creating deployment directory..."
           mkdir -p deploy
           echo "Copying frontend build..."
-          cp -r executrainsim/build deploy/frontend
+          cp -r executrainsim/build deploy/executrainsim
           echo "Copying backend files..."
-          cp -r execuTrainServer/dist deploy/backend
+          cp -r execuTrainServer deploy/execuTrainServer
           echo "Copying startup script..."
           cp startup.sh deploy
           echo "Copying package.json..."
