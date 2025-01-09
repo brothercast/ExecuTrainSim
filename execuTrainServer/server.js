@@ -3,12 +3,15 @@ const express = require('express');
 const axios = require('axios');  
 const cors = require('cors');  
 const { AzureOpenAI } = require('openai'); 
-const readline = require('readline');   
+const readline = require('readline');
+const path = require('path');   
   
 const app = express();  
   
 const GPT_PORT = process.env.GPT_PORT || 5000;  
 const DALLE_PORT = process.env.DALLE_PORT || 5001;  
+const PORT = process.env.PORT || 8080;
+
   
 // Load environment variables  
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;  
@@ -41,6 +44,17 @@ app.use(express.json());
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
+
+// Serve static files from the frontend directory
+const frontEndDir = path.join(__dirname, '..', 'executrainsim', 'build');
+console.log(`Serving static files from ${frontEndDir}`)
+app.use(express.static(frontEndDir));
+
+// Route all other requests to index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontEndDir, 'index.html'));
+});
+
   
 // Function to clear the console  
 const clearConsole = () => {  
@@ -189,12 +203,8 @@ app.post('/api/generate', async (req, res) => {
 console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);  
 console.log(`DALL-E Endpoint: ${dalleEndpoint}`);  
   
-app.listen(GPT_PORT, () => {  
-  console.log(`GPT is running on port ${GPT_PORT}`);  
-});  
+app.listen(PORT, () => {  
+  console.log(`GPT is running on port ${PORT}`);  
+});
   
-app.listen(DALLE_PORT, () => {  
-  console.log(`Dalle is running on port ${DALLE_PORT}`);  
-});  
-
-console.log(`Press "CTRL + L" to clear Log.`); 
+console.log(`Press "CTRL + L" to clear Log.`);

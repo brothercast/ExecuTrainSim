@@ -33,8 +33,6 @@ start_service() {
 # Start execuTrainServer
 start_service "execuTrainServer" "pm2 start server.js --name 'executrain-server'" "execuTrainServer"
 
-# Start executrainsim
-start_service "executrainsim" "npm run build && pm2 serve build 3000 --name 'executrainsim' --spa" "executrainsim"
 
 echo "*All* services started successfully."
 tail -f /dev/null
