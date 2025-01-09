@@ -218,6 +218,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isCustomInputMode, setIsCustomInputMode] = useState(false);
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
+    const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
@@ -599,7 +600,7 @@ const NegotiationModule = ({ onReturn }) => {
         `;
         }
 
-   // Updated addMessageToHistory function
+    // Updated addMessageToHistory function
 const addMessageToHistory = (content, role) => {
     const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
     const newMessage = {
@@ -626,7 +627,7 @@ const addMessageToHistory = (content, role) => {
         Generate four strategic response options, each representing a different high-level negotiation tactic or strategy that the user could employ.
          Each option should describe a general approach the user could take, not specific messages or phrases.
         Consider the different negotiation tactics and strategies like:
-        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\n        Return the response in the JSON format:\n        {\n            "options\": [{ \"name\": \"string\", \"description\": \"string\" }]\n        }\n    `;
+        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\n        Return the response in the JSON format:\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
     // Handle user message API response
     const handleUserResponse = (rawResponse) => {
         const parsed = parseAiJson(rawResponse);
@@ -787,8 +788,7 @@ const sendUserReply = async () => {
         if (progress >= 100) {
             finalizeSimulation();
         }
-    }, delay);
-};
+    }, delay);};
 
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
@@ -988,6 +988,7 @@ const sendUserReply = async () => {
             setShowFeedback(false); // Also reset the feedback toggle
              setIsScenarioEditable(false); // Reset scenario edit state
             setEditableScenario(null)
+            setCustomOutcomeInput('')
         };
         // Function to go to previous turn
         const goToPreviousTurn = () => {
@@ -1083,7 +1084,7 @@ const sendUserReply = async () => {
                                                       {scenario.context.split('\n').map((line, i) => (
                                                           <p key={i}>{line}</p>
                                                       ))}
-                                                        {negotiationType === 'custom' && (
+                                                         {negotiationType === 'custom' && !negotiationStarted &&(
                                                             <Edit
                                                                 className="scenario-edit-icon"
                                                                  onClick={handleScenarioEditToggle}
@@ -1193,9 +1194,9 @@ const sendUserReply = async () => {
                                         {negotiationStarted ? (
                                             <div className="chat-area">
                                                 <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
-                                                <div className="chat-history">
-                                                        {chatHistory.map((msg) => (
-                                                            <div key={msg.id} className={`chat-message ${msg.role}`}>
+                                                    <div className="chat-history">
+                                                    {chatHistory.map((msg) => (
+                                                        <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
                                                                 {msg.role === 'feedback' && (
                                                                     <div className="feedback-box">
                                                                         <h4 className="feedback-title">
@@ -1350,7 +1351,16 @@ const sendUserReply = async () => {
                                                                         {outcome}
                                                                     </option>
                                                                 ))}
+                                                                <option value="custom">Custom Outcome</option>
                                                             </select>
+                                                                 {desiredOutcome === 'custom' && (
+                                                                    <textarea
+                                                                        value={customOutcomeInput}
+                                                                        onChange={(e) => setCustomOutcomeInput(e.target.value)}
+                                                                        className="custom-outcome-input"
+                                                                         placeholder="Type your custom desired outcome..."
+                                                                      />
+                                                                    )}
                                                         </div>
                                                         <div className="form-group">
                                                             <label>Select opponent difficulty level</label>
