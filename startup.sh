@@ -22,13 +22,8 @@ start_service() {
 
   if [ -d "$service_dir" ]; then
     cd "$service_dir" || { echo "Failed to change directory to $service_dir"; exit 1; }
-    
-    echo "Installing npm dependencies in $service_dir"
-    npm install &> npm_install_$service_name.log || { echo "Failed to install npm dependencies in $service_dir, see npm_install_$service_name.log for details."; exit 1; }
-    
-    echo "Starting $service_name in $service_dir"
-    eval "$start_command" &> pm2_start_$service_name.log || { echo "Failed to start $service_name, see pm2_start_$service_name.log for details."; exit 1; }
-    
+    npm install &> npm_install_$service_name.log || { echo "Failed to install npm dependencies in $service_dir, check npm_install_$service_name.log"; exit 1; }
+    eval "$start_command" &> service_$service_name.log || { echo "Failed to start $service_name, check service_$service_name.log"; exit 1; }
     cd - > /dev/null || { echo "Failed to change back to previous directory"; exit 1; }
   else
     echo "Directory $service_dir does not exist"; exit 1;
@@ -42,3 +37,4 @@ start_service "execuTrainServer" "pm2 start server.js --name 'executrain-server'
 start_service "executrainsim" "npm run build && pm2 serve build 3000 --name 'executrainsim' --spa" "executrainsim"
 
 echo "*All* services started successfully."
+tail -f /dev/null
