@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import SlotMachineText from '../effects/SlotMachineText';
 import Select, { SelectItem } from '../ui/Select';
-import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save } from 'lucide-react';
+import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
 //import '../../styles/NegotiationModule.css';
@@ -419,6 +419,10 @@ const NegotiationModule = ({ onReturn }) => {
     const handleScenarioEditToggle = () => {
          setIsScenarioEditable(!isScenarioEditable);
     };
+    const handleCancelScenarioEdit = () => {
+            setEditableScenario(scenario);
+           setIsScenarioEditable(false);
+    }
      const handleScenarioChange = (field, value) => {
         setEditableScenario(prev => ({
             ...prev,
@@ -437,7 +441,7 @@ const NegotiationModule = ({ onReturn }) => {
             setErrorMessage('Please select a role and desired outcome.');
             return;
         }
-          if(desiredOutcome === 'custom' && !customOutcomeInput.trim()){
+         if(desiredOutcome === 'custom' && !customOutcomeInput.trim()){
             setErrorMessage("Please enter a custom outcome")
             return
         }
@@ -604,7 +608,7 @@ const NegotiationModule = ({ onReturn }) => {
         `;
         }
 
-   // Updated addMessageToHistory function
+    // Updated addMessageToHistory function
 const addMessageToHistory = (content, role) => {
     const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
     const newMessage = {
@@ -1084,6 +1088,14 @@ const sendUserReply = async () => {
                                                         onChange={(e) => handleScenarioChange('context', e.target.value)}
                                                            className="editable-scenario-context"
                                                        />
+                                                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px'}}>
+                                                          <Button onClick={handleSaveScenario}>
+                                                               Save <Save style={{ marginLeft: '8px'}}/>
+                                                        </Button>
+                                                        <Button onClick={handleCancelScenarioEdit}>
+                                                             Cancel <X style={{ marginLeft: '8px'}}/>
+                                                          </Button>
+                                                    </div>
                                                 </>
                                             ) : (
                                                   <>
@@ -1093,20 +1105,20 @@ const sendUserReply = async () => {
                                                       {scenario.context.split('\n').map((line, i) => (
                                                           <p key={i}>{line}</p>
                                                       ))}
-                                                        {negotiationType === 'custom' && !negotiationStarted &&(
+                                                          {negotiationType === 'custom' && (
+                                                            <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
                                                             <Edit
                                                                 className="scenario-edit-icon"
                                                                  onClick={handleScenarioEditToggle}
                                                             />
+                                                          </div>
                                                         )}
                                                      </div>
                                                  </>
                                             )}
                                              {isScenarioEditable && (
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
-                                                      <Button onClick={handleSaveScenario}>
-                                                           Save <Save style={{ marginLeft: '8px'}}/>
-                                                    </Button>
+
                                                 </div>
                                             )}
                                             <div className="role-info">
@@ -1203,8 +1215,8 @@ const sendUserReply = async () => {
                                         {negotiationStarted ? (
                                             <div className="chat-area">
                                                 <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
-                                                    <div className="chat-history">
-                                                    {chatHistory.map((msg) => (
+                                                     <div className="chat-history">
+                                                        {chatHistory.map((msg) => (
                                                             <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
                                                                 {msg.role === 'feedback' && (
                                                                     <div className="feedback-box">
@@ -1352,11 +1364,11 @@ const sendUserReply = async () => {
                                                             <label>Select your desired outcome</label>
                                                             <select
                                                                 onChange={(e) => {
-                                                                     setDesiredOutcome(e.target.value);
-                                                                     if(e.target.value !== 'custom'){
+                                                                    setDesiredOutcome(e.target.value);
+                                                                    if(e.target.value !== 'custom'){
                                                                         setCustomOutcomeInput('')
-                                                                      }
-                                                                }}
+                                                                    }
+                                                                  }}
                                                                 value={desiredOutcome}
                                                             >
                                                                 <option value="">Choose outcome</option>
@@ -1365,9 +1377,9 @@ const sendUserReply = async () => {
                                                                         {outcome}
                                                                     </option>
                                                                 ))}
-                                                                <option value="custom">Custom Outcome</option>
+                                                                   <option value="custom">Custom Outcome</option>
                                                             </select>
-                                                             {desiredOutcome === 'custom' && (
+                                                              {desiredOutcome === 'custom' && (
                                                                     <textarea
                                                                         value={customOutcomeInput}
                                                                         onChange={(e) => setCustomOutcomeInput(e.target.value)}
