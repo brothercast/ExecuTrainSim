@@ -42,6 +42,7 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+    console.log('Received /health request');
   res.status(200).send('OK');
 });
 

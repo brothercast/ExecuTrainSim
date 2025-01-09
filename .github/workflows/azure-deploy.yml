@@ -106,4 +106,9 @@ jobs:
       - name: Verify deployment
         run: |
           sleep 60 # Increased initial sleep time
-          curl -f -s -I ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health
+          response=$(curl -f -s -I ${{ steps.deploy-to-webapp.outputs.webapp-url }}/health)
+          echo "Response Headers: $response"
+          if [[ $response == "" ]]; then
+            echo "curl response is empty"
+            exit 1
+          fi
