@@ -11,8 +11,9 @@ export NODE_PATH=/usr/local/lib/node_modules:$NODE_PATH
 
 # Set PORT if not already set
 if [ -z "$PORT" ]; then
-  export PORT=8080
+  export PORT=80
 fi
+  export PORT=80
 
 # Function to install dependencies and start the server for a given directory
 start_service() {
@@ -32,7 +33,6 @@ start_service() {
 
 # Start execuTrainServer
 start_service "execuTrainServer" "pm2 start server.js --name 'executrain-server'" "execuTrainServer"
-
 
 echo "*All* services started successfully."
 tail -f /dev/null

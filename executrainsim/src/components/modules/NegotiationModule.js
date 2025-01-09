@@ -608,7 +608,7 @@ const NegotiationModule = ({ onReturn }) => {
         `;
         }
 
-  // Updated addMessageToHistory function
+   // Updated addMessageToHistory function
 const addMessageToHistory = (content, role) => {
     const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
     const newMessage = {
@@ -782,8 +782,7 @@ const sendUserReply = async () => {
 
     // Send Response
     setTimeout(async () => {
-        // Directly pass the user's message to generateOpponentResponse
-        const opponentMessageContent = await generateOpponentResponse(userMessage);
+        // Directly pass the user's message to generateOpponentResponse        const opponentMessageContent = await generateOpponentResponse(userMessage);
         if (opponentMessageContent) {
             addMessageToHistory(opponentMessageContent, 'opponent');
         } else {
@@ -1101,18 +1100,11 @@ const sendUserReply = async () => {
                                                   <>
                                                     <h3 style={{ position: 'relative' }}>{scenario.title}
                                                      </h3>
-                                                     <div className="scenario-description" style={{ position: 'relative' }}>
+                                                      <div className="scenario-description" style={{ position: 'relative' }}>
                                                       {scenario.context.split('\n').map((line, i) => (
                                                           <p key={i}>{line}</p>
                                                       ))}
-                                                          {negotiationType === 'custom' && (
-                                                            <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
-                                                            <Edit
-                                                                className="scenario-edit-icon"
-                                                                 onClick={handleScenarioEditToggle}
-                                                            />
-                                                          </div>
-                                                        )}
+
                                                      </div>
                                                  </>
                                             )}
@@ -1216,7 +1208,7 @@ const sendUserReply = async () => {
                                             <div className="chat-area">
                                                 <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                     <div className="chat-history">
-                                                        {chatHistory.map((msg) => (
+                                                    {chatHistory.map((msg) => (
                                                             <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
                                                                 {msg.role === 'feedback' && (
                                                                     <div className="feedback-box">
@@ -1335,18 +1327,11 @@ const sendUserReply = async () => {
                                                                 <BarLoader color="#0073e6" width="100%" />
                                                             )}
                                                         </div>
-                                                          <div className="scenario-description" style={{ position: 'relative' }}>
+                                                         <div className="scenario-description" style={{ position: 'relative' }}>
                                                       {scenario.context.split('\n').map((line, i) => (
                                                           <p key={i}>{line}</p>
                                                       ))}
-                                                          {negotiationType === 'custom' && (
-                                                            <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
-                                                            <Edit
-                                                                className="scenario-edit-icon"
-                                                                 onClick={handleScenarioEditToggle}
-                                                            />
-                                                          </div>
-                                                        )}
+
                                                      </div>
                                                     </div>
                                                 </CardHeader>
@@ -1376,7 +1361,7 @@ const sendUserReply = async () => {
                                                                      if(e.target.value !== 'custom'){
                                                                         setCustomOutcomeInput('')
                                                                       }
-                                                                }}
+                                                                  }}
                                                                 value={desiredOutcome}
                                                             >
                                                                 <option value="">Choose outcome</option>
@@ -1387,14 +1372,14 @@ const sendUserReply = async () => {
                                                                 ))}
                                                                 <option value="custom">Custom Outcome</option>
                                                             </select>
-                                                            {desiredOutcome === 'custom' && (
-                                                                  <textarea
-                                                                      value={customOutcomeInput}
-                                                                      onChange={(e) => setCustomOutcomeInput(e.target.value)}
-                                                                      className="custom-outcome-input"
-                                                                      placeholder="Type your custom desired outcome..."
-                                                                    />
-                                                                )}
+                                                              {desiredOutcome === 'custom' && (
+                                                                    <textarea
+                                                                        value={customOutcomeInput}
+                                                                        onChange={(e) => setCustomOutcomeInput(e.target.value)}
+                                                                        className="custom-outcome-input"
+                                                                         placeholder="Type your custom desired outcome..."
+                                                                      />
+                                                                    )}
                                                         </div>
                                                         <div className="form-group">
                                                             <label>Select opponent difficulty level</label>
@@ -1473,12 +1458,20 @@ const sendUserReply = async () => {
                                          ) : (
                                              <div className="form-group">
                                                  <label>Enter your custom negotiation scenario</label>
-                                                  <textarea
-                                                      value={customScenarioInput}
-                                                     onChange={(e) => setCustomScenarioInput(e.target.value)}
-                                                        placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
-                                                      className="custom-scenario-input"
-                                                  />
+                                                 <div className="scenario-description" style={{ position: 'relative' }}>
+                                                      <textarea
+                                                          value={customScenarioInput}
+                                                         onChange={(e) => setCustomScenarioInput(e.target.value)}
+                                                            placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
+                                                          className="custom-scenario-input"
+                                                        />
+                                                    <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
+                                                    <Edit
+                                                        className="scenario-edit-icon"
+                                                        onClick={handleScenarioEditToggle}
+                                                        />
+                                                </div>
+                                                  </div>
                                               </div>
                                          )}
                                         { !isCustomInputMode ? (
@@ -1486,9 +1479,22 @@ const sendUserReply = async () => {
                                                 {isFetching ? 'Generating...' : 'Generate Scenario'}
                                                 </Button>
                                            ) : (
+                                               <>
+                                               {isScenarioEditable ? (
+                                                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px'}}>
+                                                          <Button onClick={handleSaveScenario}>
+                                                               Save <Save style={{ marginLeft: '8px'}}/>
+                                                        </Button>
+                                                        <Button onClick={handleCancelScenarioEdit}>
+                                                             Cancel <X style={{ marginLeft: '8px'}}/>
+                                                          </Button>
+                                                    </div>
+                                                     ) : (
                                                <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
                                                    {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
                                                </Button>
+                                                    )}
+                                               </>
                                           )
                                       }
                                     </CardContent>
