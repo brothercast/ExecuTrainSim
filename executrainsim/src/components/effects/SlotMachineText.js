@@ -46,16 +46,23 @@ const SlotMachineText = ({
         .slot-machine-container {
             display: flex;
             flex-wrap: wrap;
-             gap: 0.15em;
+            gap: 0.15em;
             width: 100%;
             line-height: 1.2;
         }
-
-         .slot-machine-container.standard-size button{
+         .slot-machine-container.standard-size {
+            align-items: stretch;  /* Ensure items stretch to fill the height */
+           
+         }
+          .slot-machine-container.standard-size button {
+            width: calc(100%/4 - 0.15em);
             display: flex;
              align-items: center;
-             justify-content: center;
-            text-align: center;
+              justify-content: center;
+              text-align: center;
+            min-height: 50px;
+            font-family: 'Arial', sans-serif;
+            font-weight: bold;
          }
         .slot-machine-text {
             display: inline-block;
@@ -63,12 +70,12 @@ const SlotMachineText = ({
             position: relative;
             white-space: normal;
              word-break: break-word;
-              font-family: 'Arial', sans-serif;
-           text-align: center;
         }
         .slot-machine-text.spinning {
            filter: blur(2px);
             transform: translateY(2px);
+            font-family: monospace;
+            font-weight: bold;
           animation: spin-animation 0.2s linear infinite;
         }
         .slot-machine-text.revealed {
