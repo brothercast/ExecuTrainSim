@@ -257,6 +257,10 @@ h3 {
   word-wrap: break-word;
 }
 
+.scenario-edit-icon{
+  display: flex;
+}
+
 .reload-icon {
   cursor: pointer;
   margin-left: 10px;

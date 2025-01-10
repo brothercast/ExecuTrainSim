@@ -6,7 +6,9 @@
     "build": "react-scripts build"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "axios": "^1.7.9",
+    "dompurify": "^3.2.3",
     "lucide-react": "^0.469.0",
     "openai": "^4.77.0",
     "react": "^19.0.0",

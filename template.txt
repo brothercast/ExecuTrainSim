@@ -329,7 +329,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import SlotMachineText from '../effects/SlotMachineText';
 import Select, { SelectItem } from '../ui/Select';
-import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save } from 'lucide-react';
+import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
 //import '../../styles/NegotiationModule.css';
@@ -507,6 +507,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [negotiationType, setNegotiationType] = useState('');
     const [negotiationSubType, setNegotiationSubType] = useState('');
     const [desiredOutcome, setDesiredOutcome] = useState('');
+       const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     const [opponentDifficulty, setOpponentDifficulty] = useState('medium');
     const [scenario, setScenario] = useState(null);
     const [roles, setRoles] = useState(['Role 1', 'Role 2']);
@@ -661,7 +662,7 @@ const NegotiationModule = ({ onReturn }) => {
               {
                   "scenario": {
                       "title": "string",
-                      "context": "string",
+                      "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
                       ],
@@ -706,7 +707,7 @@ const NegotiationModule = ({ onReturn }) => {
               {
                   "scenario": {
                       "title": "string",
-                      "context": "string",
+                      "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
                       ],
@@ -743,6 +744,10 @@ const NegotiationModule = ({ onReturn }) => {
     const handleScenarioEditToggle = () => {
          setIsScenarioEditable(!isScenarioEditable);
     };
+    const handleCancelScenarioEdit = () => {
+            setEditableScenario(scenario);
+           setIsScenarioEditable(false);
+    }
      const handleScenarioChange = (field, value) => {
         setEditableScenario(prev => ({
             ...prev,
@@ -760,6 +765,10 @@ const NegotiationModule = ({ onReturn }) => {
         if (!selectedRole || !desiredOutcome) {
             setErrorMessage('Please select a role and desired outcome.');
             return;
+        }
+         if(desiredOutcome === 'custom' && !customOutcomeInput.trim()){
+            setErrorMessage("Please enter a custom outcome")
+            return
         }
         setNegotiationStarted(true);
         setErrorMessage('');
@@ -790,7 +799,7 @@ const NegotiationModule = ({ onReturn }) => {
             const openingPrompt = `
         As ${opponentRole.name}, in your role as "${opponentRole.role}", provide a very short, direct opening message to ${userRole.name} to start the negotiation.
         The message should set the stage for negotiation and be appropriate for a chat interface, and not a long email. Use a familiar yet professional tone that reflects the context: "${scenario.context}".
-        Return the response in JSON format: { "message": "string" }
+        Return the response in JSON format: { "message": "<p>string</p><p>string</p>..." }
       `;
 
             const rawOpeningResponse = await fetchOpenAIResponse(
@@ -919,12 +928,12 @@ const NegotiationModule = ({ onReturn }) => {
             Your goal is to find common ground, not simply reiterate your own position.
               Return the response in JSON format:
             {
-                "message": "Your concise message here"
+                "message": "<p>Your concise message here</p><p>And another paragraph here</p>"
             }
         `;
         }
 
-   // Updated addMessageToHistory function
+    // Updated addMessageToHistory function
 const addMessageToHistory = (content, role) => {
     const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
     const newMessage = {
@@ -951,7 +960,7 @@ const addMessageToHistory = (content, role) => {
         Generate four strategic response options, each representing a different high-level negotiation tactic or strategy that the user could employ.
          Each option should describe a general approach the user could take, not specific messages or phrases.
         Consider the different negotiation tactics and strategies like:
-        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\n        Return the response in the JSON format:\n        {\n            "options\": [{ \"name\": \"string\", \"description\": \"string\" }]\n        }\n    `;
+        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\n        Return the response in the JSON format:\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
     // Handle user message API response
     const handleUserResponse = (rawResponse) => {
         const parsed = parseAiJson(rawResponse);
@@ -999,7 +1008,7 @@ const generateFeedback = async (userMessage) => {
      Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
      Return the feedback in JSON format:
     {
-       "feedback": "Your concise feedback here"
+       "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>"
      }
 `;
 
@@ -1028,7 +1037,7 @@ const generateOpponentResponse = async (lastUserMessage) => {
         const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
         const opponentPrompt = `
-            As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "string" }.
+            As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
         `;
 
         const rawResponse = await fetchOpenAIResponse(
@@ -1149,12 +1158,16 @@ const sendUserReply = async () => {
     };
     // Assess the final outcome of the negotiation
     const assessNegotiationOutcome = async () => {
-        if(!desiredOutcome) {
-            return { outcome: 'Draw', reason: 'No desired outcome was selected.' };
-        }
+       let finalOutcome = desiredOutcome;
+        if (desiredOutcome === 'custom') {
+           if (!customOutcomeInput.trim()) {
+               return { outcome: 'Draw', reason: 'No custom desired outcome was entered.' };
+           }
+            finalOutcome = customOutcomeInput
+         }
         const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
         const outcomeCheckPrompt = `
-        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${desiredOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
+        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
         {
             "outcome": "Win" | "Lose" | "Draw",
             "reason": "Your objective justification."
@@ -1313,6 +1326,7 @@ const sendUserReply = async () => {
             setShowFeedback(false); // Also reset the feedback toggle
              setIsScenarioEditable(false); // Reset scenario edit state
             setEditableScenario(null)
+            setCustomOutcomeInput('');
         };
         // Function to go to previous turn
         const goToPreviousTurn = () => {
@@ -1399,29 +1413,27 @@ const sendUserReply = async () => {
                                                         onChange={(e) => handleScenarioChange('context', e.target.value)}
                                                            className="editable-scenario-context"
                                                        />
+                                                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px'}}>
+                                                          <Button onClick={handleSaveScenario}>
+                                                               Save <Save style={{ marginLeft: '8px'}}/>
+                                                        </Button>
+                                                        <Button onClick={handleCancelScenarioEdit}>
+                                                             Cancel <X style={{ marginLeft: '8px'}}/>
+                                                          </Button>
+                                                    </div>
                                                 </>
                                             ) : (
                                                   <>
                                                     <h3 style={{ position: 'relative' }}>{scenario.title}
                                                      </h3>
-                                                     <div style={{ position: 'relative' }}>
-                                                      {scenario.context.split('\n').map((line, i) => (
-                                                          <p key={i}>{line}</p>
-                                                      ))}
-                                                        {negotiationType === 'custom' && (
-                                                            <Edit
-                                                                className="scenario-edit-icon"
-                                                                 onClick={handleScenarioEditToggle}
-                                                            />
-                                                        )}
+                                                      <div className="scenario-description" style={{ position: 'relative' }}>
+                                                        <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
                                                      </div>
                                                  </>
                                             )}
                                              {isScenarioEditable && (
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
-                                                      <Button onClick={handleSaveScenario}>
-                                                           Save <Save style={{ marginLeft: '8px'}}/>
-                                                    </Button>
+
                                                 </div>
                                             )}
                                             <div className="role-info">
@@ -1433,7 +1445,7 @@ const sendUserReply = async () => {
                                                 </div>
                                             </div>
                                             <p>
-                                                <strong>Desired Outcome:</strong> {desiredOutcome}
+                                                <strong>Desired Outcome:</strong> {desiredOutcome === 'custom' ? customOutcomeInput : desiredOutcome}
                                             </p>
                                             {scenario && images[0] && (
                                                 <img
@@ -1518,17 +1530,15 @@ const sendUserReply = async () => {
                                         {negotiationStarted ? (
                                             <div className="chat-area">
                                                 <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
-                                                <div className="chat-history">
-                                                        {chatHistory.map((msg) => (
-                                                            <div key={msg.id} className={`chat-message ${msg.role}`}>
+                                                    <div className="chat-history">
+                                                    {chatHistory.map((msg) => (
+                                                            <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
                                                                 {msg.role === 'feedback' && (
                                                                     <div className="feedback-box">
                                                                         <h4 className="feedback-title">
                                                                             <Info className="icon" /> Feedback
                                                                         </h4>
-                                                                        {msg.content.split('\n').map((line, i) => (
-                                                                            <p key={i}>{line}</p>
-                                                                        ))}
+                                                                        <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                         <Button onClick={() => dismissFeedback(msg.id)} className="dismiss-button">
                                                                             Dismiss
                                                                         </Button>
@@ -1542,11 +1552,7 @@ const sendUserReply = async () => {
                                                                         <div>
                                                                             <strong className="message-timestamp">Time:</strong> {msg.timestamp}
                                                                         </div>
-                                                                        <div>
-                                                                            {msg.content.split('\n').map((line, i) => (
-                                                                                <p key={i}>{line}</p>
-                                                                            ))}
-                                                                        </div>
+                                                                         <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                     </>
                                                                 )}
                                                             </div>
@@ -1638,10 +1644,8 @@ const sendUserReply = async () => {
                                                                 <BarLoader color="#0073e6" width="100%" />
                                                             )}
                                                         </div>
-                                                        <div>
-                                                            {scenario.context.split('\n').map((line, i) => (
-                                                                <p key={i}>{line}</p>
-                                                            ))}
+                                                        <div  className="scenario-description" style={{ position: 'relative' }}>
+                                                         <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
                                                         </div>
                                                     </div>
                                                 </CardHeader>
@@ -1666,7 +1670,12 @@ const sendUserReply = async () => {
                                                         <div className="form-group">
                                                             <label>Select your desired outcome</label>
                                                             <select
-                                                                onChange={(e) => setDesiredOutcome(e.target.value)}
+                                                                  onChange={(e) => {
+                                                                    setDesiredOutcome(e.target.value);
+                                                                     if(e.target.value !== 'custom'){
+                                                                        setCustomOutcomeInput('')
+                                                                    }
+                                                                  }}
                                                                 value={desiredOutcome}
                                                             >
                                                                 <option value="">Choose outcome</option>
@@ -1675,7 +1684,16 @@ const sendUserReply = async () => {
                                                                         {outcome}
                                                                     </option>
                                                                 ))}
+                                                                  <option value="custom">Custom Outcome</option>
                                                             </select>
+                                                                {desiredOutcome === 'custom' && (
+                                                                    <textarea
+                                                                        value={customOutcomeInput}
+                                                                        onChange={(e) => setCustomOutcomeInput(e.target.value)}
+                                                                        className="custom-outcome-input"
+                                                                         placeholder="Type your custom desired outcome..."
+                                                                      />
+                                                                    )}
                                                         </div>
                                                         <div className="form-group">
                                                             <label>Select opponent difficulty level</label>
@@ -1754,12 +1772,25 @@ const sendUserReply = async () => {
                                          ) : (
                                              <div className="form-group">
                                                  <label>Enter your custom negotiation scenario</label>
-                                                  <textarea
-                                                      value={customScenarioInput}
-                                                     onChange={(e) => setCustomScenarioInput(e.target.value)}
-                                                        placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
-                                                      className="custom-scenario-input"
-                                                  />
+                                                    <div className="scenario-description" style={{ position: 'relative' }}>
+                                                     <textarea
+                                                          value={customScenarioInput}
+                                                         onChange={(e) => setCustomScenarioInput(e.target.value)}
+                                                            placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
+                                                          className="custom-scenario-input"
+                                                       />
+                                                      
+                                                    {isScenarioEditable && (
+                                                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px'}}>
+                                                          <Button onClick={handleSaveScenario}>
+                                                               Save <Save style={{ marginLeft: '8px'}}/>
+                                                        </Button>
+                                                        <Button onClick={handleCancelScenarioEdit}>
+                                                             Cancel <X style={{ marginLeft: '8px'}}/>
+                                                          </Button>
+                                                    </div>
+                                                    )}
+                                               </div>
                                               </div>
                                          )}
                                         { !isCustomInputMode ? (
@@ -1767,9 +1798,13 @@ const sendUserReply = async () => {
                                                 {isFetching ? 'Generating...' : 'Generate Scenario'}
                                                 </Button>
                                            ) : (
-                                               <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
+                                               <>
+                                                {!isScenarioEditable && (
+                                                 <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
                                                    {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
                                                </Button>
+                                               )}
+                                               </>
                                           )
                                       }
                                     </CardContent>
@@ -1870,7 +1905,7 @@ const sendUserReply = async () => {
                                                     .filter(msg => msg.role === 'user' || msg.role === 'opponent')
                                                     .map((msg, index) => (
                                                         <div key={index}>
-                                                            <strong>{msg.name}:</strong> {msg.content}
+                                                            <strong>{msg.name}:</strong> <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                         </div>
                                                     ))}
                                             </div>

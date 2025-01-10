@@ -9,6 +9,7 @@ import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
 //import '../../styles/NegotiationModule.css';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import DOMPurify from 'dompurify';
 
 // Define API Base URLs
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -219,6 +220,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isCustomInputMode, setIsCustomInputMode] = useState(false);
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
+     const [customSetupStage, setCustomSetupStage] = useState('selection');
     
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
@@ -337,7 +339,7 @@ const NegotiationModule = ({ onReturn }) => {
               {
                   "scenario": {
                       "title": "string",
-                      "context": "string",
+                      "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
                       ],
@@ -382,7 +384,7 @@ const NegotiationModule = ({ onReturn }) => {
               {
                   "scenario": {
                       "title": "string",
-                      "context": "string",
+                      "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
                       ],
@@ -414,6 +416,7 @@ const NegotiationModule = ({ onReturn }) => {
         finally{
           setIsFetchingScenario(false);
           setIsCustomInputMode(false);
+            setCustomSetupStage('results');
         }
   };
     const handleScenarioEditToggle = () => {
@@ -474,7 +477,7 @@ const NegotiationModule = ({ onReturn }) => {
             const openingPrompt = `
         As ${opponentRole.name}, in your role as "${opponentRole.role}", provide a very short, direct opening message to ${userRole.name} to start the negotiation.
         The message should set the stage for negotiation and be appropriate for a chat interface, and not a long email. Use a familiar yet professional tone that reflects the context: "${scenario.context}".
-        Return the response in JSON format: { "message": "string" }
+        Return the response in JSON format: { "message": "<p>string</p><p>string</p>..." }
       `;
 
             const rawOpeningResponse = await fetchOpenAIResponse(
@@ -603,16 +606,17 @@ const NegotiationModule = ({ onReturn }) => {
             Your goal is to find common ground, not simply reiterate your own position.
               Return the response in JSON format:
             {
-                "message": "Your concise message here"
+                "message": "<p>Your concise message here</p><p>And another paragraph here</p>"
             }
         `;
         }
 
-   // Updated addMessageToHistory function
+    // Updated addMessageToHistory function
 const addMessageToHistory = (content, role) => {
     const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+    const sanitizedContent = DOMPurify.sanitize(content);
     const newMessage = {
-        content,
+        content: sanitizedContent,
         role,
         name: roleName,
         timestamp: generateSequentialTimestamp(),
@@ -635,7 +639,7 @@ const addMessageToHistory = (content, role) => {
         Generate four strategic response options, each representing a different high-level negotiation tactic or strategy that the user could employ.
          Each option should describe a general approach the user could take, not specific messages or phrases.
         Consider the different negotiation tactics and strategies like:
-        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\n        Return the response in the JSON format:\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
+        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\\n        Return the response in the JSON format:\\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
     // Handle user message API response
     const handleUserResponse = (rawResponse) => {
         const parsed = parseAiJson(rawResponse);
@@ -683,13 +687,13 @@ const generateFeedback = async (userMessage) => {
      Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
      Return the feedback in JSON format:
     {
-       "feedback": "Your concise feedback here"
+       "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>"
      }
 `;
 
     try {
         const rawFeedbackResponse = await fetchOpenAIResponse(
-            { messages: [{ role: 'system', content: feedbackPrompt }], temperature: 0.7, max_tokens: 500 },
+            { messages: [{ role: 'system', content: feedbackPrompt }] },
             '/api/generate'
         );
         const parsedFeedback = parseAiJson(rawFeedbackResponse);
@@ -712,7 +716,7 @@ const generateOpponentResponse = async (lastUserMessage) => {
         const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
         const opponentPrompt = `
-            As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "string" }.
+            As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
         `;
 
         const rawResponse = await fetchOpenAIResponse(
@@ -770,7 +774,7 @@ const sendUserReply = async () => {
         setIsFetchingOpponent(true);
     }, animationDelay);
 
-    // Generate feedback if the toggle is on and add it separately
+    //    // Generate feedback if the toggle is on and add it separately
     if (showFeedback) {
         const feedbackContent = await generateFeedback(userMessage);
         if (feedbackContent) {
@@ -782,7 +786,8 @@ const sendUserReply = async () => {
 
     // Send Response
     setTimeout(async () => {
-        // Directly pass the user's message to generateOpponentResponse        const opponentMessageContent = await generateOpponentResponse(userMessage);
+        // Directly pass the user's message to generateOpponentResponse
+        const opponentMessageContent = await generateOpponentResponse(userMessage);
         if (opponentMessageContent) {
             addMessageToHistory(opponentMessageContent, 'opponent');
         } else {
@@ -832,11 +837,11 @@ const sendUserReply = async () => {
     };
     // Assess the final outcome of the negotiation
     const assessNegotiationOutcome = async () => {
-       let finalOutcome = desiredOutcome;
-        if (desiredOutcome === 'custom') {
-           if (!customOutcomeInput.trim()) {
-               return { outcome: 'Draw', reason: 'No custom desired outcome was entered.' };
-           }
+        let finalOutcome = desiredOutcome;
+         if (desiredOutcome === 'custom') {
+            if (!customOutcomeInput.trim()) {
+                return { outcome: 'Draw', reason: 'No custom desired outcome was entered.' };
+            }
             finalOutcome = customOutcomeInput
          }
         const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
@@ -856,16 +861,17 @@ const sendUserReply = async () => {
                 throw new Error("Received empty response from server.");
             }
             const parsedResponse = parseAiJson(rawResponse);
-            return parsedResponse        }
-            catch (error) {
-                console.error('Failed to assess negotiation outcome', error);
-                return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
-            }
+            return parsedResponse
         }
-        // Analyze the negotiation transcript
-        const analyzeNegotiation = async () => {
-            const userRole = scenario.roles.find((r) => r.name === selectedRole);
-            const analysisPrompt = `
+        catch (error) {
+            console.error('Failed to assess negotiation outcome', error);
+            return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
+        }
+    }
+    // Analyze the negotiation transcript
+    const analyzeNegotiation = async () => {
+        const userRole = scenario.roles.find((r) => r.name === selectedRole);
+        const analysisPrompt = `
                 Analyze the following negotiation transcript, paying special attention to how the user, playing as ${userRole.name}, in the role of the ${userRole.role}, navigated the negotiation.
                 Evaluate ${userRole.name}’s performance based on several key negotiation tactics and provide a score on a scale of 1-10 for each tactic.
                 For each tactic, provide 2-3 specific examples from the transcript to illustrate where ${userRole.name} demonstrated that tactic effectively or ineffectively.
@@ -887,134 +893,135 @@ const sendUserReply = async () => {
                 The negotiation transcript:
                 ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
               `;
-            try {
-                const rawAnalysisResponse = await fetchOpenAIResponse({
-                    messages: [{ role: 'system', content: analysisPrompt }],
-                }, '/api/generate');
-                const parsedAnalysis = parseAiJson(rawAnalysisResponse);
+        try {
+            const rawAnalysisResponse = await fetchOpenAIResponse({
+                messages: [{ role: 'system', content: analysisPrompt }],
+            }, '/api/generate');
+            const parsedAnalysis = parseAiJson(rawAnalysisResponse);
 
-                if (parsedAnalysis) {
-                    console.log('Parsed Analysis:', parsedAnalysis)
-                    const sentenceCaseKeys = (obj) => {
-                        if (typeof obj !== 'object' || obj === null) {
-                            return obj;
+            if (parsedAnalysis) {
+                console.log('Parsed Analysis:', parsedAnalysis)
+                const sentenceCaseKeys = (obj) => {
+                    if (typeof obj !== 'object' || obj === null) {
+                        return obj;
+                    }
+                    if(Array.isArray(obj)){
+                        return obj.map(sentenceCaseKeys)
+                    }
+                    const newObj = {};
+                    for (const key in obj) {
+                        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                            const newKey = key.charAt(0).toUpperCase() + key.slice(1);
+                            newObj[newKey] = sentenceCaseKeys(obj[key]);
                         }
-                        if(Array.isArray(obj)){
-                            return obj.map(sentenceCaseKeys)
-                        }
-                        const newObj = {};
-                        for (const key in obj) {
-                            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                                const newKey = key.charAt(0).toUpperCase() + key.slice(1);
-                                newObj[newKey] = sentenceCaseKeys(obj[key]);
-                            }
-                        }
-                        return newObj
-                    };
+                    }
+                    return newObj
+                };
 
-                    const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
+                const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
 
-                    setDebriefing((prev) => ({
-                        ...prev,
-                        summary: formattedAnalysis.Summary,
-                        tactics: formattedAnalysis.Tactics,
-                    }));
-
-                    const radarData = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
-                        skill: name,
-                        score: value.score,
-                    }));
-
-                    setRadarData(radarData)
-                    return formattedAnalysis;
-                } else {
-                    setErrorMessage('Failed to analyze negotiation. Please try again.');
-                    return null;
-                }
-
-            } catch (error) {
-                setErrorMessage('Failed to analyze negotiation. Please try again.');
-                console.error('Error analyzing negotiation:', error);
-                return null;
-            }
-        };
-        // Finalize the simulation after completion
-        const finalizeSimulation = async () => {
-            const outcomeData = await assessNegotiationOutcome();
-            const analysisData = await analyzeNegotiation()
-
-            const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
-                if (msg.role === 'user') {
-                    return acc + 1;
-                }
-                return acc;
-            }, 0);
-
-            const totalMessages = chatHistory.length;
-            const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
-
-            if (analysisData && outcomeData) {
-                const outcome = outcomeData.outcome;
-                const outcomeReason = outcomeData.reason;
                 setDebriefing((prev) => ({
                     ...prev,
-                    strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
-                        .filter(([, value]) => value.score > 7)
-                        .map(([key]) => key) : ['None'],
-                    areasForImprovement:  analysisData.Tactics ? Object.entries(analysisData.Tactics)
-                        .filter(([, value]) => value.score < 6)
-                        .map(([key]) => key) : ['None'],
-                    overallScore: Math.round(effectivenessScore),
-                    letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
-                    advice: outcome === 'Win' ? 'Continue refining your strategies. Your approach was effective in this negotiation.':  outcome === 'Lose' ? 'Consider revising your approach for better results. Take a closer look at the areas needing improvement.': 'Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.',
-                    transcript: chatHistory,
-                    outcome: outcome,
-                    outcomeReason: outcomeReason,
-                    summary: analysisData.Summary,
-                    tactics: analysisData.Tactics
+                    summary: formattedAnalysis.Summary,
+                    tactics: formattedAnalysis.Tactics,
                 }));
+
+                const radarData = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
+                    skill: name,
+                    score: value.score,
+                }));
+
+                setRadarData(radarData)
+                return formattedAnalysis;
             } else {
-                setErrorMessage('Failed to generate a proper summary. Please try again.');
-                setDebriefing(null);
+                setErrorMessage('Failed to analyze negotiation. Please try again.');
+                return null;
             }
-            setSimulationComplete(true);
-        };
-        // Reset all state variables for new simulations
-        const resetNegotiation = () => {
-            setScenario(null);
-            setRoles(['Role 1', 'Role 2']);
-            setSelectedRole('');
-            setChatHistory([]);
-            setUserDraft('');
-            setProgress(0);
-            setSimulationComplete(false);
+
+        } catch (error) {
+            setErrorMessage('Failed to analyze negotiation. Please try again.');
+            console.error('Error analyzing negotiation:', error);
+            return null;
+        }
+    };
+    // Finalize the simulation after completion
+    const finalizeSimulation = async () => {
+        const outcomeData = await assessNegotiationOutcome();
+        const analysisData = await analyzeNegotiation()
+
+        const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
+            if (msg.role === 'user') {
+                return acc + 1;
+            }
+            return acc;
+        }, 0);
+
+        const totalMessages = chatHistory.length;
+        const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
+
+        if (analysisData && outcomeData) {
+            const outcome = outcomeData.outcome;
+            const outcomeReason = outcomeData.reason;
+            setDebriefing((prev) => ({
+                ...prev,
+                strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
+                    .filter(([, value]) => value.score > 7)
+                    .map(([key]) => key) : ['None'],
+                areasForImprovement: analysisData.Tactics ? Object.entries(analysisData.Tactics)
+                    .filter(([, value]) => value.score < 6)
+                    .map(([key]) => key) : ['None'],
+                overallScore: Math.round(effectivenessScore),
+                letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
+                advice: outcome === 'Win' ? 'Continue refining your strategies. Your approach was effective in this negotiation.' : outcome === 'Lose' ? 'Consider revising your approach for better results. Take a closer look at the areas needing improvement.' : 'Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.',
+                transcript: chatHistory,
+                outcome: outcome,
+                outcomeReason: outcomeReason,
+                summary: analysisData.Summary,
+                tactics: analysisData.Tactics
+            }));
+        } else {
+            setErrorMessage('Failed to generate a proper summary. Please try again.');
             setDebriefing(null);
-            setErrorMessage('');
-            setImages({});
-            setNegotiationStarted(false);
-            setScenarioGenerated(false); // Reset the scenario generated flag
-            setCurrentTurnIndex(1);
-            setRadarData(null)
-            setResponseOptions([]);
-            setButtonRevealComplete(true)
-            setShowFeedback(false); // Also reset the feedback toggle
-             setIsScenarioEditable(false); // Reset scenario edit state
-            setEditableScenario(null)
-            setCustomOutcomeInput('');
-        };
-        // Function to go to previous turn
-        const goToPreviousTurn = () => {
-            if (currentTurnIndex > 1 && simulationComplete) {
-                setCurrentTurnIndex(prevIndex => prevIndex - 1);
-            }
-        };
-        // Function to go to next turn
-        const goToNextTurn = () => {
-            const totalTurns = Math.ceil(chatHistory.length / 2);
-            if (currentTurnIndex < totalTurns && simulationComplete) {
-                setCurrentTurnIndex(prevIndex => prevIndex + 1);
-            }
-        };
+        }
+        setSimulationComplete(true);
+    };
+    // Reset all state variables for new simulations
+    const resetNegotiation = () => {
+        setScenario(null);
+        setRoles(['Role 1', 'Role 2']);
+        setSelectedRole('');
+        setChatHistory([]);
+        setUserDraft('');
+        setProgress(0);
+        setSimulationComplete(false);
+        setDebriefing(null);
+        setErrorMessage('');
+        setImages({});
+        setNegotiationStarted(false);
+        setScenarioGenerated(false); // Reset the scenario generated flag
+        setCurrentTurnIndex(1);
+        setRadarData(null)
+        setResponseOptions([]);
+        setButtonRevealComplete(true)
+        setShowFeedback(false); // Also reset the feedback toggle
+         setIsScenarioEditable(false); // Reset scenario edit state
+        setEditableScenario(null)
+        setCustomOutcomeInput('');
+         setCustomSetupStage('selection');
+    };
+    // Function to go to previous turn
+    const goToPreviousTurn = () => {
+        if (currentTurnIndex > 1 && simulationComplete) {
+            setCurrentTurnIndex(prevIndex => prevIndex - 1);
+        }
+    };
+    // Function to go to next turn
+    const goToNextTurn = () => {
+        const totalTurns = Math.ceil(chatHistory.length / 2);
+        if (currentTurnIndex < totalTurns && simulationComplete) {
+            setCurrentTurnIndex(prevIndex => prevIndex + 1);
+        }
+    };
 
     // Return the JSX that constructs the UI
         return (
@@ -1101,16 +1108,21 @@ const sendUserReply = async () => {
                                                     <h3 style={{ position: 'relative' }}>{scenario.title}
                                                      </h3>
                                                       <div className="scenario-description" style={{ position: 'relative' }}>
-                                                      {scenario.context.split('\n').map((line, i) => (
-                                                          <p key={i}>{line}</p>
-                                                      ))}
-
+                                                     <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                                                      {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
+                                                            <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
+                                                            <Edit
+                                                                className="scenario-edit-icon"
+                                                                 onClick={handleScenarioEditToggle}
+                                                            />
+                                                          </div>
+                                                        )}
                                                      </div>
                                                  </>
                                             )}
                                              {isScenarioEditable && (
                                                 <div style={{ display: 'flex', justifyContent: 'flex-end'}}>
-
+                                                      
                                                 </div>
                                             )}
                                             <div className="role-info">
@@ -1208,16 +1220,14 @@ const sendUserReply = async () => {
                                             <div className="chat-area">
                                                 <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                     <div className="chat-history">
-                                                    {chatHistory.map((msg) => (
+                                                        {chatHistory.map((msg) => (
                                                             <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
                                                                 {msg.role === 'feedback' && (
                                                                     <div className="feedback-box">
                                                                         <h4 className="feedback-title">
                                                                             <Info className="icon" /> Feedback
                                                                         </h4>
-                                                                        {msg.content.split('\n').map((line, i) => (
-                                                                            <p key={i}>{line}</p>
-                                                                        ))}
+                                                                         <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                         <Button onClick={() => dismissFeedback(msg.id)} className="dismiss-button">
                                                                             Dismiss
                                                                         </Button>
@@ -1231,11 +1241,7 @@ const sendUserReply = async () => {
                                                                         <div>
                                                                             <strong className="message-timestamp">Time:</strong> {msg.timestamp}
                                                                         </div>
-                                                                        <div>
-                                                                            {msg.content.split('\n').map((line, i) => (
-                                                                                <p key={i}>{line}</p>
-                                                                            ))}
-                                                                        </div>
+                                                                      <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                     </>
                                                                 )}
                                                             </div>
@@ -1327,11 +1333,17 @@ const sendUserReply = async () => {
                                                                 <BarLoader color="#0073e6" width="100%" />
                                                             )}
                                                         </div>
-                                                         <div className="scenario-description" style={{ position: 'relative' }}>
-                                                      {scenario.context.split('\n').map((line, i) => (
-                                                          <p key={i}>{line}</p>
-                                                      ))}
-
+                                                        <div  className="scenario-description" style={{ position: 'relative' }}>
+                                                        <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                                                        {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
+                                                          
+                                                         <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
+                                                          <Edit
+                                                            className="scenario-edit-icon"
+                                                            onClick={handleScenarioEditToggle}
+                                                        />
+                                                   </div>
+                                                        )}
                                                      </div>
                                                     </div>
                                                 </CardHeader>
@@ -1356,7 +1368,7 @@ const sendUserReply = async () => {
                                                         <div className="form-group">
                                                             <label>Select your desired outcome</label>
                                                             <select
-                                                                 onChange={(e) => {
+                                                                onChange={(e) => {
                                                                     setDesiredOutcome(e.target.value);
                                                                      if(e.target.value !== 'custom'){
                                                                         setCustomOutcomeInput('')
@@ -1370,9 +1382,9 @@ const sendUserReply = async () => {
                                                                         {outcome}
                                                                     </option>
                                                                 ))}
-                                                                <option value="custom">Custom Outcome</option>
+                                                                  <option value="custom">Custom Outcome</option>
                                                             </select>
-                                                              {desiredOutcome === 'custom' && (
+                                                                 {desiredOutcome === 'custom' && (
                                                                     <textarea
                                                                         value={customOutcomeInput}
                                                                         onChange={(e) => setCustomOutcomeInput(e.target.value)}
@@ -1458,39 +1470,34 @@ const sendUserReply = async () => {
                                          ) : (
                                              <div className="form-group">
                                                  <label>Enter your custom negotiation scenario</label>
-                                                 <div className="scenario-description" style={{ position: 'relative' }}>
+                                                <div className="scenario-title-container">
+                                                      <div className="spinner-container">
+                                                            {isFetchingScenario && (
+                                                                <BarLoader color="#0073e6" width="100%" />
+                                                            )}
+                                                        </div>
+                                                               <div className="scenario-description" style={{ position: 'relative' }}>
                                                       <textarea
                                                           value={customScenarioInput}
                                                          onChange={(e) => setCustomScenarioInput(e.target.value)}
                                                             placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
                                                           className="custom-scenario-input"
                                                         />
-                                                    <div style={{position: 'absolute', right: '0', bottom: '0', padding: '10px'}}>
-                                                    <Edit
-                                                        className="scenario-edit-icon"
-                                                        onClick={handleScenarioEditToggle}
-                                                        />
-                                                </div>
+                                                         
+                                                 </div>
                                                   </div>
-                                              </div>
+                                                
+                                           
+                                        </div>
                                          )}
-                                        { !isCustomInputMode ? (
+                                         { !isCustomInputMode ? (
                                             <Button onClick={generateScenario} disabled={isFetching}>
                                                 {isFetching ? 'Generating...' : 'Generate Scenario'}
                                                 </Button>
                                            ) : (
                                                <>
-                                               {isScenarioEditable ? (
-                                                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px'}}>
-                                                          <Button onClick={handleSaveScenario}>
-                                                               Save <Save style={{ marginLeft: '8px'}}/>
-                                                        </Button>
-                                                        <Button onClick={handleCancelScenarioEdit}>
-                                                             Cancel <X style={{ marginLeft: '8px'}}/>
-                                                          </Button>
-                                                    </div>
-                                                     ) : (
-                                               <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
+                                                {!isScenarioEditable && (
+                                                 <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
                                                    {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
                                                </Button>
                                                     )}
@@ -1595,7 +1602,7 @@ const sendUserReply = async () => {
                                                     .filter(msg => msg.role === 'user' || msg.role === 'opponent')
                                                     .map((msg, index) => (
                                                         <div key={index}>
-                                                            <strong>{msg.name}:</strong> {msg.content}
+                                                            <strong>{msg.name}:</strong> <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                         </div>
                                                     ))}
                                             </div>

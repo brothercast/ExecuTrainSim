@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const SpinningUnit = ({ content, isRevealed, characterSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' }) => {
+const SpinningReel = ({ content, isRevealed, characterSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' }) => {
     const [displayContent, setDisplayContent] = useState(content);
 
     useEffect(() => {
@@ -27,116 +27,115 @@ const SpinningUnit = ({ content, isRevealed, characterSet = 'ABCDEFGHIJKLMNOPQRS
 };
 
 const SlotMachineText = ({
-    text = "",
+    texts = [], // Expecting an array of strings, one for each button
     isSpinning = false,
     revealSpeed = 100,
     characterSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
-    stagger = false,
     standardizedSize = false,
     onComplete = () => { }
 }) => {
-    const [revealed, setRevealed] = useState(false);
+    const [reelsRevealed, setReelsRevealed] = useState([]);
     const animationTimeoutRef = useRef(null);
-    const revealTimeoutRef = useRef(null);
 
+    const revealReel = useCallback((index) => {
+        setReelsRevealed(prev => {
+            const nextRevealed = [...prev];
+            nextRevealed[index] = true;
+            return nextRevealed;
+        });
+    }, []);
 
     useEffect(() => {
         const style = document.createElement('style');
         style.textContent = `
         .slot-machine-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.15em;
+            gap: 10px; /* Adjust gap between reels (buttons) as needed */
             width: 100%;
-            line-height: 1.2;
         }
-         .slot-machine-container.standard-size {
-            align-items: stretch;  /* Ensure items stretch to fill the height */
-           
-         }
-          .slot-machine-container.standard-size button {
-            width: calc(100%/4 - 0.15em);
+        .slot-machine-reel-container {
+            flex-grow: 1; /* Allow reels to take up equal space */
             display: flex;
-             align-items: center;
-              justify-content: center;
-              text-align: center;
-            min-height: 50px;
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-         }
+            align-items: center;
+            justify-content: center;
+            position: relative; /* For positioning the spinning text */
+            overflow: hidden; /* Clip overflowing text during spin */
+            min-height: 50px; /* Ensure consistent height */
+        }
         .slot-machine-text {
-            display: inline-block;
+            display: block;
             transition: all 0.3s ease;
-            position: relative;
-            white-space: normal;
-             word-break: break-word;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            font-weight: bold;
+            font-family: 'Arial', sans-serif;
         }
         .slot-machine-text.spinning {
-           filter: blur(2px);
-            transform: translateY(2px);
+            filter: blur(2px);
+            transform: translate(-50%, -50%) translateY(2px);
             font-family: monospace;
-            font-weight: bold;
-          animation: spin-animation 0.2s linear infinite;
+            animation: spin-animation 0.2s linear infinite;
         }
         .slot-machine-text.revealed {
             filter: blur(0);
-          animation: reveal-animation 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: reveal-animation 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes spin-animation {
-            0% { transform: translateY(0px); }
-          50% { transform: translateY(2px); }
-            100% { transform: translateY(0px); }
+            0% { transform: translate(-50%, -50%) translateY(0px); }
+            50% { transform: translate(-50%, -50%) translateY(2px); }
+            100% { transform: translate(-50%, -50%) translateY(0px); }
         }
         @keyframes reveal-animation {
-          0% { transform: translateY(-15px); opacity: 0; }
-            60% { transform: translateY(3px); opacity: 1; }
-           80% { transform: translateY(-2px); }
-            100% { transform: translateY(0); }
+            0% { transform: translate(-50%, -50%) translateY(-15px); opacity: 0; }
+            60% { transform: translate(-50%, -50%) translateY(3px); opacity: 1; }
+            80% { transform: translate(-50%, -50%) translateY(-2px); }
+            100% { transform: translate(-50%, -50%) translateY(0); }
         }
-      `;
+        `;
         document.head.appendChild(style);
         return () => document.head.removeChild(style);
     }, []);
 
     useEffect(() => {
-         if (isSpinning) {
-             setRevealed(false);
-         } else {
-            if(animationTimeoutRef.current){
-                clearTimeout(animationTimeoutRef.current)
+        if (isSpinning) {
+            setReelsRevealed(Array(texts.length).fill(false));
+        } else {
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
             }
-             if (revealTimeoutRef.current) {
-                 clearTimeout(revealTimeoutRef.current);
-             }
 
-             revealTimeoutRef.current = setTimeout(() => {
-               setRevealed(true);
-                 onComplete();
-            }, text.split(/(\s+)/).length * (revealSpeed + 75)); // Use a longer duration with revealSpeed
+            texts.forEach((text, index) => {
+                animationTimeoutRef.current = setTimeout(() => {
+                    revealReel(index);
+                    if (index === texts.length - 1) {
+                        setTimeout(onComplete, revealSpeed + 100);
+                    }
+                }, index * revealSpeed);
+            });
         }
-     return () => {
-            if(animationTimeoutRef.current){
-                clearTimeout(animationTimeoutRef.current)
+        return () => {
+            if (animationTimeoutRef.current) {
+                clearTimeout(animationTimeoutRef.current);
             }
-            if(revealTimeoutRef.current){
-                clearTimeout(revealTimeoutRef.current)
-            }
-        }
+        };
+    }, [isSpinning, texts, revealSpeed, revealReel, onComplete]);
 
-    }, [isSpinning, text, revealSpeed, onComplete]);
-
-  return (
-      <div className={`slot-machine-container ${standardizedSize ? 'standard-size' : ''}`}>
-        {text.split(/(\s+)/).map((word, index) =>
-                <SpinningUnit
-                    key={index}
-                    content={word}
-                    isRevealed={revealed}
-                    characterSet={characterSet}
-                />
-        )}
-      </div>
-  );
+    return (
+        <div className="slot-machine-container">
+            {texts.map((text, index) => (
+                <div key={index} className="slot-machine-reel-container">
+                    <SpinningReel
+                        content={text}
+                        isRevealed={reelsRevealed[index]}
+                        characterSet={characterSet}
+                    />
+                </div>
+            ))}
+        </div>
+    );
 };
 
 export default SlotMachineText;
