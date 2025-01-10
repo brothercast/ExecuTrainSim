@@ -23,6 +23,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
+          cache: 'npm'  # Retain node_modules between runs
 
       - name: Build frontend
         working-directory: ./executrainsim
@@ -31,7 +32,6 @@ jobs:
           npm install
           echo "Building frontend..."
           npm run build
-
       - name: Build backend
         working-directory: ./execuTrainServer
         run: |
@@ -43,6 +43,8 @@ jobs:
         run: |
           echo "Creating deployment directory..."
           mkdir -p deploy
+          echo "Creating public directory in deploy"
+          mkdir -p deploy/public
           echo "Copying frontend build..."
           cp -r executrainsim/build/* deploy/public  # Serve frontend from 'public'
           echo "Copying backend files..."
@@ -61,6 +63,7 @@ jobs:
         with:
           name: combined-app
           path: deploy
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -76,7 +79,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: combined-app
-          path: .
+          path: deploy_artifact  # Use another download path
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -97,7 +100,7 @@ jobs:
         with:
           app-name: ${{ env.WEBAPP_NAME }}
           slot-name: "Production"
-          package: .
+          package: deploy_artifact # Use the new artifact download path
 
       - name: Start Web App
         run: |
