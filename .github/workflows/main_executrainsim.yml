@@ -43,6 +43,8 @@ jobs:
         run: |
           echo "Creating deployment directory..."
           mkdir -p deploy
+          echo "Creating public directory in deploy"
+          mkdir -p deploy/public
           echo "Copying frontend build..."
           cp -r executrainsim/build/* deploy/public  # Serve frontend from 'public'
           echo "Copying backend files..."
