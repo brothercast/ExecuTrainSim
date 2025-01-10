@@ -88,11 +88,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BA8FAF1E10A042E4A2F42989602D18AB }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_68A27ED84C3B49EEA196F0495783FD89 }}
 
-      - name: Stop Web App
-        run: |
-          echo "Stopping WebApp..."
-          az webapp stop --name ${{ env.WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
-          sleep 30
+      - name: Stop Web App (if it exists)
+        run: az webapp stop --name ${{ env.WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} || true
+        
+      - name: Wait before Deploy
+        run: sleep 30  # wait for existing instance to stop
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -107,7 +107,6 @@ jobs:
           echo "Starting WebApp..."
           az webapp start --name ${{ env.WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
           sleep 30
-
       - name: Verify deployment
         run: |
           sleep 60

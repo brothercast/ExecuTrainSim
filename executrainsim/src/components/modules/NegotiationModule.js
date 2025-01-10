@@ -1257,26 +1257,24 @@ const sendUserReply = async () => {
                                                 <div className="message-input-container">
                                                     <div className="response-options-container">
                                                         <div className="response-buttons">
-                                                            {responseOptions.map((option, index) => (
-                                                                <Button
-                                                                    key={index}
-                                                                    onClick={() => generateUserResponse(option.description)}
-                                                                    disabled={isResponseLoading || !buttonRevealComplete}
-                                                                    className={`response-button ${
-                                                                        isResponseLoading ? 'loading' : ''
-                                                                    }`}
-                                                                >
-                                                                    <SlotMachineText
-                                                                        text={option.name}
-                                                                        isSpinning={isResponseLoading}
-                                                                        revealSpeed={100}
-                                                                        standardizedSize={true}
-                                                                        onComplete={handleButtonAnimationComplete}
-                                                                    />
-                                                                </Button>
-                                                            ))}
+                                                            <SlotMachineText
+                                                                texts={responseOptions.map(option => option.name)}
+                                                                isSpinning={isResponseLoading}
+                                                                revealSpeed={100}
+                                                                onComplete={handleButtonAnimationComplete}
+                                                            >
+                                                                {responseOptions.map((option, index) => (
+                                                                    <Button
+                                                                        key={index}
+                                                                        className="response-button"
+                                                                        disabled={isResponseLoading || !buttonRevealComplete}
+                                                                        // onClick handler remains the same
+                                                                    >
+                                                                        {/* The text content is now handled by SlotMachineText */}
+                                                                    </Button>
+                                                                ))}
+                                                            </SlotMachineText>
                                                         </div>
-
                                                     </div>
                                                     <div className="feedback-toggle-container">
                                                         <label className="feedback-checkbox-label">

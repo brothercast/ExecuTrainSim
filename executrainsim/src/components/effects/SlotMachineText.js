@@ -1,139 +1,94 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-
-const SpinningReel = ({ content, isRevealed, characterSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' }) => {
-    const [displayContent, setDisplayContent] = useState(content);
-
-    useEffect(() => {
-        if (!isRevealed) {
-            const interval = setInterval(() => {
-                setDisplayContent(
-                    Array(content.length)
-                        .fill()
-                        .map(() => characterSet[Math.floor(Math.random() * characterSet.length)])
-                        .join('')
-                );
-            }, 50);
-            return () => clearInterval(interval);
-        } else {
-            setDisplayContent(content);
-        }
-    }, [isRevealed, content, characterSet]);
-
-    return (
-        <span className={`slot-machine-text ${isRevealed ? 'revealed' : 'spinning'}`}>
-            {displayContent}
-        </span>
-    );
-};
+import React, { useState, useEffect, useRef } from 'react';
 
 const SlotMachineText = ({
-    texts = [], // Expecting an array of strings, one for each button
+    text = "",
     isSpinning = false,
     revealSpeed = 100,
     characterSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
     standardizedSize = false,
     onComplete = () => { }
 }) => {
-    const [reelsRevealed, setReelsRevealed] = useState([]);
-    const animationTimeoutRef = useRef(null);
+    const [displayContent, setDisplayContent] = useState('');
+    const [isRevealed, setIsRevealed] = useState(false);
+    const intervalRef = useRef(null);
+    const revealTimeoutRef = useRef(null);
 
-    const revealReel = useCallback((index) => {
-        setReelsRevealed(prev => {
-            const nextRevealed = [...prev];
-            nextRevealed[index] = true;
-            return nextRevealed;
-        });
-    }, []);
+    useEffect(() => {
+        if (isSpinning) {
+            setIsRevealed(false);
+            let currentIndex = 0;
+            clearInterval(intervalRef.current);
+            intervalRef.current = setInterval(() => {
+                setDisplayContent(
+                    Array(text.length)
+                        .fill()
+                        .map(() => characterSet[Math.floor(Math.random() * characterSet.length)])
+                        .join('')
+                );
+                currentIndex = (currentIndex + 1) % characterSet.length;
+            }, 50);
+        } else if (!isSpinning && !isRevealed) {
+            clearInterval(intervalRef.current);
+            revealTimeoutRef.current = setTimeout(() => {
+                setDisplayContent(text);
+                setIsRevealed(true);
+                onComplete();
+            }, revealSpeed);
+        }
+
+        return () => {
+            clearInterval(intervalRef.current);
+            clearTimeout(revealTimeoutRef.current);
+        };
+    }, [isSpinning, text, revealSpeed, characterSet, onComplete, isRevealed]);
 
     useEffect(() => {
         const style = document.createElement('style');
         style.textContent = `
-        .slot-machine-container {
-            display: flex;
-            gap: 10px; /* Adjust gap between reels (buttons) as needed */
-            width: 100%;
-        }
-        .slot-machine-reel-container {
-            flex-grow: 1; /* Allow reels to take up equal space */
-            display: flex;
+        .slot-machine-text-container {
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            position: relative; /* For positioning the spinning text */
-            overflow: hidden; /* Clip overflowing text during spin */
-            min-height: 50px; /* Ensure consistent height */
+            width: 100%;
+            height: 100%;
         }
         .slot-machine-text {
-            display: block;
+            display: inline-block;
             transition: all 0.3s ease;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             white-space: nowrap;
-            font-weight: bold;
-            font-family: 'Arial', sans-serif;
+            font-family: inherit; /* Inherit font from the button */
+            font-weight: inherit; /* Inherit font weight from the button */
+            font-size: inherit; /* Inherit font size from the button */
+            line-height: 1;
         }
         .slot-machine-text.spinning {
             filter: blur(2px);
-            transform: translate(-50%, -50%) translateY(2px);
-            font-family: monospace;
-            animation: spin-animation 0.2s linear infinite;
+            opacity: 0.8;
+            animation: spin-animation 0.1s linear infinite;
         }
         .slot-machine-text.revealed {
             filter: blur(0);
-            animation: reveal-animation 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 1;
+            animation: reveal-animation 0.3s ease-out;
         }
         @keyframes spin-animation {
-            0% { transform: translate(-50%, -50%) translateY(0px); }
-            50% { transform: translate(-50%, -50%) translateY(2px); }
-            100% { transform: translate(-50%, -50%) translateY(0px); }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(2px); }
         }
         @keyframes reveal-animation {
-            0% { transform: translate(-50%, -50%) translateY(-15px); opacity: 0; }
-            60% { transform: translate(-50%, -50%) translateY(3px); opacity: 1; }
-            80% { transform: translate(-50%, -50%) translateY(-2px); }
-            100% { transform: translate(-50%, -50%) translateY(0); }
+            0% { transform: translateY(-10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
         `;
         document.head.appendChild(style);
         return () => document.head.removeChild(style);
     }, []);
 
-    useEffect(() => {
-        if (isSpinning) {
-            setReelsRevealed(Array(texts.length).fill(false));
-        } else {
-            if (animationTimeoutRef.current) {
-                clearTimeout(animationTimeoutRef.current);
-            }
-
-            texts.forEach((text, index) => {
-                animationTimeoutRef.current = setTimeout(() => {
-                    revealReel(index);
-                    if (index === texts.length - 1) {
-                        setTimeout(onComplete, revealSpeed + 100);
-                    }
-                }, index * revealSpeed);
-            });
-        }
-        return () => {
-            if (animationTimeoutRef.current) {
-                clearTimeout(animationTimeoutRef.current);
-            }
-        };
-    }, [isSpinning, texts, revealSpeed, revealReel, onComplete]);
-
     return (
-        <div className="slot-machine-container">
-            {texts.map((text, index) => (
-                <div key={index} className="slot-machine-reel-container">
-                    <SpinningReel
-                        content={text}
-                        isRevealed={reelsRevealed[index]}
-                        characterSet={characterSet}
-                    />
-                </div>
-            ))}
+        <div className="slot-machine-text-container">
+            <span className={`slot-machine-text ${isSpinning ? 'spinning' : isRevealed ? 'revealed' : ''}`}>
+                {isSpinning ? displayContent : text}
+            </span>
         </div>
     );
 };
