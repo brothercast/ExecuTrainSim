@@ -36,7 +36,7 @@ start_service() {
   else  
     echo "Directory $service_dir does not exist"  
     exit 1  
-  fi  
+  }  
 }  
   
 # Start the backend server  
