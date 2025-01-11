@@ -320,19 +320,24 @@ h3 {
 .scenario-edit-icon {
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
+  margin-left: 5px; /* For space from the label */
 }
 .scenario-edit-icon:hover {
    transform: scale(1.1);
   }
+
   .save-button,
 .cancel-button {
-  cursor: pointer;
-  transition: transform 0.2s ease-in-out;
-}
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+     display: inline-flex;
+    align-items: center; /* Align icon and text */
+     justify-content: center; /* Center content horizontally */
+  }
 .save-button:hover,
 .cancel-button:hover {
    transform: scale(1.1);
-  }
+}
 
 .reload-icon {
   cursor: pointer;
@@ -676,17 +681,17 @@ h3 {
 
 .custom-scenario-input {
   width: 90%;
-  /* Adjust the width to match the layout */
-  height: 150px;
-  /* Adjust the height as needed */
+  height: auto; /* Let the height adjust dynamically based on content */
+  min-height: calc(1.5em * 8); /* Set a minimum height of 8 lines */
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #ccc;
-  /* Add a border if you wish */
   border-radius: 4px;
   font-size: 1em;
   resize: vertical;
-  /* Allows user to resize vertically */
+}
+.edit-control-label{
+    cursor: pointer;
 }
 
 .custom-outcome-input {

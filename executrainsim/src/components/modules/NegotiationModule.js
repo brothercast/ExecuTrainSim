@@ -1352,10 +1352,10 @@ const sendUserReply = async () => {
                                             {isScenarioEditable && (
                                                     <div style={{display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap'}}>
                                                     <span style={{whiteSpace: 'nowrap'}} onClick={handleSaveScenario} className='edit-control-label'>
-                                                    Save <Save style={{marginLeft: '5px'}}/>
+                                                    <Save style={{marginLeft: '5px'}}/>
                                                    </span>
                                                    <span style={{whiteSpace: 'nowrap'}} onClick={handleCancelScenarioEdit} className='edit-control-label'>
-                                                        Cancel <X style={{marginLeft: '5px'}}/>
+                                                        <X style={{marginLeft: '5px'}}/>
                                                    </span>
                                                 </div>
                                             )}

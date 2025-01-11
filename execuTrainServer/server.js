@@ -191,6 +191,10 @@ app.post('/api/respond', async (req, res) => {
 console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);
 console.log(`DALL-E Endpoint: ${dalleEndpoint}`);
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Start listening on only one port
 app.listen(GPT_PORT, () => {
   console.log(`Server is running on port ${GPT_PORT}`);
