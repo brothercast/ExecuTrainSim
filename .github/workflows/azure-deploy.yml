@@ -1,39 +1,57 @@
 name: Deploy Node.js App to Azure  
-
+  
 on:  
   push:  
     branches:  
       - main  
-
+  
 jobs:  
   build-and-deploy:  
     runs-on: ubuntu-latest  
+  
     steps:  
     - name: Checkout code  
-      uses: actions/checkout@v2  
-
+      uses: actions/checkout@v3  # Update to the latest version  
+  
     - name: Set up Node.js  
-      uses: actions/setup-node@v2  
+      uses: actions/setup-node@v3  # Update to the latest version  
       with:  
         node-version: '18.x'  
-
+  
     - name: Install and Build  
       run: |  
         cd executrainsim  
-        npm install  
+        npm ci  # Use npm ci for faster installs in CI environments  
         npm run build  
         cd ../execuTrainServer  
-        npm install  
-
-    - name: Upload artifacts  
-      uses: actions/upload-artifact@v2  
+        npm ci  
+  
+    - name: Archive production artifacts  
+      run: |  
+        mkdir -p ./deploy  
+        cp -r ./executrainsim/build ./deploy/executrainsim  
+        cp -r ./execuTrainServer ./deploy/execuTrainServer  
+  
+    - name: Upload artifact  
+      uses: actions/upload-artifact@v3  # Update to the latest version  
       with:  
         name: node-app  
-        path: ./executrainsim/build  
-
+        path: ./deploy  
+  
+    - name: Download artifact  
+      uses: actions/download-artifact@v3  # Update to the latest version  
+      with:  
+        name: node-app  
+        path: .  
+  
+    - name: Login to Azure  
+      uses: azure/login@v1  
+      with:  
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  
+  
     - name: Deploy to Azure Web App  
       uses: azure/webapps-deploy@v2  
       with:  
         app-name: 'ExecuTrainSim'  
-        package: ./executrainsim/build  
         slot-name: 'production'  
+        package: ./deploy  
