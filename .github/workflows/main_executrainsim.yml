@@ -1,90 +1,92 @@
-name: Build and Deploy Node.js App to Azure Web App - ExecuTrainSim  
-  
-on:  
-  push:  
-    branches:  
-      - main  
-  workflow_dispatch:  
-  
-env:  
-  AZURE_RESOURCE_GROUP: "ExecuTrainSimGroup"  
-  WEBAPP_NAME: "ExecuTrainSim"  
-  
-jobs:  
-  build-and-deploy:  
-    runs-on: ubuntu-latest  
-    steps:  
-    - name: Checkout code  
-      uses: actions/checkout@v4  
-  
-    - name: Set up Node.js  
-      uses: actions/setup-node@v3  
-      with:  
-        node-version: "20.x"  # Ensure Node.js 20.x  
-  
-    - name: Install and Build Frontend  
-      working-directory: ./executrainsim  
-      run: |  
-        echo "Installing frontend dependencies..."  
-        npm ci  # Clean install  
-        echo "Building frontend..."  
-        npm run build  
-  
-    - name: Install Backend Dependencies  
-      working-directory: ./execuTrainServer  
-      run: |  
-        echo "Installing backend dependencies..."  
-        npm ci  # Clean install  
-  
-    - name: Prepare Deployment Package  
-      run: |  
-        echo "Creating deployment directory..."  
-        mkdir -p deploy/public  
-        echo "Copying frontend build..."  
-        cp -r executrainsim/build/* deploy/public  # Serve frontend from 'public'  
-        echo "Copying backend files..."  
-        cp -r execuTrainServer/* deploy/  
-        echo "Copying startup script..."  
-        cp startup.sh deploy/  
-        echo "Copying package.json..."  
-        cp package.json deploy/  
-        echo "Setting startup script as executable..."  
-        chmod +x deploy/startup.sh  
-  
-    - name: Upload artifact  
-      uses: actions/upload-artifact@v4  
-      with:  
-        name: combined-app  
-        path: deploy  
-  
-    - name: Download artifact  
-      uses: actions/download-artifact@v4  
-      with:  
-        name: combined-app  
-        path: .  
-  
-    - name: Login to Azure  
-      uses: azure/login@v2  
-      with:  
-        creds: ${{ secrets.AZURE_CREDENTIALS }}  
-  
-    - name: Deploy to Azure Web App  
-      uses: azure/webapps-deploy@v3  
-      with:  
-        app-name: ${{ env.WEBAPP_NAME }}  
-        package: ./deploy  
-  
-    - name: Verify deployment  
-      run: |  
-        sleep 60  
-        for i in {1..3}; do  
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.WEBAPP_NAME }}.azurewebsites.net/health)  
-          if [[ "$STATUS_CODE" -eq 200 ]]; then  
-              echo "Deployment verified successfully"  
-              exit 0  
-          fi  
-          echo "Attempt $i failed, retrying..."  
-          sleep 10  
-        done  
-        echo "Deployment verification failed after 3 attempts"  
-        exit 1  
+name: Build and Deploy Node.js App to Azure Web App - ExecuTrainSim
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: "ExecuTrainSimGroup"
+  WEBAPP_NAME: "ExecuTrainSim"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"  # Ensure Node.js 20.x
+
+      - name: Install and Build Frontend
+        working-directory: ./executrainsim
+        run: |
+          echo "Installing frontend dependencies..."
+          npm ci  # Clean install
+          echo "Building frontend..."
+          npm run build
+
+      - name: Install Backend Dependencies
+        working-directory: ./execuTrainServer
+        run: |
+          echo "Installing backend dependencies..."
+          npm ci  # Clean install
+
+      - name: Prepare Deployment Package
+        run: |
+          echo "Creating deployment directory..."
+          mkdir -p deploy/public
+          echo "Copying frontend build..."
+          cp -r executrainsim/build/* deploy/public  # Serve frontend from 'public'
+          echo "Copying backend files..."
+          cp -r execuTrainServer/* deploy/
+          echo "Copying startup script..."
+          cp startup.sh deploy/
+          echo "Copying backend .env file..."
+          cp execuTrainServer/.env deploy/
+          echo "Copying root package.json file..."
+          cp package.json deploy/
+          echo "Setting startup script as executable..."
+          chmod +x deploy/startup.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-app
+          path: deploy
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: combined-app
+          path: .
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.WEBAPP_NAME }}
+          package: ./deploy
+
+      - name: Verify deployment
+        run: |
+            sleep 60
+            for i in {1..3}; do
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.WEBAPP_NAME }}.azurewebsites.net/health)
+              if [[ "$STATUS_CODE" -eq 200 ]]; then
+                  echo "Deployment verified successfully"
+                  exit 0
+              fi
+              echo "Attempt $i failed, retrying..."
+              sleep 10
+            done
+            echo "Deployment verification failed after 3 attempts"
+            exit 1
