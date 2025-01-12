@@ -37,17 +37,12 @@ jobs:
       - name: Prepare Deployment Package
         run: |
           echo "Creating deployment directory..."
-          mkdir -p deploy/public
+          mkdir -p deploy
           echo "Copying frontend build..."
-          cp -r executrainsim/build/* deploy/public  # Serve frontend from 'public'
+          cp -r executrainsim/build/* deploy
           echo "Copying backend files..."
-          cp -r execuTrainServer/* deploy/
-          echo "Copying startup script..."
-          cp startup.sh deploy/
-          echo "Copying root package.json file..."
-          cp package.json deploy/
-          echo "Setting startup script as executable..."
-          chmod +x deploy/startup.sh
+          cp -r execuTrainServer/* deploy
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

@@ -228,12 +228,33 @@ const NegotiationModule = ({ onReturn }) => {
         // Ref for scrolling chat history
     const chatHistoryContainerRef = useRef(null);
 
+   //   useLayoutEffect(() => {
+   //         if (chatHistoryContainerRef.current) {
+   //              chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+   //        }
+   // }, [chatHistory]);
 
-      useLayoutEffect(() => {
-            if (chatHistoryContainerRef.current) {
-                 chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
-           }
-    }, [chatHistory]);
+
+   const addMessageToHistory = (content, role) => {
+        const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+        const sanitizedContent = DOMPurify.sanitize(content);
+        const newMessage = {
+            content: sanitizedContent,
+            role,
+            name: roleName,
+            timestamp: generateSequentialTimestamp(),
+            id: Date.now(),
+            feedbackVisible: false
+        };
+
+    setChatHistory((prevHistory) => {
+          const updatedHistory = [...prevHistory, newMessage];
+            // After setting the state, we trigger the scroll
+          if(chatHistoryContainerRef.current)
+             chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+            return updatedHistory
+        });
+    };
 
 
     // Handler for changes to selected role
@@ -503,7 +524,7 @@ const NegotiationModule = ({ onReturn }) => {
 
             addMessageToHistory(opponentMessageContent, 'opponent');
             setProgress(20);
-            generateResponseOptions(scenario?.context);
+             generateResponseOptions(scenario?.context);
         } catch (error) {
             console.error('Error generating opening message:', error);
             setErrorMessage('Failed to generate the opponent’s opening message. Please try again.');
@@ -569,7 +590,7 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
     // Generate response options for the user
-    const generateResponseOptions = async (context) => {
+        const generateResponseOptions = async (context) => {
         if (!selectedRole || !desiredOutcome) {
             console.warn('Selected role or desired outcome not set. Skipping response option generation.');
             return;
@@ -592,6 +613,11 @@ const NegotiationModule = ({ onReturn }) => {
             setIsSpinning(false);
             setIsResponseLoading(false);
         }
+    };
+
+     // Function to get the latest message for a particular role
+    const getLatestMessage = (role) => {
+        return chatHistory.filter((msg) => msg.role === role).slice(-1)[0]?.content || '';
     };
     // Generate user response based on selected strategy
     const generateUserResponse = async (strategyDescription) => {
@@ -625,30 +651,8 @@ const NegotiationModule = ({ onReturn }) => {
         `;
         }
 
-    // Updated addMessageToHistory function
-    const addMessageToHistory = (content, role) => {
-        const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
-          const sanitizedContent = DOMPurify.sanitize(content);
-          const newMessage = {
-              content: sanitizedContent,
-              role,
-              name: roleName,
-              timestamp: generateSequentialTimestamp(),
-              id: Date.now(),
-              feedbackVisible: false
-          };
-  
-          setChatHistory((prevHistory) => {
-            const updatedHistory = [...prevHistory, newMessage];
-              // After setting the state, we trigger the scroll
-            if(chatHistoryContainerRef.current)
-              chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
-              return updatedHistory
-          });
-      };
-
     // Create prompt for response options
-    const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
+        const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
         Based on the ongoing negotiation for the scenario: ${context},
         consider the latest opponent message: "${latestOpponentMessage}"
         and the user's previous message: "${previousUserMessage}".
@@ -812,7 +816,7 @@ const sendUserReply = async () => {
         }
         setIsUserTurn(true);
         setIsFetchingOpponent(false);
-        await generateResponseOptions(scenario?.context); // Regenerate response options here
+        await generateResponseOptions(scenario?.context);
         if (progress >= 100) {
             finalizeSimulation();
         }
@@ -1195,10 +1199,8 @@ const sendUserReply = async () => {
                         )}
                         {!simulationComplete ? (
                             scenario ? (
-                                <Card className="scenario-card">
-                                    {negotiationStarted ? (
-                                        <div className="chat-area">
-                                            <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
+                                <div className="chat-area">
+                                    <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                 <div className="chat-history">
                                                     {chatHistory.map((msg) => (
                                                         <div key={msg.id} className={`chat-message ${msg.role}`}>
@@ -1226,7 +1228,7 @@ const sendUserReply = async () => {
                                                             )}
                                                         </div>
                                                     ))}
-                                                    <div />
+                                                     <div />
                                                 </div>
                                                 {isFetchingOpponent && (
                                                     <div className="spinner-container">
@@ -1616,35 +1618,4 @@ const sendUserReply = async () => {
                                         <Button onClick={() => setSimulationComplete(false)}>
                                             Try Different Choices
                                         </Button>
-                                        <Button onClick={resetNegotiation}>
-                                            Run as Different Type
-                                        </Button>
-                                    </div>
-                                </div>
-                            )
-                        )}
-                    </div>
-                </section>
-            </main>
-        </div>
-    );
-};
-
-// Metadata for the component
-export const metadata = {
-    title: 'Negotiation Simulator',
-    description: 'Flex your negotiation skills against a skilled opponent.',
-    imageUrl: '../images/NegotiationModule.png',
-    instructions: `
-<h2>Gameplay Overview</h2>
-<p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
-<h3>Simulation Mechanism</h3>
-<p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>
-<p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>
-<h3>Outcome and Debriefing</h3>
-<p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
-`,
-    component: NegotiationModule
-};
-
-export default NegotiationModule;
+                                        <Button onClick
