@@ -46,8 +46,6 @@ jobs:
           cp -r execuTrainServer/* deploy/
           echo "Copying startup script..."
           cp startup.sh deploy/
-          echo "Copying backend .env file..."
-          cp execuTrainServer/.env deploy/
           echo "Copying root package.json file..."
           cp package.json deploy/
           echo "Setting startup script as executable..."
