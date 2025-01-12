@@ -228,15 +228,10 @@ const NegotiationModule = ({ onReturn }) => {
         // Ref for scrolling chat history
     const chatHistoryContainerRef = useRef(null);
 
-   //   useLayoutEffect(() => {
-   //         if (chatHistoryContainerRef.current) {
-   //              chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
-   //        }
-   // }, [chatHistory]);
 
-
-   const addMessageToHistory = (content, role) => {
-        const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+        // addMessageToHistory function (Modified)
+    const addMessageToHistory = (content, role) => {
+      const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
         const sanitizedContent = DOMPurify.sanitize(content);
         const newMessage = {
             content: sanitizedContent,
@@ -247,11 +242,11 @@ const NegotiationModule = ({ onReturn }) => {
             feedbackVisible: false
         };
 
-    setChatHistory((prevHistory) => {
+          setChatHistory((prevHistory) => {
           const updatedHistory = [...prevHistory, newMessage];
             // After setting the state, we trigger the scroll
           if(chatHistoryContainerRef.current)
-             chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+            chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
             return updatedHistory
         });
     };
@@ -780,8 +775,7 @@ const sendUserReply = async () => {
     // Add user message to chat history first
     addMessageToHistory(userDraft, 'user');
     setUserDraft(''); // Clear the user draft immediately after adding the message
-    setProgress((prev) => prev + 20);
-    setCurrentTurnIndex((prev) => prev + 1);
+    setProgress((prev) => prev + 20);    setCurrentTurnIndex((prev) => prev + 1);
     setIsUserTurn(false);
 
     // Get the delay time
@@ -816,7 +810,7 @@ const sendUserReply = async () => {
         }
         setIsUserTurn(true);
         setIsFetchingOpponent(false);
-        await generateResponseOptions(scenario?.context);
+         generateResponseOptions(scenario?.context);
         if (progress >= 100) {
             finalizeSimulation();
         }
@@ -1199,8 +1193,10 @@ const sendUserReply = async () => {
                         )}
                         {!simulationComplete ? (
                             scenario ? (
-                                <div className="chat-area">
-                                    <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
+                                <Card className="scenario-card">
+                                    {negotiationStarted ? (
+                                        <div className="chat-area">
+                                            <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                 <div className="chat-history">
                                                     {chatHistory.map((msg) => (
                                                         <div key={msg.id} className={`chat-message ${msg.role}`}>
@@ -1228,7 +1224,7 @@ const sendUserReply = async () => {
                                                             )}
                                                         </div>
                                                     ))}
-                                                     <div />
+                                                    <div />
                                                 </div>
                                                 {isFetchingOpponent && (
                                                     <div className="spinner-container">
@@ -1618,4 +1614,35 @@ const sendUserReply = async () => {
                                         <Button onClick={() => setSimulationComplete(false)}>
                                             Try Different Choices
                                         </Button>
-                                        <Button onClick
+                                        <Button onClick={resetNegotiation}>
+                                            Run as Different Type
+                                        </Button>
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
+                </section>
+            </main>
+        </div>
+    );
+};
+
+// Metadata for the component
+export const metadata = {
+    title: 'Negotiation Simulator',
+    description: 'Flex your negotiation skills against a skilled opponent.',
+    imageUrl: '../images/NegotiationModule.png',
+    instructions: `
+<h2>Gameplay Overview</h2>
+<p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
+<h3>Simulation Mechanism</h3>
+<p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>
+<p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>
+<h3>Outcome and Debriefing</h3>
+<p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
+`,
+    component: NegotiationModule
+};
+
+export default NegotiationModule;

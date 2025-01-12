@@ -1074,7 +1074,8 @@ h3 {
   color: #0056b3;
 }
 
-.response-button.loading {  pointer-events: none;
+.response-button.loading {
+  pointer-events: none;
   opacity: 0.6;
 }
 
