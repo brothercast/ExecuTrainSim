@@ -804,7 +804,7 @@ h3 {
 .chat-message.user {
   background-color: #007bff;
   color: white;
-  margin-left: 170px;
+    align-self: flex-end; /* Added this to push user message to right */
   text-align: left;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
 }

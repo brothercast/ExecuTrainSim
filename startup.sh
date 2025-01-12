@@ -10,6 +10,8 @@ cd "/home/site/wwwroot" || {
 export NODE_ENV=production
 export PORT=${PORT:-80}
 
+echo "Starting with PORT: $PORT"
+
 # Function to install dependencies and start a service
 start_service() {
     local service_dir="$1"
@@ -17,23 +19,28 @@ start_service() {
     local service_name="$3"
     
     if [ -d "$service_dir" ]; then
+        echo "Changing directory to: $service_dir"
         cd "$service_dir" || {
             echo "Failed to change directory to $service_dir"
              exit 1
         }
+        echo "Installing npm dependencies for $service_name"
         npm install || {
              echo "Failed to install npm dependencies in $service_dir"
             exit 1
         }
-        #Start the service with & to background the process
-         eval "$start_command &" || {
+        echo "Starting $service_name with command: $start_command"
+         # Start the service with nohup and & to background the process and ignore the user signal.
+         nohup eval "$start_command" & || {
             echo "Failed to start $service_name"
              exit 1
          }
-        cd - > /dev/null || {
-             echo "Failed to change back to previous directory"
-           exit 1
-        }
+          sleep 10 #give the server time to start.
+         cd - > /dev/null || {
+              echo "Failed to change back to previous directory"
+            exit 1
+         }
+        echo "Successfully Started $service_name"
       else
           echo "Directory $service_dir does not exist"
           exit 1
@@ -42,7 +49,6 @@ start_service() {
 
 # Start the backend server
 start_service "execuTrainServer" "node server.js" "execuTrainServer"
-
 
 echo "All services started successfully."
 

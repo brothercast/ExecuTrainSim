@@ -227,18 +227,14 @@ const NegotiationModule = ({ onReturn }) => {
 
         // Ref for scrolling chat history
         const chatHistoryContainerRef = useRef(null);
-        // Add the useLayoutEffect hook here
+      
         useLayoutEffect(() => {
-            console.log("useLayoutEffect for scrolling triggered, chatHistory length:", chatHistory.length);
-            const chatHistoryDiv = chatHistoryContainerRef.current;
-            if (chatHistoryDiv) {
-                console.log("chatHistoryContainerRef.current is:", chatHistoryDiv);
+          const chatHistoryDiv = chatHistoryContainerRef.current;
+            if(chatHistoryDiv){
                 chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-                console.log("Scrolled to bottom, scrollHeight:", chatHistoryDiv.scrollHeight, "scrollTop:", chatHistoryDiv.scrollTop);
-            } else {
-                console.log("chatHistoryContainerRef.current is null");
             }
         }, [chatHistory]);
+
 
     // Handler for changes to selected role
     const handleRoleChange = (newRole) => {
@@ -1203,7 +1199,7 @@ const sendUserReply = async () => {
                                             <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                 <div className="chat-history">
                                                     {chatHistory.map((msg) => (
-                                                        <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
+                                                        <div key={msg.id} className={`chat-message ${msg.role}`}>
                                                             {msg.role === 'feedback' && (
                                                                 <div className="feedback-box">
                                                                     <h4 className="feedback-title">
