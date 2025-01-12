@@ -226,14 +226,14 @@ const NegotiationModule = ({ onReturn }) => {
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
 
         // Ref for scrolling chat history
-        const chatHistoryContainerRef = useRef(null);
-      
-        useLayoutEffect(() => {
-          const chatHistoryDiv = chatHistoryContainerRef.current;
-            if(chatHistoryDiv){
-                chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-            }
-        }, [chatHistory]);
+    const chatHistoryContainerRef = useRef(null);
+
+
+      useLayoutEffect(() => {
+            if (chatHistoryContainerRef.current) {
+                 chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+           }
+    }, [chatHistory]);
 
 
     // Handler for changes to selected role
@@ -626,24 +626,26 @@ const NegotiationModule = ({ onReturn }) => {
         }
 
     // Updated addMessageToHistory function
-const addMessageToHistory = (content, role) => {
-    const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
-    const sanitizedContent = DOMPurify.sanitize(content);
-    const newMessage = {
-        content: sanitizedContent,
-        role,
-        name: roleName,
-        timestamp: generateSequentialTimestamp(),
-        id: Date.now(),
-    };
-
-    setChatHistory((prevHistory) => [...prevHistory, newMessage]);
-};
-
-    // Get the latest message for a particular role
-    const getLatestMessage = (role) => {
-        return chatHistory.filter((msg) => msg.role === role).slice(-1)[0]?.content || '';
-    };
+    const addMessageToHistory = (content, role) => {
+        const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+          const sanitizedContent = DOMPurify.sanitize(content);
+          const newMessage = {
+              content: sanitizedContent,
+              role,
+              name: roleName,
+              timestamp: generateSequentialTimestamp(),
+              id: Date.now(),
+              feedbackVisible: false
+          };
+  
+          setChatHistory((prevHistory) => {
+            const updatedHistory = [...prevHistory, newMessage];
+              // After setting the state, we trigger the scroll
+            if(chatHistoryContainerRef.current)
+              chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+              return updatedHistory
+          });
+      };
 
     // Create prompt for response options
     const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `

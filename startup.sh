@@ -1,32 +1,36 @@
 #!/bin/bash
-    
+
 # Set the working directory to the app root
 cd "/home/site/wwwroot" || {
     echo "Failed to change directory to /home/site/wwwroot"
     exit 1
 }
-    
+
 # Export necessary environment variables
 export NODE_ENV=production
 export PORT=${PORT:-80}
 
 echo "Starting with PORT: $PORT"
 
+# Log all environment variables for debugging
+echo "Environment Variables:"
+env | sort
+
 # Function to install dependencies and start a service
 start_service() {
     local service_dir="$1"
     local start_command="$2"
     local service_name="$3"
-    
+
     if [ -d "$service_dir" ]; then
         echo "Changing directory to: $service_dir"
         cd "$service_dir" || {
             echo "Failed to change directory to $service_dir"
-             exit 1
+            exit 1
         }
         echo "Installing npm dependencies for $service_name"
         npm install || {
-             echo "Failed to install npm dependencies in $service_dir"
+            echo "Failed to install npm dependencies in $service_dir"
             exit 1
         }
         echo "Starting $service_name with command: $start_command"

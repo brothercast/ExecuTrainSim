@@ -95,8 +95,8 @@ body {
   flex-direction: column;
   box-sizing: border-box;
   overflow: hidden;
-  height: auto;
-  position: relative;
+    position: relative;
+    height: auto;
 }
 
 .main-content-flex {
@@ -106,9 +106,12 @@ body {
 }
 
 .chat-area {
-  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 100%);
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 100%);
   overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* Make sure this is a column */
 }
+
 
 .chat-area-wrapper {
   display: flex;
@@ -782,11 +785,13 @@ h3 {
 }
 
 .chat-history {
-  max-height: 500px;
+    max-height: 500px;
   overflow-y: auto;
   margin-bottom: 20px;
   border: 0px solid #e0e0e0;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.0);
+   display: flex;
+    flex-direction: column;
 }
 
 .chat-message {
@@ -794,18 +799,18 @@ h3 {
   padding: 10px 12px;
   border-radius: 12px;
   max-width: 70%;
-  word-wrap: break-word;
-  line-height: 1.4;
-  font-size: 0.9em;
-  margin-bottom: 12px;
-  position: relative;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 0.9em;
+    margin-bottom: 12px;
+    position: relative;
 }
 
 .chat-message.user {
   background-color: #007bff;
   color: white;
-    align-self: flex-end; /* Added this to push user message to right */
-  text-align: left;
+    align-self: flex-end; /* Align messages to the right */
+    text-align: left;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -1069,8 +1074,7 @@ h3 {
   color: #0056b3;
 }
 
-.response-button.loading {
-  pointer-events: none;
+.response-button.loading {  pointer-events: none;
   opacity: 0.6;
 }
 
