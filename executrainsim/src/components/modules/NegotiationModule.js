@@ -227,9 +227,9 @@ const NegotiationModule = ({ onReturn }) => {
 
         // Ref for scrolling chat history
         const chatHistoryContainerRef = useRef(null);
-
-        useEffect(() => {
-            console.log("useEffect for scrolling triggered, chatHistory length:", chatHistory.length);
+        // Add the useLayoutEffect hook here
+        useLayoutEffect(() => {
+            console.log("useLayoutEffect for scrolling triggered, chatHistory length:", chatHistory.length);
             const chatHistoryDiv = chatHistoryContainerRef.current;
             if (chatHistoryDiv) {
                 console.log("chatHistoryContainerRef.current is:", chatHistoryDiv);
@@ -1345,7 +1345,7 @@ const sendUserReply = async () => {
                                                     </div>
                                                    {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
                                                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px'}}>
-                                                        <span  onClick={handleScenarioEditToggle} className="edit-control-label">Edit <Edit className="scenario-edit-icon" style={{marginLeft: '5px'}}/>
+                                                        <span  onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{marginLeft: '5px'}}/>
                                                         </span>
                                                     </div>
                                                     )}

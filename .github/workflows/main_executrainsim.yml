@@ -29,13 +29,11 @@ jobs:
           npm ci  # Clean install
           echo "Building frontend..."
           npm run build
-
       - name: Install Backend Dependencies
         working-directory: ./execuTrainServer
         run: |
           echo "Installing backend dependencies..."
           npm ci  # Clean install
-
       - name: Prepare Deployment Package
         run: |
           echo "Creating deployment directory..."
@@ -50,7 +48,6 @@ jobs:
           cp package.json deploy/
           echo "Setting startup script as executable..."
           chmod +x deploy/startup.sh
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

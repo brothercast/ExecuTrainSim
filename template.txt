@@ -1669,17 +1669,17 @@ const sendUserReply = async () => {
                                                     </div>
                                                    {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
                                                     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px'}}>
-                                                        <span  onClick={handleScenarioEditToggle} className="edit-control-label">Edit <Edit className="scenario-edit-icon" style={{marginLeft: '5px'}}/>
+                                                        <span  onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{marginLeft: '5px'}}/>
                                                         </span>
                                                     </div>
                                                     )}
                                             {isScenarioEditable && (
                                                     <div style={{display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap'}}>
                                                     <span style={{whiteSpace: 'nowrap'}} onClick={handleSaveScenario} className='edit-control-label'>
-                                                    Save <Save style={{marginLeft: '5px'}}/>
+                                                    <Save style={{marginLeft: '5px'}}/>
                                                    </span>
                                                    <span style={{whiteSpace: 'nowrap'}} onClick={handleCancelScenarioEdit} className='edit-control-label'>
-                                                        Cancel <X style={{marginLeft: '5px'}}/>
+                                                        <X style={{marginLeft: '5px'}}/>
                                                    </span>
                                                 </div>
                                             )}
