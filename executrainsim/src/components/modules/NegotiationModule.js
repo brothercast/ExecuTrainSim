@@ -1287,18 +1287,51 @@ const NegotiationModule = ({ onReturn }) => {
                             )}
                             {scenario && !negotiationStarted && (
                                 <div className="roles-customization">
-                                    <strong>Customize Roles:</strong>
-                                    {roles.map((role, index) => (
-                                        <input
-                                            key={index}
-                                            type="text"
-                                            className="editable-role"
-                                            value={role}
-                                            onChange={(e) => updateRoles(e.target.value, index)}
-                                        />
-                                    ))}
+                                <strong>Customize Roles:</strong>
+                                {roles.map((role, index) => (
+                                    <input
+                                        key={index}
+                                        type="text"
+                                        className="editable-role"
+                                        value={role}
+                                        onChange={(e) => updateRoles(e.target.value, index)}
+                                    />
+                                ))}
+                             <div className="form-group">
+                                <label>Set Opponent Personality:</label>
+                                <div className="form-slider">
+                                <div style={{width: '80%', position: 'relative'}}>
+                                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
+                                    <span style={{position: 'absolute', left: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap'}}>Collaborative</span>
+                                        <span style={{position: 'absolute', left: 'calc(50% - 20px)', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap'}}>Balanced</span>
+                                            <span style={{position: 'absolute', right: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap'}}>Aggressive</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                            min="0"
+                                            max="3"
+                                        step="1"
+                                        value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
+                                            onChange={handleOpponentPersonalityChange}
+                                            style={{
+                                                width: '100%',
+
+                                            }}
+                                            />
+                                        </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '5px'}}>
+                                        <span style={{fontSize: '0.8em'}}><Circle style={{height: '10px', width: '10px'}}/></span>
+                                            <span style={{fontSize: '0.8em'}}><CircleDot style={{height: '10px', width: '10px'}}/></span>
+                                        <span style={{fontSize: '0.8em'}}><Circle style={{height: '10px', width: '10px'}}/></span>
+                                            <span style={{fontSize: '0.8em'}}><Circle style={{height: '10px', width: '10px'}}/></span>
+                                    </div>
+                                    <div style={{width: '80%', fontSize: '0.7em'}}>
+                                <span >Choose a personality for your opponent, which will affect their tone, communication style, and negotiation tactics. A collaborative opponent is more agreeable, while an aggressive opponent can be manipulative and unwilling to compromise.</span>
                                 </div>
-                            )}
+                                </div>
+                        </div>
+        </div>
+    )}
                         </CardContent>
                     </Card>
                 </aside>
