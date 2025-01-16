@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import SlotMachineText from '../effects/SlotMachineText';
 import Select, { SelectItem } from '../ui/Select';
-import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X } from 'lucide-react';
+import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X, ArrowUp, ArrowDown, Circle, CircleDot, ArrowLeft, ArrowRight, Activity, Layout, MessageSquare, UserCheck, Users, Flag, MessageCircle, Hand, Lightbulb } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
 //import '../../styles/NegotiationModule.css';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import DOMPurify from 'dompurify';
 
 // Define API Base URLs
@@ -183,14 +183,14 @@ const NegotiationModule = ({ onReturn }) => {
     const [negotiationType, setNegotiationType] = useState('');
     const [negotiationSubType, setNegotiationSubType] = useState('');
     const [desiredOutcome, setDesiredOutcome] = useState('');
-       const [customOutcomeInput, setCustomOutcomeInput] = useState('');
+    const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     const [opponentDifficulty, setOpponentDifficulty] = useState('medium');
     const [scenario, setScenario] = useState(null);
     const [roles, setRoles] = useState(['Role 1', 'Role 2']);
     const [selectedRole, setSelectedRole] = useState('');
     const [chatHistory, setChatHistory] = useState([]);
     const [userDraft, setUserDraft] = useState('');
-    const [progress, setProgress] = useState(0);
+      const [performanceScore, setPerformanceScore] = useState(0);
     const [simulationComplete, setSimulationComplete] = useState(false);
     const [debriefing, setDebriefing] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
@@ -210,6 +210,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isSpinning, setIsSpinning] = useState(false);
     const [isResponseLoading, setIsResponseLoading] = useState(false);
     const [radarData, setRadarData] = useState(null);
+     const [performanceData, setPerformanceData] = useState([]);
     const [showFeedback, setShowFeedback] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
     const [feedbackVisible, setFeedbackVisible] = useState(false);
@@ -220,18 +221,44 @@ const NegotiationModule = ({ onReturn }) => {
     const [isCustomInputMode, setIsCustomInputMode] = useState(false);
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
-     const [customSetupStage, setCustomSetupStage] = useState('selection');
-    
+    const [customSetupStage, setCustomSetupStage] = useState('selection');
+     const [opponentPersonality, setOpponentPersonality] = useState('balanced');
+     const [opponentPersonalitySetting, setOpponentPersonalitySetting] = useState({
+           aggressive: {
+                tone: 'highly assertive, sometimes combative',
+                complexity: 'advanced negotiation tactics, often uses challenging statements',
+                strategy: 'prioritizes own interests, will use direct challenges and put downs',
+                reactivity: 'attempts to dominate the conversation, actively undermines the user’s points, will not concede without a major benefit, and seeks to exploit any weakness. Can use sarcasm or put downs.',
+            },
+           balanced: {
+                tone: 'professional, but still friendly and relatable',
+                complexity: 'standard negotiation strategies, sometimes challenges user but ultimately seeking mutual benefit',
+                strategy: 'firm but fair, seeking mutual benefit, will defend points well',
+                reactivity: 'responds directly to the user’s points, maintains a strong position, uses balanced responses that take both positions into account. Uses relatable and friendly language.',
+            },
+            collaborative: {
+                tone: 'friendly, casual, and lighthearted',
+                complexity: 'simple negotiation tactics, often making concessions',
+                strategy: 'accommodating and quick to compromise, focus on common ground',
+                reactivity: 'responds positively to user\'s points, often conceding or agreeing, seeks harmony and common ground. Uses casual, friendly language and humor to build rapport.',
+             },
+             emotional: {
+                tone: 'highly intuitive and emotionally responsive',
+                complexity: 'uses emotional tactics to make a point',
+                strategy: 'will respond from the perspective of feelings more than needs',
+                reactivity: 'responds from their gut, and can be swayed through appeals to emotions and empathy. Can be easily distracted by strong emotions.',
+            },
+    });
+     const [progress, setProgress] = useState(0);
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
 
-        // Ref for scrolling chat history
+    // Ref for scrolling chat history
     const chatHistoryContainerRef = useRef(null);
 
-
         // addMessageToHistory function (Modified)
-    const addMessageToHistory = (content, role) => {
-      const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+    const addMessageToHistory = (content, role, scores) => {
+        const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
         const sanitizedContent = DOMPurify.sanitize(content);
         const newMessage = {
             content: sanitizedContent,
@@ -239,10 +266,11 @@ const NegotiationModule = ({ onReturn }) => {
             name: roleName,
             timestamp: generateSequentialTimestamp(),
             id: Date.now(),
-            feedbackVisible: false
+            feedbackVisible: false,
+            scores: scores,
         };
 
-          setChatHistory((prevHistory) => {
+        setChatHistory((prevHistory) => {
           const updatedHistory = [...prevHistory, newMessage];
             // After setting the state, we trigger the scroll
           if(chatHistoryContainerRef.current)
@@ -256,6 +284,15 @@ const NegotiationModule = ({ onReturn }) => {
     const handleRoleChange = (newRole) => {
         setNegotiationRole(newRole);
     };
+
+      // Handler for the Opponent Personality Slider
+        const handleOpponentPersonalityChange = (event) => {
+             setOpponentPersonality(event.target.value);
+         };
+
+     const getOpponentPersonalitySettings = (personality) => {
+          return  opponentPersonalitySetting[personality] || opponentPersonalitySetting['balanced'];
+        };
 
     // Function to generate Dalle Image
     const generateImage = async (title, context) => {
@@ -345,12 +382,14 @@ const NegotiationModule = ({ onReturn }) => {
               two distinct roles with realistic names, and their respective objectives.
               Ensure that the roles have conflicting objectives to drive negotiation dynamics.
               Include potential challenges each role might face.
+                Include a simple goal as a singular value that the user can achieve.
               Generate 4-6 role-agnostic desired outcomes based on the context.
               Respond empathetically and adaptively to user tone and style.
               Return the scenario in JSON with the format:
               {
                   "scenario": {
                       "title": "string",
+                       "goal": "number",
                       "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
@@ -372,7 +411,6 @@ const NegotiationModule = ({ onReturn }) => {
                 setSimulationComplete(false);
                 setScenarioGenerated(true); // Set the scenario generated flag
                 await generateImage(parsedScenario.scenario.title, parsedScenario.scenario.context);
-
             } else {
                 setErrorMessage('Failed to generate scenario. Please try again.');
             }
@@ -390,12 +428,14 @@ const NegotiationModule = ({ onReturn }) => {
               two distinct roles with realistic names, and their respective objectives.
               Ensure that the roles have conflicting objectives to drive negotiation dynamics.
               Include potential challenges each role might face.
+               Include a simple goal as a singular value that the user can achieve.
               Generate 4-6 role-agnostic desired outcomes based on the context.
               Respond empathetically and adaptively to user tone and style.
                Return the scenario in JSON with the format:
               {
                   "scenario": {
                       "title": "string",
+                       "goal": "number",
                       "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
@@ -469,63 +509,68 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
     // Function to start the negotiation by getting the initial messages
-    const startNegotiation = async () => {
-        if (!selectedRole || !desiredOutcome) {
-            setErrorMessage('Please select a role and desired outcome.');
-            return;
-        }
-         if(desiredOutcome === 'custom' && !customOutcomeInput.trim()){
-            setErrorMessage("Please enter a custom outcome")
-            return
-        }
-        setNegotiationStarted(true);
-        setErrorMessage('');
+   const startNegotiation = async () => {
+    if (!selectedRole || !desiredOutcome) {
+        setErrorMessage('Please select a role and desired outcome.');
+        return;
+    }
+    if (desiredOutcome === 'custom' && !customOutcomeInput.trim()) {
+        setErrorMessage("Please enter a custom outcome")
+        return
+    }
+    setNegotiationStarted(true);
+    setErrorMessage('');
 
-        try {
-            const userRole = scenario.roles.find((r, index) => roles[index] === selectedRole);
-            const opponentRole = scenario.roles.find((r, index) => roles[index] !== selectedRole);
+    try {
+        const userRole = scenario.roles.find((r, index) => roles[index] === selectedRole);
+        const opponentRole = scenario.roles.find((r, index) => roles[index] !== selectedRole);
 
-            if (!userRole || !opponentRole) {
-                throw new Error('Roles not correctly set or not found.');
+        if (!userRole || !opponentRole) {
+            throw new Error('Roles not correctly set or not found.');
+        }
+
+        const opponentObjectivePrompt = `
+            Generate a specific objective for the role of ${opponentRole.role} in the context of the negotiation.
+            Return your answer in JSON with the format:
+            {
+            "opponentObjective": "string"
             }
-
-            const opponentObjectivePrompt = `
-        Generate a specific objective for the role of ${opponentRole.role} in the context of the negotiation.
-        Return your answer in JSON with the format:
-        {
-          "opponentObjective": "string"
-        }
       `;
-            const rawObjectiveResponse = await fetchOpenAIResponse(
-                { messages: [{ role: 'system', content: opponentObjectivePrompt }], temperature: 0.7, max_tokens: 150 },
-                '/api/generate'
-            );
-            const parsedObjective = parseAiJson(rawObjectiveResponse);
-            const opponentObjective = parsedObjective?.opponentObjective || 'Negotiate effectively.';
-            opponentRole.objective = opponentObjective;
+        const rawObjectiveResponse = await fetchOpenAIResponse(
+            { messages: [{ role: 'system', content: opponentObjectivePrompt }], temperature: 0.7, max_tokens: 150 },
+            '/api/generate'
+        );
+        const parsedObjective = parseAiJson(rawObjectiveResponse);
+        const opponentObjective = parsedObjective?.opponentObjective || 'Negotiate effectively.';
+        opponentRole.objective = opponentObjective;
 
-            const openingPrompt = `
-        As ${opponentRole.name}, in your role as "${opponentRole.role}", provide a very short, direct opening message to ${userRole.name} to start the negotiation.
-        The message should set the stage for negotiation and be appropriate for a chat interface, and not a long email. Use a familiar yet professional tone that reflects the context: "${scenario.context}".
-        Return the response in JSON format: { "message": "<p>string</p><p>string</p>..." }
-      `;
+         const openingPrompt = `
+          As ${opponentRole.name}, in your role as "${opponentRole.role}", provide a direct and specific opening message to ${userRole.name} to start the negotiation.
+          This message must include a concrete offer (or initial demand), and a deadline, to clearly establish the negotiation parameters upfront.
+          Include a specific value/term/price that would be acceptable to you, and a time-bound constraint.
+          The message should set the stage for negotiation and be appropriate for a chat interface, and not a long email. Use a familiar yet professional tone that reflects the context: "${scenario.context}".
+           Return the response in JSON format: { "message": "<p>string</p><p>string</p>..." }
+       `;
 
-            const rawOpeningResponse = await fetchOpenAIResponse(
-                { messages: [{ role: 'system', content: openingPrompt }], temperature: 0.7, max_tokens: 500 },
-                '/api/generate'
-            );
-            const parsedOpening = parseAiJson(rawOpeningResponse);
-            const opponentMessageContent = parsedOpening?.message || 'Unable to fetch opening message.';
-
-            addMessageToHistory(opponentMessageContent, 'opponent');
-            setProgress(20);
-             generateResponseOptions(scenario?.context);
-        } catch (error) {
-            console.error('Error generating opening message:', error);
-            setErrorMessage('Failed to generate the opponent’s opening message. Please try again.');
-        }
-    };
-
+        const rawOpeningResponse = await fetchOpenAIResponse(
+            { messages: [{ role: 'system', content: openingPrompt }], temperature: 0.7, max_tokens: 500 },
+            '/api/generate'
+        );
+        const parsedOpening = parseAiJson(rawOpeningResponse);
+        const opponentMessageContent = parsedOpening?.message || 'Unable to fetch opening message.';
+         const initialScore = 0
+           addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
+            let scaledProgress = (performanceScore / scenario.goal) * 100
+           if(scaledProgress > 100){
+              scaledProgress = 100
+         }
+          setProgress(scaledProgress);
+           generateResponseOptions(scenario?.context);
+    } catch (error) {
+        console.error('Error generating opening message:', error);
+        setErrorMessage('Failed to generate the opponent’s opening message. Please try again.');
+    }
+  };
     // Function to update the roles in the state
     const updateRoles = (newRole, index) => {
         const newRoles = [...roles];
@@ -538,49 +583,22 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
     // Generate prompt for opponent
-    const generateOpponentSystemPrompt = (scenario, player, opponent, difficulty, chatHistory) => {
-         const difficultySettings = {
-            easy: {
-                tone: 'friendly, casual, and lighthearted',
-                complexity: 'simple negotiation tactics, often making concessions',
-                strategy: 'accommodating and quick to compromise, focus on common ground',
-                reactivity: 'responds positively to user\'s points, often conceding or agreeing, seeks harmony and common ground. Uses casual, friendly language and humor to build rapport.',
-            },
-            medium: {
-                tone: 'professional, but still friendly and relatable',
-                complexity: 'standard negotiation strategies, sometimes challenges user but ultimately seeking mutual benefit',
-                strategy: 'firm but fair, seeking mutual benefit, will defend points well',
-                reactivity: 'responds directly to the user’s points, maintains a strong position, uses balanced responses that take both positions into account. Uses relatable and friendly language.',
-            },
-            hard: {
-                tone: 'strategic, but still relatable and somewhat challenging',
-                complexity: 'advanced negotiation tactics, uses strategic framing of arguments',
-                strategy: 'aggressive, aiming for maximum advantage, not open to compromise initially',
-                reactivity: 'challenges user’s points using their own arguments, remains steadfast, and is difficult to persuade, seeks to dominate the conversation, but will concede some ground if there is a strong reason. May use playful challenges or teasing.',
-            },
-            expert: {
-                tone: 'highly strategic, and can be challenging or manipulative',
-                complexity: 'complex and multifaceted negotiation strategies, often uses psychological tactics',
-                strategy: 'ruthless, prioritizing own interests, will use psychological tactics to sway the user',
-                 reactivity: 'attempts to dominate the conversation, actively undermines the user’s points, will not concede without a major benefit, and seeks to exploit any weakness. Can use sarcasm or put downs.',
-            },
-        };
-        const settings = difficultySettings[difficulty] || difficultySettings['medium'];
-        const chatHistoryString = chatHistory.map(msg => `${msg.name}: ${msg.content}`).join("\n");
-
+     const generateOpponentSystemPrompt = (scenario, player, opponent, difficulty, chatHistory) => {
+        const settings = getOpponentPersonalitySettings(opponentPersonality);
+         const chatHistoryString = chatHistory.map(msg => `${msg.name}: ${msg.content}`).join("\n");
         return `
             You are ${opponent.name}, the ${opponent.role} in a ${scenario.type} negotiation (${scenario.subType}).
-            Your goal is to ${opponent.objective}.
+            Your goal is to ${opponent.objective}. You are negotiating with ${player.name} who is in the role of ${player.role}.
              Engage in a conversational style typical of roommates discussing a pet. Use casual, colloquial language, avoiding overly formal phrases.
              Do not use conversational filler or rephrase previous statements too frequently. Vary your sentence structure and word choice to prevent repetitive phrases.
             Maintain a ${settings.tone} tone and employ ${settings.complexity} and utilize the strategy of being ${settings.strategy}.
+           **When starting a new negotiation, always offer a concrete proposal to begin negotiation as your first message. This should be a specific and measurable offer related to the type of negotiation**. You must include a deadline. This does not apply to any response messages, only the first one.
             **You will analyze the user's last message and address the key points they have raised, responding to the specifics of their argument. The difficulty level indicates your flexibility in this response, with an 'easy' opponent being more likely to concede and an 'expert' opponent being more likely to challenge each point.**
             Keep your responses concise and directly address the points raised by ${player.name}.
             Do not reveal your negotiation strategy or desired outcome explicitly.
             Base your responses solely on the conversation history provided, and do not repeat points already addressed:
 
-            ${chatHistoryString}
-
+             ${chatHistoryString}
         `;
     };
 
@@ -647,14 +665,25 @@ const NegotiationModule = ({ onReturn }) => {
         }
 
     // Create prompt for response options
-        const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
+       const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
         Based on the ongoing negotiation for the scenario: ${context},
         consider the latest opponent message: "${latestOpponentMessage}"
         and the user's previous message: "${previousUserMessage}".
         Generate four strategic response options, each representing a different high-level negotiation tactic or strategy that the user could employ.
          Each option should describe a general approach the user could take, not specific messages or phrases.
-        Consider the different negotiation tactics and strategies like:
-        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\\n        Return the response in the JSON format:\\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
+          The response options should be general negotiation strategies or tactics such as the following:
+           - Counter Offer
+           - Ask for More
+           - Play Hardball
+           - Concede
+           - Collaboration
+           - Delay
+           - Bargain
+           - Emotional Appeal
+           - Information Gathering
+            - Value-Based Approach
+          Do not mention specific numbers or phrases.  Focus on high level strategies.
+        Return the response in the JSON format:\\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
     // Handle user message API response
     const handleUserResponse = (rawResponse) => {
         const parsed = parseAiJson(rawResponse);
@@ -689,135 +718,167 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
 
-// Generate feedback for user response
-const generateFeedback = async (userMessage) => {
-    const userRole = scenario.roles.find((r) => r.name === selectedRole);
-    const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
-
-    const feedbackPrompt = `
-    Analyze the user's message: "${userMessage}" as ${userRole.name} in the role of ${userRole.role}, in the context of the current negotiation, with a focus on negotiation tactics.
-     Consider the opponent's position as ${opponentRole.name} in the role of ${opponentRole.role}.
-    Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between roommates.
-    Focus on how the user could improve in the future by exploring common ground and advancing the negotiation goals, or by being more emotionally responsive.
-     Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
-     Return the feedback in JSON format:
-    {
-       "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>"
-     }
-`;
-
-    try {
-        const rawFeedbackResponse = await fetchOpenAIResponse(
-            { messages: [{ role: 'system', content: feedbackPrompt }] },
-            '/api/generate'
-        );
-        const parsedFeedback = parseAiJson(rawFeedbackResponse);
-        return parsedFeedback?.feedback;
-    } catch (error) {
-        console.error('Failed to generate feedback:', error);
-        setErrorMessage('Failed to generate feedback. Please try again.');
-        return null;
-    }
-};
-
-// Updated generateOpponentResponse function
-const generateOpponentResponse = async (lastUserMessage) => {
-    try {
+    // Generate feedback for user response
+   const generateFeedback = async (userMessage) => {
         const userRole = scenario.roles.find((r) => r.name === selectedRole);
         const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
-        if (!userRole || !opponentRole) {
-            throw new Error('Roles not correctly set.');
-        }
-        const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
-        const opponentPrompt = `
-            As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
+        const feedbackPrompt = `
+            Analyze the user's message: "${userMessage}" as ${userRole.name} in the role of ${userRole.role}, in the context of the current negotiation, with a focus on negotiation tactics.
+            Consider the opponent's position as ${opponentRole.name} in the role of ${opponentRole.role}.
+            Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between roommates.
+            Focus on how the user could improve in the future by exploring common ground and advancing the negotiation goals, or by being more emotionally responsive.
+            Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
+            Score the user's message on the following categories using a scale from -2 to +2:
+                - Assertiveness: How effectively the user stated their position.
+                - Adaptability: How well the user changed strategy or incorporated new information.
+                - Empathy: How well the user understood the other party's feelings and needs.
+                - Strategic Thinking: How effectively the user advanced their goals in a strategic manner.
+                - Communication: How clearly and concisely the user delivered their message.
+                - Compromise: How open and willing the user was to find a middle ground.
+            Return the feedback and scores in JSON format:
+            {
+            "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>",
+                "scores": {
+                    "Assertiveness": number,
+                    "Adaptability": number,
+                    "Empathy": number,
+                    "Strategic Thinking": number,
+                    "Communication": number,
+                    "Compromise": number
+                }
+            }
         `;
 
-        const rawResponse = await fetchOpenAIResponse(
-            {
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: opponentPrompt },
-                    { role: 'user', content: lastUserMessage }, // Directly use the last user message
-                ],
-                temperature: 0.7,
-                max_tokens: 500,
-            },
-            '/api/generate'
-        );
-
-        if (!rawResponse) {
-            throw new Error('No response from AI server');
+        try {
+            const rawFeedbackResponse = await fetchOpenAIResponse(
+                { messages: [{ role: 'system', content: feedbackPrompt }] },
+                '/api/generate'
+            );
+            const parsedFeedback = parseAiJson(rawFeedbackResponse);
+            return parsedFeedback;
+        } catch (error) {
+            console.error('Failed to generate feedback:', error);
+            setErrorMessage('Failed to generate feedback. Please try again.');
+            return null;
         }
+    };
+    // Updated generateOpponentResponse function
+  const generateOpponentResponse = async (lastUserMessage) => {
+        try {
+            const userRole = scenario.roles.find((r) => r.name === selectedRole);
+            const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
+            if (!userRole || !opponentRole) {
+                throw new Error('Roles not correctly set.');
+            }
+            const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
-        const parsed = parseAiJson(rawResponse);
-        const finalMessage = parsed?.message;
-        if (!finalMessage) {
-            throw new Error('Opponent response is empty or invalid JSON.');
+            const opponentPrompt = `
+                 As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
+            `;
+
+            const rawResponse = await fetchOpenAIResponse(
+                {
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: opponentPrompt },
+                        { role: 'user', content: lastUserMessage }, // Directly use the last user message
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500,
+                },
+                '/api/generate'
+            );
+
+            if (!rawResponse) {
+                throw new Error('No response from AI server');
+            }
+
+            const parsed = parseAiJson(rawResponse);
+            const finalMessage = parsed?.message;
+            if (!finalMessage) {
+                throw new Error('Opponent response is empty or invalid JSON.');
+            }
+              const initialScore = 0;
+                addMessageToHistory(finalMessage.trim(), 'opponent', initialScore);
+                  const outcome = await assessNegotiationOutcome();
+                  if (outcome && outcome.outcome !== 'Draw') {
+                      finalizeSimulation();
+                         return;
+                  }
+             return finalMessage.trim();
+        } catch (error) {
+            console.error('Failed to generate opponent response:', error);
+            setErrorMessage('Failed to generate opponent response. Please try again.');
+            return null;
         }
-        return finalMessage.trim();
-    } catch (error) {
-        console.error('Failed to generate opponent response:', error);
-        setErrorMessage('Failed to generate opponent response. Please try again.');
-        return null;
-    }
-};
-
-// Send user reply and process AI response
-const sendUserReply = async () => {
-    if (!userDraft.trim()) {
-        setErrorMessage('Please type a reply before sending.');
-        return;
-    }
-    setErrorMessage('');
-    const userMessage = userDraft;
-    // Add user message to chat history first
-    addMessageToHistory(userDraft, 'user');
-    setUserDraft(''); // Clear the user draft immediately after adding the message
-    setProgress((prev) => prev + 20);    setCurrentTurnIndex((prev) => prev + 1);
-    setIsUserTurn(false);
-
-    // Get the delay time
-    const delay = getRandomDelay();
-    const feedbackDelay = delay * 0.5;
-    const animationDelay = delay * 0.25;
-
-    // Start loader animation
-    setTimeout(() => {
-        setIsFetchingOpponent(true);
-    }, animationDelay);
-
-    //    // Generate feedback if the toggle is on and add it separately
-    if (showFeedback) {
-        const feedbackContent = await generateFeedback(userMessage);
-        if (feedbackContent) {
-            setTimeout(() => {
-                addMessageToHistory(feedbackContent, 'feedback');
-            }, feedbackDelay);
+    };
+    // Send user reply and process AI response
+      const sendUserReply = async () => {
+        if (!userDraft.trim()) {
+            setErrorMessage('Please type a reply before sending.');
+            return;
         }
-    }
+        setErrorMessage('');
+        const userMessage = userDraft;
+        setUserDraft('');
+         setIsUserTurn(false);
 
-    // Send Response
-    setTimeout(async () => {
-        // Directly pass the user's message to generateOpponentResponse
-        const opponentMessageContent = await generateOpponentResponse(userMessage);
-        if (opponentMessageContent) {
-            addMessageToHistory(opponentMessageContent, 'opponent');
-        } else {
-            console.error("Opponent message is null or undefined.");
-            setErrorMessage('Failed to generate opponent message.');
-        }
-        setIsUserTurn(true);
-        setIsFetchingOpponent(false);
-         generateResponseOptions(scenario?.context);
-        if (progress >= 100) {
-            finalizeSimulation();
-        }
-    }, delay);
-};
+        // Get the delay time
+        const delay = getRandomDelay();
+        const feedbackDelay = delay * 0.5;
+        const animationDelay = delay * 0.25;
 
-    // dismiss the feedback bubble
+        // Start loader animation
+        setTimeout(() => {
+            setIsFetchingOpponent(true);
+        }, animationDelay);
+        // Generate feedback if the toggle is on and add it separately
+         let feedbackContent = null;
+         if (showFeedback) {
+                const rawFeedback = await generateFeedback(userMessage);
+                  if (rawFeedback) {
+                        feedbackContent = rawFeedback.feedback;
+                        // Add scores from feedback to chat history
+                       const scores = rawFeedback.scores;
+                       setTimeout(() => {
+                               addMessageToHistory(feedbackContent, 'feedback', scores);
+                          }, feedbackDelay);
+                    }
+          }
+
+           // Add user message to chat history after delay
+         addMessageToHistory(userMessage, 'user');
+            const outcome = await assessNegotiationOutcome();
+           if (outcome && outcome.outcome !== 'Draw') {
+                   finalizeSimulation();
+                      return;
+            }
+
+         // Send Response
+        setTimeout(async () => {
+              // Directly pass the user's message to generateOpponentResponse
+            const opponentMessageContent = await generateOpponentResponse(userMessage);
+             if (opponentMessageContent) {
+                const initialScore = 0;
+                  addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
+            } else {
+                console.error("Opponent message is null or undefined.");
+                setErrorMessage('Failed to generate opponent message.');
+            }
+           setIsUserTurn(true);
+           setIsFetchingOpponent(false);
+           generateResponseOptions(scenario?.context);
+             let scaledProgress = (performanceScore / scenario.goal) * 100
+               if(scaledProgress > 100){
+                   scaledProgress = 100
+                }
+             updateProgress(scaledProgress);
+            setCurrentTurnIndex((prev) => prev + 1);
+
+         }, delay);
+     };
+        // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
         setChatHistory((prevHistory) =>
             prevHistory.map((msg) =>
@@ -850,40 +911,42 @@ const sendUserReply = async () => {
         );
     };
     // Assess the final outcome of the negotiation
-    const assessNegotiationOutcome = async () => {
+      const assessNegotiationOutcome = async () => {
         let finalOutcome = desiredOutcome;
-         if (desiredOutcome === 'custom') {
+        if (desiredOutcome === 'custom') {
             if (!customOutcomeInput.trim()) {
                 return { outcome: 'Draw', reason: 'No custom desired outcome was entered.' };
             }
             finalOutcome = customOutcomeInput
-         }
-        const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
-        const outcomeCheckPrompt = `
-        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
-        {
-            "outcome": "Win" | "Lose" | "Draw",
-            "reason": "Your objective justification."
         }
-        `;
-        try {
-            const rawResponse = await fetchOpenAIResponse(
-                { messages: [{ role: 'system', content: outcomeCheckPrompt }] },
-                '/api/generate'
-            );
-            if (!rawResponse) {
-                throw new Error("Received empty response from server.");
+
+         const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
+            const outcomeCheckPrompt = `
+                Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. In the case of a win, check if the opponent has explicitly agreed with a contract or proposal by name. Return the result in JSON format:
+                {
+                    "outcome": "Win" | "Lose" | "Draw",
+                    "reason": "Your objective justification."
+                }
+            `;
+
+            try {
+                const rawResponse = await fetchOpenAIResponse(
+                    { messages: [{ role: 'system', content: outcomeCheckPrompt }] },
+                    '/api/generate'
+                );
+                 if (!rawResponse) {
+                    throw new Error("Received empty response from server.");
+                }
+                const parsedResponse = parseAiJson(rawResponse);
+                return parsedResponse;
+
+            } catch (error) {
+                console.error('Failed to assess negotiation outcome', error);
+                return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
             }
-            const parsedResponse = parseAiJson(rawResponse);
-            return parsedResponse
-        }
-        catch (error) {
-            console.error('Failed to assess negotiation outcome', error);
-            return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
-        }
-    }
+      };
     // Analyze the negotiation transcript
-    const analyzeNegotiation = async () => {
+      const analyzeNegotiation = async () => {
         const userRole = scenario.roles.find((r) => r.name === selectedRole);
         const analysisPrompt = `
                 Analyze the following negotiation transcript, paying special attention to how the user, playing as ${userRole.name}, in the role of the ${userRole.role}, navigated the negotiation.
@@ -891,7 +954,7 @@ const sendUserReply = async () => {
                 For each tactic, provide 2-3 specific examples from the transcript to illustrate where ${userRole.name} demonstrated that tactic effectively or ineffectively.
                 Provide an overall summary that describes ${userRole.name}’s strategy in the negotiation, and specific examples of when they employed those strategies well, or not so well. Start your summary with a sentence directly addressing ${userRole.name}, by name and role, before proceeding to the rest of your summary.
                 Provide concise and actionable recommendations to improve ${userRole.name}’s performance in these areas, making the language encouraging.
-                Return the result in JSON format with the following structure, ensuring that keys appear in Sentence Case, and recommendations are offered as a string array:
+                 Return the result in JSON format with the following structure, ensuring that keys appear in Sentence Case, and recommendations are offered as a string array:
                  {
                      "Summary": "string",
                      "Tactics": {
@@ -906,7 +969,7 @@ const sendUserReply = async () => {
 
                 The negotiation transcript:
                 ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
-              `;
+            `;
         try {
             const rawAnalysisResponse = await fetchOpenAIResponse({
                 messages: [{ role: 'system', content: analysisPrompt }],
@@ -915,7 +978,7 @@ const sendUserReply = async () => {
 
             if (parsedAnalysis) {
                 console.log('Parsed Analysis:', parsedAnalysis)
-                const sentenceCaseKeys = (obj) => {
+                 const sentenceCaseKeys = (obj) => {
                     if (typeof obj !== 'object' || obj === null) {
                         return obj;
                     }
@@ -934,18 +997,17 @@ const sendUserReply = async () => {
 
                 const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
 
-                setDebriefing((prev) => ({
+                 setDebriefing((prev) => ({
                     ...prev,
                     summary: formattedAnalysis.Summary,
                     tactics: formattedAnalysis.Tactics,
-                }));
-
-                const radarData = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
+                 }));
+                 const radarData = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
                     skill: name,
                     score: value.score,
                 }));
 
-                setRadarData(radarData)
+               setRadarData(radarData)
                 return formattedAnalysis;
             } else {
                 setErrorMessage('Failed to analyze negotiation. Please try again.');
@@ -958,25 +1020,32 @@ const sendUserReply = async () => {
             return null;
         }
     };
-    // Finalize the simulation after completion
+     // Finalize the simulation after completion
     const finalizeSimulation = async () => {
-        const outcomeData = await assessNegotiationOutcome();
-        const analysisData = await analyzeNegotiation()
+       const outcomeData = await assessNegotiationOutcome();
+       const analysisData = await analyzeNegotiation()
+            const recommendationData = await generateRecommendation();
 
-        const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
-            if (msg.role === 'user') {
-                return acc + 1;
-            }
+           const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
+            if (msg.role === 'user' ) {
+                    return acc + 1
+                }
+                if(msg.role === 'feedback'){
+                       if(msg.scores){
+                      const scoreSum = Object.values(msg.scores).reduce((sum, score) => sum + score, 0);
+                          return acc + scoreSum
+                       }
+                 }
             return acc;
         }, 0);
-
-        const totalMessages = chatHistory.length;
+         const totalMessages = chatHistory.length;
         const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
 
-        if (analysisData && outcomeData) {
+         if (analysisData && outcomeData && recommendationData) {
             const outcome = outcomeData.outcome;
             const outcomeReason = outcomeData.reason;
-            setDebriefing((prev) => ({
+
+              setDebriefing((prev) => ({
                 ...prev,
                 strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
                     .filter(([, value]) => value.score > 7)
@@ -984,21 +1053,41 @@ const sendUserReply = async () => {
                 areasForImprovement: analysisData.Tactics ? Object.entries(analysisData.Tactics)
                     .filter(([, value]) => value.score < 6)
                     .map(([key]) => key) : ['None'],
-                overallScore: Math.round(effectivenessScore),
-                letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
-                advice: outcome === 'Win' ? 'Continue refining your strategies. Your approach was effective in this negotiation.' : outcome === 'Lose' ? 'Consider revising your approach for better results. Take a closer look at the areas needing improvement.' : 'Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.',
-                transcript: chatHistory,
+               overallScore: Math.round(effectivenessScore),
+                  letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
+                   advice: recommendationData,
+                 transcript: chatHistory,
                 outcome: outcome,
                 outcomeReason: outcomeReason,
-                summary: analysisData.Summary,
-                tactics: analysisData.Tactics
-            }));
-        } else {
-            setErrorMessage('Failed to generate a proper summary. Please try again.');
-            setDebriefing(null);
-        }
+                 summary: analysisData.Summary,
+                 tactics: analysisData.Tactics,
+             }));
+            } else {
+                setErrorMessage('Failed to generate a proper summary. Please try again.');
+                 setDebriefing(null);
+             }
         setSimulationComplete(true);
     };
+
+     const generateRecommendation = async () => {
+        const userRole = scenario.roles.find((r) => r.name === selectedRole);
+        const transcript = chatHistory.filter(msg => msg.role !== 'feedback');
+       const  analysisPrompt = `
+          Given this negotiation transcript: "${JSON.stringify(transcript)}", and the context of the scenario: "${scenario.context}" evaluate the user's performance, playing as ${userRole.name}. Provide clear, concise and actionable advice on what specific strategies to improve next time, in the format: "string".
+           Return the advice in a single, continuous string.
+        `;
+         try {
+            const rawRecommendationResponse = await fetchOpenAIResponse({
+                messages: [{ role: 'system', content: analysisPrompt }],
+            }, '/api/generate');
+            const parsedRecommendation = parseAiJson(rawRecommendationResponse);
+            return parsedRecommendation;
+        }
+        catch (error) {
+            console.error('Failed to generate recommendation:', error);
+            return "Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.";
+        }
+    }
     // Reset all state variables for new simulations
     const resetNegotiation = () => {
         setScenario(null);
@@ -1006,37 +1095,51 @@ const sendUserReply = async () => {
         setSelectedRole('');
         setChatHistory([]);
         setUserDraft('');
-        setProgress(0);
+         setProgress(0);
+         setPerformanceScore(0)
         setSimulationComplete(false);
         setDebriefing(null);
         setErrorMessage('');
         setImages({});
         setNegotiationStarted(false);
-        setScenarioGenerated(false); // Reset the scenario generated flag
-        setCurrentTurnIndex(1);
-        setRadarData(null)
-        setResponseOptions([]);
+         setScenarioGenerated(false); // Reset the scenario generated flag
+         setCurrentTurnIndex(1);
+         setRadarData(null)
+          setResponseOptions([]);
         setButtonRevealComplete(true)
-        setShowFeedback(false); // Also reset the feedback toggle
-         setIsScenarioEditable(false); // Reset scenario edit state
+         setShowFeedback(false); // Also reset the feedback toggle
+        setIsScenarioEditable(false); // Reset scenario edit state
         setEditableScenario(null)
         setCustomOutcomeInput('');
          setCustomSetupStage('selection');
+         setPerformanceData([]);
     };
-    // Function to go to previous turn
+   // Function to go to previous turn
     const goToPreviousTurn = () => {
         if (currentTurnIndex > 1 && simulationComplete) {
             setCurrentTurnIndex(prevIndex => prevIndex - 1);
         }
     };
-    // Function to go to next turn
-    const goToNextTurn = () => {
+   // Function to go to next turn
+     const goToNextTurn = () => {
         const totalTurns = Math.ceil(chatHistory.length / 2);
         if (currentTurnIndex < totalTurns && simulationComplete) {
             setCurrentTurnIndex(prevIndex => prevIndex + 1);
         }
     };
-
+      //  Update the progress to factor in scores
+    const updateProgress = (newProgress) => {
+          setPerformanceScore((prev)=> {
+              const updatedValue = prev + newProgress;
+             return updatedValue
+         });
+        setPerformanceData((prevData) => [...prevData, {turn: currentTurnIndex, score:  performanceScore}])
+             let scaledProgress = (performanceScore / scenario.goal) * 100
+             if(scaledProgress > 100){
+                scaledProgress = 100
+            }
+          setProgress(scaledProgress);
+        };
     // Return the JSX that constructs the UI
     return (
         <div className="app-container">
@@ -1049,7 +1152,7 @@ const sendUserReply = async () => {
             <main className="content-grid">
                 <aside className="left-column">
                     {/* CONDITIONAL RENDERING OF STEP BOX HERE */}
-                    {scenario && (
+                     {scenario && (
                         <div className="step-box">
                             <ChevronLeft
                                 onClick={goToPreviousTurn}
@@ -1092,6 +1195,44 @@ const sendUserReply = async () => {
                     )}
                     <Card className="details-card">
                         <CardContent>
+                             {scenario && images[0] ? (
+                                        <img
+                                            src={images[0]}
+                                            alt="Scenario Illustration"
+                                            className="scenario-image"
+                                        />
+                                    ) : (
+                                        <img
+                                            src="../images/NegotiationModule.png"
+                                            alt="Scenario Illustration"
+                                            className="scenario-image"
+                                        />
+                                    )}
+                                      {negotiationStarted && scenario && (
+                            <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', padding: '10px', justifyContent: 'space-between', marginBottom: '10px'}}>
+                                   <h3 style={{position: 'relative', padding: '0px', textAlign: 'center'}}>
+                                     Performance Meter
+                                </h3>
+                                    <div className="meter-container">
+                                <div
+                                        className="meter-gradient"
+                                    >
+                                       <div className="meter-needle"
+                                            style={{
+                                                  left: `${progress}%`,
+                                                  transform: `translateX(-50%) rotate(${ (progress -50) * 1.8 }deg)`
+                                                }}>
+                                        </div>
+                                    </div>
+                                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                                       <span style={{color: 'green'}}>Win</span>
+                                       <span style={{color: 'yellow'}}>Draw</span>
+                                         <span style={{color: 'red'}}>Lose</span>
+                                     </div>
+                                      <p style={{fontSize: '0.8em', textAlign: 'center'}}>Your Goal: {scenario.goal}. Current Progress: {progress}</p>
+                                   </div>
+                             </div>
+                        )}
                             {negotiationStarted && scenario ? (
                                 <div>
                                     <div className="scenario-info">
@@ -1116,31 +1257,10 @@ const sendUserReply = async () => {
                                         <p>
                                             <strong>Desired Outcome:</strong> {desiredOutcome === 'custom' ? customOutcomeInput : desiredOutcome}
                                         </p>
-                                        {scenario && images[0] && (
-                                            <img
-                                                src={images[0]}
-                                                alt="Scenario Illustration"
-                                                className="scenario-image"
-                                                style={{ marginTop: '10px', width: '100%' }}
-                                            />
-                                        )}
-                                    </div>
+                                   </div>
                                 </div>
                             ) : (
                                 <>
-                                    {scenario && images[0] ? (
-                                        <img
-                                            src={images[0]}
-                                            alt="Scenario Illustration"
-                                            className="scenario-image"
-                                        />
-                                    ) : (
-                                        <img
-                                            src="../images/NegotiationModule.png"
-                                            alt="Scenario Illustration"
-                                            className="scenario-image"
-                                        />
-                                    )}
                                     {!scenario && (
                                         <div className="module-description">
                                             <h2>Negotiation Simulator</h2>
@@ -1205,7 +1325,59 @@ const sendUserReply = async () => {
                                                                     <h4 className="feedback-title">
                                                                         <Info className="icon" /> Feedback
                                                                     </h4>
-                                                                    <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                                                       <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                                                      {msg.scores && (
+                                                                        <div style={{display: 'flex', flexDirection: 'row', marginTop: '10px', alignItems: 'center', justifyContent: 'flex-start', gap: '10px'}}>
+                                                                              <span style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                                                <span style={{color: msg.scores.Assertiveness > 0 ? 'green' : 'red'}}><ArrowUp style={{height: '16px', width: '16px'}} />
+                                                                                     <ArrowDown  style={{height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none'}}/>
+                                                                                </span>
+                                                                                <span>Assertiveness: <span style={{}}>{msg.scores.Assertiveness > 0 ? "+" : msg.scores.Assertiveness < 0 ? "-" : ""}{msg.scores.Assertiveness}</span>
+                                                                                </span>
+                                                                               </span>
+                                                                            <span style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                                                  <span style={{color: msg.scores.Adaptability > 0 ? 'green' : 'red'}}>
+                                                                                     <ArrowUp style={{height: '16px', width: '16px'}}/>
+                                                                                      <ArrowDown  style={{height: '16px', width: '16px', display: msg.scores.Adaptability < 0 ? 'inline' : 'none'}}/>
+                                                                                 </span>
+                                                                               <span>Adaptability: <span style={{}}>{msg.scores.Adaptability > 0 ? "+" : msg.scores.Adaptability < 0 ? "-" : ""}{msg.scores.Adaptability}</span>
+                                                                               </span>
+                                                                               </span>
+                                                                            <span style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                                              <span style={{color: msg.scores.Empathy > 0 ? 'green' : 'red'}}>
+                                                                                  <ArrowUp style={{height: '16px', width: '16px'}}/>
+                                                                                 <ArrowDown  style={{height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none'}}/>
+                                                                               </span>
+                                                                               <span>Empathy: <span style={{}}>{msg.scores.Empathy > 0 ? "+" :  msg.scores.Empathy < 0 ? "-" : ""}{msg.scores.Empathy}</span>
+                                                                               </span>
+                                                                                </span>
+                                                                            <span style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                                                <span style={{color: msg.scores['Strategic Thinking'] > 0 ? 'green' : 'red'}}>
+                                                                                  <ArrowUp style={{height: '16px', width: '16px'}}/>
+                                                                                 <ArrowDown  style={{height: '16px', width: '16px', display: msg.scores['Strategic Thinking'] < 0 ? 'inline' : 'none'}}/>
+                                                                               </span>
+                                                                               <span>Strategic Thinking: <span style={{}}>{msg.scores['Strategic Thinking'] > 0 ? "+" : msg.scores['Strategic Thinking'] < 0 ? "-" : ""}{msg.scores['Strategic Thinking']}</span>
+                                                                                </span>
+                                                                             </span>
+                                                                         <span style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                                               <span style={{color: msg.scores.Communication > 0 ? 'green' : 'red'}}>
+                                                                                  <ArrowUp style={{height: '16px', width: '16px'}}/>
+                                                                                     <ArrowDown  style={{height: '16px', width: '16px', display: msg.scores.Communication < 0 ? 'inline' : 'none'}}/>
+                                                                               </span>
+                                                                                 <span>Communication: <span style={{}}>{msg.scores.Communication > 0 ? "+" : msg.scores.Communication < 0 ? "-" : ""}{msg.scores.Communication}</span>
+                                                                                </span>
+                                                                                 </span>
+                                                                               <span style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                                                                                <span style={{color: msg.scores.Compromise > 0 ? 'green' : 'red'}}>
+                                                                                   <ArrowUp style={{height: '16px', width: '16px'}}/>
+                                                                                      <ArrowDown  style={{height: '16px', width: '16px', display: msg.scores.Compromise < 0 ? 'inline' : 'none'}}/>
+                                                                                 </span>
+                                                                                  <span>Compromise: <span style={{}}>{msg.scores.Compromise > 0 ? "+" : msg.scores.Compromise < 0 ? "-" : ""}{msg.scores.Compromise}</span>
+                                                                                    </span>
+                                                                               </span>
+                                                                    </div>
+                                                                  )}
+
                                                                     <Button onClick={() => dismissFeedback(msg.id)} className="dismiss-button">
                                                                         Dismiss
                                                                     </Button>
@@ -1219,7 +1391,7 @@ const sendUserReply = async () => {
                                                                     <div>
                                                                         <strong className="message-timestamp">Time:</strong> {msg.timestamp}
                                                                     </div>
-                                                                    <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                                                   <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                 </>
                                                             )}
                                                         </div>
@@ -1392,248 +1564,296 @@ const sendUserReply = async () => {
                                                             <option value="">Choose outcome</option>
                                                             {scenario.desiredOutcomes.map((outcome, index) => (
                                                                 <option key={index} value={outcome}>
-                                                                    {outcome}
-                                                                </option>
-                                                            ))}
-                                                            <option value="custom">Custom Outcome</option>
-                                                        </select>
-                                                        {desiredOutcome === 'custom' && (
-                                                            <textarea
-                                                                value={customOutcomeInput}
-                                                                onChange={(e) => setCustomOutcomeInput(e.target.value)}
-                                                                className="custom-outcome-input"
-                                                                placeholder="Type your custom desired outcome..."
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <div className="form-group">
-                                                        <label>Select opponent difficulty level</label>
-                                                        <select
-                                                            onChange={(e) =>
-                                                                setOpponentDifficulty(e.target.value)
-                                                            }
-                                                            value={opponentDifficulty}
-                                                        >
-                                                            <option value="easy">Easy</option>
-                                                            <option value="medium">Medium</option>
-                                                            <option value="hard">Hard</option>
-                                                            <option value="expert">Expert</option>
-                                                        </select>
-                                                    </div>
-                                                    <Button
-                                                        onClick={() => {
-                                                            startNegotiation();
-                                                            setShowInstructions(false);
-                                                        }}
-                                                        className="start-button"
-                                                    >
-                                                        Start Negotiation
-                                                    </Button>
-                                                </div>
-                                            </CardContent>
-                                        </>
-                                    )}
-                                </Card>
-                            ) : (
-                                <Card className="setup-card">
-                                    <CardHeader>
-                                        <CardTitle className="header-title">
-                                            Setup Your Simulation
-                                        </CardTitle>
-                                        <div className="spinner-container">
-                                            {isFetching && <BarLoader color="#0073e6" width="100%" />}
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {!isCustomInputMode ? (
-                                            <>
-                                                <div className="form-group">
-                                                    <label>Select negotiation type</label>
-                                                    <select
-                                                        onChange={(e) => setNegotiationType(e.target.value)}
-                                                        value={negotiationType}
-                                                    >
-                                                        <option value="">Choose negotiation type</option>
-                                                        {negotiationTypes.map((type) => (
-                                                            <option key={type.value} value={type.value}>
-                                                                {type.title}
+                                                                {outcome}
                                                             </option>
                                                         ))}
+                                                        <option value="custom">Custom Outcome</option>
+                                                    </select>
+                                                    {desiredOutcome === 'custom' && (
+                                                        <textarea
+                                                            value={customOutcomeInput}
+                                                            onChange={(e) => setCustomOutcomeInput(e.target.value)}
+                                                            className="custom-outcome-input"
+                                                            placeholder="Type your custom desired outcome..."
+                                                        />
+                                                    )}
+                                                </div>
+                                                  <div className="form-group">
+                                                       <label>Set Opponent Personality:</label>
+                                                       <div className="form-slider">
+                                                        <div style={{width: '80%', position: 'relative'}}>
+                                                           <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
+                                                            <span style={{position: 'absolute', left: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap'}}>Collaborative</span>
+                                                              <span style={{position: 'absolute', left: 'calc(50% - 20px)', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap'}}>Balanced</span>
+                                                                 <span style={{position: 'absolute', right: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap'}}>Aggressive</span>
+                                                            </div>
+                                                           <input
+                                                                type="range"
+                                                                  min="0"
+                                                                  max="3"
+                                                                step="1"
+                                                                value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
+                                                                  onChange={handleOpponentPersonalityChange}
+                                                                  style={{
+                                                                     width: '100%',
+
+                                                                  }}
+                                                                  />
+                                                              </div>
+                                                         <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '5px'}}>
+                                                              <span style={{fontSize: '0.8em'}}><Circle style={{height: '10px', width: '10px'}}/></span>
+                                                                  <span style={{fontSize: '0.8em'}}><CircleDot style={{height: '10px', width: '10px'}}/></span>
+                                                               <span style={{fontSize: '0.8em'}}><Circle style={{height: '10px', width: '10px'}}/></span>
+                                                                 <span style={{fontSize: '0.8em'}}><Circle style={{height: '10px', width: '10px'}}/></span>
+                                                          </div>
+                                                         <div style={{width: '80%', fontSize: '0.7em'}}>
+                                                        <span >Choose a personality for your opponent, which will affect their tone, communication style, and negotiation tactics. A collaborative opponent is more agreeable, while an aggressive opponent can be manipulative and unwilling to compromise.</span>
+                                                     </div>
+                                                        </div>
+                                                </div>
+                                                <div className="form-group">
+                                                    <label>Select opponent difficulty level</label>
+                                                    <select
+                                                        onChange={(e) =>
+                                                            setOpponentDifficulty(e.target.value)
+                                                        }
+                                                        value={opponentDifficulty}
+                                                    >
+                                                        <option value="easy">Easy</option>
+                                                        <option value="medium">Medium</option>
+                                                        <option value="hard">Hard</option>
+                                                        <option value="expert">Expert</option>
                                                     </select>
                                                 </div>
-                                                {negotiationSubTypes[negotiationType] && (
-                                                    <div className="form-group">
-                                                        <label>Select negotiation subtype</label>
-                                                        <select
-                                                            onChange={(e) => setNegotiationSubType(e.target.value)}
-                                                            value={negotiationSubType}
-                                                        >
-                                                            <option value="">Choose negotiation subtype</option>
-                                                            {negotiationSubTypes[negotiationType].map(
-                                                                (subType, index) => (
-                                                                    <option key={index} value={subType}>
-                                                                        {subType}
-                                                                    </option>
-                                                                )
-                                                            )}
-                                                        </select>
-                                                    </div>
-                                                )}
-                                            </>
-                                        ) : (
+                                                <Button
+                                                    onClick={() => {
+                                                        startNegotiation();
+                                                        setShowInstructions(false);
+                                                    }}
+                                                    className="start-button"
+                                                >
+                                                    Start Negotiation
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </>
+                                )}
+                            </Card>
+                        ) : (
+                            <Card className="setup-card">
+                                <CardHeader>
+                                    <CardTitle className="header-title">
+                                        Setup Your Simulation
+                                    </CardTitle>
+                                    <div className="spinner-container">
+                                        {isFetching && <BarLoader color="#0073e6" width="100%" />}
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    {!isCustomInputMode ? (
+                                        <>
                                             <div className="form-group">
-                                                <label>Enter your custom negotiation scenario</label>
-                                                <div className="scenario-title-container">
-                                                    <div className="scenario-description" style={{ position: 'relative' }}>
-                                                        <textarea
-                                                            value={customScenarioInput}
-                                                            onChange={(e) => setCustomScenarioInput(e.target.value)}
-                                                            placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
-                                                            className="custom-scenario-input"
-                                                        />
-                                                    </div>
+                                                <label>Select negotiation type</label>
+                                                <select
+                                                    onChange={(e) => setNegotiationType(e.target.value)}
+                                                    value={negotiationType}
+                                                >
+                                                    <option value="">Choose negotiation type</option>
+                                                    {negotiationTypes.map((type) => (
+                                                        <option key={type.value} value={type.value}>
+                                                            {type.title}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            {negotiationSubTypes[negotiationType] && (
+                                                <div className="form-group">
+                                                    <label>Select negotiation subtype</label>
+                                                    <select
+                                                        onChange={(e) => setNegotiationSubType(e.target.value)}
+                                                        value={negotiationSubType}
+                                                    >
+                                                        <option value="">Choose negotiation subtype</option>
+                                                        {negotiationSubTypes[negotiationType].map(
+                                                            (subType, index) => (
+                                                                <option key={index} value={subType}>
+                                                                    {subType}
+                                                                </option>
+                                                            )
+                                                        )}
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div className="form-group">
+                                            <label>Enter your custom negotiation scenario</label>
+                                            <div className="scenario-title-container">
+                                                <div className="scenario-description" style={{ position: 'relative' }}>
+                                                    <textarea
+                                                        value={customScenarioInput}
+                                                        onChange={(e) => setCustomScenarioInput(e.target.value)}
+                                                        placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
+                                                        className="custom-scenario-input"
+                                                    />
                                                 </div>
                                             </div>
-                                        )}
-                                        {!isCustomInputMode ? (
-                                            <Button onClick={generateScenario} disabled={isFetching}>
-                                                {isFetching ? 'Generating...' : 'Generate Scenario'}
-                                            </Button>
-                                        ) : (
-                                            <>
-                                                {!isScenarioEditable && (
-                                                    <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
-                                                        {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
-                                                    </Button>
-                                                )}
-                                            </>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            )
-                        ) : (
-                            debriefing && (
-                                <div className="debriefing-section">
-                                    <h4 className="debriefing-title">Simulation Debriefing</h4>
-                                     {radarData && (
-                                        <div style={{ width: '100%', height: 300 }}>
-                                            <ResponsiveContainer>
-                                                <RadarChart data={radarData}>
-                                                    <PolarGrid />
-                                                    <PolarAngleAxis dataKey="skill" />
-                                                    <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                                                    <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                                                </RadarChart>
-                                            </ResponsiveContainer>
-                                             <p style={{textAlign: 'center', fontSize: '0.8em', marginTop: '5px'}}>
-                                                This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
-                                            </p>
                                         </div>
                                     )}
-                                    <p>
-                                        <strong>Summary:</strong>
-                                        {debriefing.summary?.split('\n').map((line, i) => (
-                                            <p key={i}>{line}</p>
-                                        ))}
-                                    </p>
-                                    <p>
-                                        <strong>Outcome:</strong> {debriefing.outcome}
-                                        {debriefing.outcomeReason && (
-                                            <>
-                                                <br /><strong>Reason:</strong> {debriefing.outcomeReason}
-                                            </>
-                                        )}
-                                    </p>
-                                    <p>
-                                        <strong>Strengths:</strong>
-                                        {debriefing.strengths && debriefing.strengths.length > 0 ? (
-                                            <ul className="debriefing-list">
-                                                {debriefing.strengths.map((strength, i) => (
-                                                    <li key={i}>
-                                                        {strength}
-                                                        {debriefing.tactics && debriefing.tactics[strength]?.examples &&
-                                                            <ul className="debriefing-examples">
-                                                                {debriefing.tactics[strength].examples.map((ex, idx) => (
-                                                                    <li key={idx}>
-                                                                        {ex}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        }
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : 'None'}
-                                    </p>
-                                    <p>
-                                        <strong>Areas for Improvement:</strong>
-                                        {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
-                                            <ul className="debriefing-list">
-                                                {debriefing.areasForImprovement.map((area, i) => (
-                                                    <li key={i}>
-                                                        {area}
-                                                        {debriefing.tactics && debriefing.tactics[area]?.examples &&
-                                                            <ul className="debriefing-examples">
-                                                                {debriefing.tactics[area].examples.map((ex, idx) => (
-                                                                    <li key={idx}>
-                                                                        {ex}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        }
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : 'None'}
-                                    </p>
-                                     <p>
-                                        <strong>Overall Score:</strong> {debriefing.overallScore}
-                                    </p>
-                                    <p>
-                                        <strong>Letter Grade:</strong> {debriefing.letterGrade}
-                                    </p>
-                                    <p>
-                                        <strong>Recommendations:</strong> {debriefing.advice}
-                                    </p>
-                                    <Button onClick={() => setShowTranscript(!showTranscript)}>
-                                        {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
-                                    </Button>
-                                    {showTranscript && (
-                                        <div className="transcript">
-                                            <h5>Full Transcript:</h5>
-                                            {chatHistory
-                                                .filter(msg => msg.role === 'user' || msg.role === 'opponent')
-                                                .map((msg, index) => (
-                                                    <div key={index}>
-                                                        <strong>{msg.name}:</strong> <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                                                    </div>
-                                                ))}
-                                        </div>
+                                    {!isCustomInputMode ? (
+                                        <Button onClick={generateScenario} disabled={isFetching}>
+                                            {isFetching ? 'Generating...' : 'Generate Scenario'}
+                                        </Button>
+                                    ) : (
+                                        <>
+                                            {!isScenarioEditable && (
+                                                <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
+                                                    {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
+                                                </Button>
+                                            )}
+                                        </>
                                     )}
-                                    <div className="action-buttons">
-                                        <Button onClick={() => setSimulationComplete(false)}>
-                                            Try Different Choices
-                                        </Button>
-                                        <Button onClick={resetNegotiation}>
-                                            Run as Different Type
-                                        </Button>
+                                </CardContent>
+                            </Card>
+                        )
+                    ) : (
+                        debriefing && (
+                            <div className="debriefing-section">
+                                <h4 className="debriefing-title">Simulation Debriefing</h4>
+                                  {radarData && (
+                                    <div style={{ width: '100%', height: 300 }}>
+                                        <ResponsiveContainer>
+                                            <RadarChart data={radarData}>
+                                                <PolarGrid />
+                                                <PolarAngleAxis dataKey="skill" />
+                                                <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                                                <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                                            </RadarChart>
+                                        </ResponsiveContainer>
+                                         <p style={{textAlign: 'center', fontSize: '0.8em', marginTop: '5px'}}>
+                                            This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
+                                        </p>
                                     </div>
+                                )}
+                                  {performanceData.length > 0 && (
+                                     <div style={{width: '100%', height: 300}}>
+                                        <ResponsiveContainer>
+                                            <LineChart data={performanceData}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="turn" />
+                                                <YAxis />
+                                                <Tooltip />
+                                                <Legend />
+                                                 <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    <p style={{textAlign: 'center', fontSize: '0.8em', marginTop: '5px'}}>This graph shows how your overall score changed over time.</p>
+                                   </div>
+                                )}
+                                <p>
+                                    <strong>Summary:</strong>
+                                    {debriefing.summary?.split('\n').map((line, i) => (
+                                        <p key={i}>{line}</p>
+                                    ))}
+                                </p>
+                                <p>
+                                    <strong>Outcome:</strong> {debriefing.outcome}
+                                    {debriefing.outcomeReason && (
+                                        <>
+                                            <br /><strong>Reason:</strong> {debriefing.outcomeReason}
+                                        </>
+                                    )}
+                                </p>
+                                <p>
+                                    <strong>Strengths:</strong>
+                                    {debriefing.strengths && debriefing.strengths.length > 0 ? (
+                                        <ul className="debriefing-list">
+                                            {debriefing.strengths.map((strength, i) => (
+                                                <li key={i}>
+                                                    {strength}
+                                                    {debriefing.tactics && debriefing.tactics[strength]?.examples &&
+                                                        <ul className="debriefing-examples">
+                                                            {debriefing.tactics[strength].examples.map((ex, idx) => (
+                                                                <li key={idx}>
+                                                                    {ex}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    }
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : 'None'}
+                                </p>
+                                <p>
+                                    <strong>Areas for Improvement:</strong>
+                                    {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
+                                        <ul className="debriefing-list">
+                                            {debriefing.areasForImprovement.map((area, i) => (
+                                                <li key={i}>
+                                                    {area}
+                                                    {debriefing.tactics && debriefing.tactics[area]?.examples &&
+                                                        <ul className="debriefing-examples">
+                                                            {debriefing.tactics[area].examples.map((ex, idx) => (
+                                                                <li key={idx}>
+                                                                    {ex}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    }
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : 'None'}
+                                </p>
+                                 <p>
+                                    <strong>Overall Score:</strong> {debriefing.overallScore}
+                                </p>
+                                <p>
+                                    <strong>Letter Grade:</strong> {debriefing.letterGrade}
+                                </p>
+                                <p>
+                                    <strong>Recommendations:</strong> {debriefing.advice}
+                                </p>
+                                <Button onClick={() => setShowTranscript(!showTranscript)}>
+                                    {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
+                                </Button>
+                                {showTranscript && (
+                                    <div className="transcript">
+                                        <h5>Full Transcript:</h5>
+                                        {chatHistory
+                                            .filter(msg => msg.role === 'user' || msg.role === 'opponent')
+                                            .map((msg, index) => (
+                                                <div key={index}>
+                                                    <strong>{msg.name}:</strong> <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
+                                <div className="action-buttons">
+                                    <Button onClick={() => setSimulationComplete(false)}>
+                                        Try Different Choices
+                                    </Button>
+                                    <Button onClick={resetNegotiation}>
+                                        Run as Different Type
+                                    </Button>
                                 </div>
-                            )
-                        )}
-                    </div>
-                </section>
-            </main>
-        </div>
-    );
+                            </div>
+                        )
+                    )}
+                </div>
+            </section>
+        </main>
+    </div>
+);
 };
 
 // Metadata for the component
 export const metadata = {
-    title: 'Negotiation Simulator',
-    description: 'Flex your negotiation skills against a skilled opponent.',
-    imageUrl: '../images/NegotiationModule.png',
-    instructions: `
+title: 'Negotiation Simulator',
+description: 'Flex your negotiation skills against a skilled opponent.',
+imageUrl: '../images/NegotiationModule.png',
+instructions: `
 <h2>Gameplay Overview</h2>
 <p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
 <h3>Simulation Mechanism</h3>
@@ -1642,7 +1862,7 @@ export const metadata = {
 <h3>Outcome and Debriefing</h3>
 <p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
 `,
-    component: NegotiationModule
+component: NegotiationModule
 };
 
 export default NegotiationModule;

@@ -120,6 +120,1144 @@ const App = () => {
   
 export default App;  
 
+🎨 AppStyles.css:
+/* styles/AppStyles.css */
+
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fa;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #f0a202, #ea3f07);
+  padding: 10px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.6);
+}
+
+.header-box {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.header-title {
+  text-transform: uppercase;
+  font-size: 40px;
+  font-family: 'Jura', sans-serif;
+}
+
+.hamburger-icon {
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.dropdown-menu div {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.dropdown-menu div:hover {
+  background-color: #f0f0f0;
+}
+
+.content-grid {
+  display: flex;
+  margin-top: 20px;
+  padding-top: 80px;
+}
+
+.left-column {
+  width: 35%;
+  padding: 0 20px 20px;
+}
+
+.main-content {
+  width: 65%;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+    position: relative;
+    height: auto;
+}
+
+.main-content-flex {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.chat-area {
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 100%);
+  overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* Make sure this is a column */
+}
+
+
+.chat-area-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  justify-content: space-between;
+  height: auto;
+  padding: 0px;
+}
+
+.module-description h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  color: #0073e6;
+  font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
+  font-family: 'Jura', sans-serif;
+  margin-bottom: 10px;
+}
+
+.module-description p,
+.module-description ol {
+  margin-bottom: 0.5rem;
+}
+
+.details-card {
+  margin-bottom: 20px;
+}
+
+.module-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.module-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 10px;
+  margin: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  text-align: center;
+}
+
+.module-card:hover {
+  transform: translateY(-10px);
+}
+
+.module-icon-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.module-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.module-description {
+  font-size: 14px;
+  color: #666;
+}
+
+.module-container {
+  display: flex;
+}
+
+.module-info {
+  text-align: center;
+}
+
+.custom-role-input {
+  margin-top: 10px;
+  padding: 10px 20px;
+  width: calc(100% - 40px);
+  box-sizing: border-box;
+}
+
+.progress-info {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.progress-bar {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.progress-text {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.user-settings {
+  margin-top: 15px;
+}
+
+.user-settings p {
+  margin: 10px 0;
+}
+
+.custom-scenario-textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: calc(100% - 40px);
+}
+
+.scenario-card {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.scenario-title,
+h3 {
+  display: flex;
+  align-items: center;
+  color: #0073e6;
+  font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
+  font-family: 'Jura', sans-serif;
+  margin-bottom: 10px;
+}
+
+/* Style for scenario titles in the left column */
+.left-column-scenario-title {
+  font-size: 1.1rem;
+  /* Slightly smaller than the main area titles */
+  margin-bottom: 5px;
+  /* Reduced bottom margin */
+}
+
+/* Style for scenario descriptions in the left column */
+.left-column-scenario-description {
+  font-size: 0.85rem;
+  /* Slightly smaller font size */
+  margin-bottom: 10px;
+  /* Reduced bottom margin */
+  line-height: 1.3;
+  /* Slightly reduced line height */
+}
+
+/* Style for scenario descriptions in the main content area */
+.main-content-scenario-description {
+  font-size: 1em;
+  /* Smaller font size */
+  margin-bottom: 10px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  /* Added to preserve newlines */
+  word-wrap: break-word;
+}
+
+.editable-scenario-context {
+  font-size: 1em;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 150px;
+  
+}
+.editable-scenario-title {
+  font-size: 2.5em;
+    font-family: 'Jura', sans-serif;
+    /* Smaller font size */
+      width: 100%;
+  color: black;
+  margin-bottom: 10px;
+    border: none;
+    background-color: transparent;
+  min-width: 100%;
+    box-sizing: border-box;
+  text-transform: uppercase;
+}
+
+.scenario-context {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+
+.scenario-edit-icon {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  margin-left: 5px; /* For space from the label */
+}
+.scenario-edit-icon:hover {
+   transform: scale(1.1);
+  }
+
+  .save-button,
+.cancel-button {
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+     display: inline-flex;
+    align-items: center; /* Align icon and text */
+     justify-content: center; /* Center content horizontally */
+  }
+.save-button:hover,
+.cancel-button:hover {
+   transform: scale(1.1);
+}
+
+.reload-icon {
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 16px;
+  vertical-align: middle;
+  color: #721c24;
+  transition: transform 0.2s ease-in-out;
+}
+
+.reload-icon:hover {
+  transform: rotate(90deg);
+}
+
+.Card-title,
+.debriefing-title {
+  text-transform: uppercase;
+  font-size: 32px;
+  color: #0073e6;
+  font-family: 'Jura', sans-serif;
+}
+
+.Card card-setup {
+  border: 2px solid #ccc;
+}
+
+.chevron-marker {
+  width: 20px;
+  height: 20px;
+  background-color: #0073e6;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  margin-right: 10px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.your-answer {
+  top: -15px;
+  margin-bottom: 40px;
+}
+
+.feedback-section {
+  margin-top: 10px;
+}
+
+.feedback {
+  background-color: #e0f7fa;
+  padding: 20px 20px 0px;
+  padding-top: 1px;
+  border-radius: 8px;
+  position: relative;
+  margin-top: 10px;
+  border: 1px solid #0073e6;
+}
+
+.hidden-feedback {
+  opacity: 0.5;
+}
+
+.feedback-box.hidden {
+  display: none;
+}
+
+.feedback-icon.hidden-feedback {
+  opacity: 0.5;
+}
+
+.dismiss-button {
+  background: #f5c6cb;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: .8em;
+}
+
+.dismiss-button:hover {
+  background: #f0b8be;
+}
+
+.feedback-title {
+  font-weight: bold;
+  color: #0073e6;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: -44px;
+  left: 16px;
+  background-color: #f0e68c;
+  padding: 4px 10px;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 -1px 0 #0073e6, 1px 0 0 #0073e6, -1px 0 0 #0073e6;
+  border-bottom: 0px solid #e0f7fa;
+}
+
+.feedback-title .icon {
+  margin-right: 5px;
+}
+
+.scenario-description,
+.question-title {
+  margin-bottom: 15px;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-button {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.Button {
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.restart-button {
+  display: block;
+  margin: 20px auto;
+  background-color: red;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.restart-button:hover {
+  background-color: darkred;
+}
+
+.custom-answer-section {
+  margin-top: 15px;
+}
+
+.custom-answer-label {
+  display: flex;
+  align-items: center;
+}
+
+.custom-answer-form {
+  margin-top: 10px;
+}
+
+.custom-answer-textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.debriefing-section {
+  margin-top: 10px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.stars-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.star {
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
+  color: #ccc;
+}
+
+.star.filled {
+  color: #ffd700;
+}
+
+.action-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+.image-container img,
+.image-placeholder,
+.scenario-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  object-fit: contain;
+}
+
+.image-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  border: 1px solid #e0f7fa;
+}
+
+.scenario-image {
+  border: 2px solid #ccc;
+}
+
+.step-box {
+  background-color: #e0e0e0;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.step-text {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-arrow {
+  cursor: pointer;
+  font-size: 24px;
+  color: #333;
+  padding: 5px;
+}
+
+.nav-arrow.disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.nav-arrow:hover:not(.disabled) {
+  color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .content-grid {
+    flex-direction: column;
+    margin-top: 0;
+  }
+
+  .left-column,
+  .main-content {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .scenario-image {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .chat-history {
+    height: 200px;
+    max-height: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .left-column {
+    width: 40%;
+  }
+
+  .main-content {
+    width: 60%;
+  }
+}
+
+.error-box {
+  background-color: #fdecea;
+  padding: 0px 20px 0px;
+  border-radius: 8px;
+  position: relative;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #f5c6cb;
+}
+
+.error-title {
+  font-weight: bold;
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: -43px;
+  left: 20px;
+  background-color: #fdecea;
+  padding: 4px 10px;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 -1px 0 #f5c6cb, 1px 0 0 #f5c6cb, -1px 0 0 #f5c6cb;
+  border-bottom: 0px solid #f5c6cb;
+}
+
+.error-title .icon {
+  margin-right: 5px;
+  color: #c0392b;
+}
+
+.spinner-container {
+  width: 100%;
+  height: 20px;
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  margin-bottom: 10px;
+}
+
+.editable-role {
+  margin-bottom: 2.5px;
+  margin-top: 2.5px;
+  width: 90%;
+  display: block;
+}
+
+.custom-scenario-input {
+  width: 90%;
+  height: auto; /* Let the height adjust dynamically based on content */
+  min-height: calc(1.5em * 8); /* Set a minimum height of 8 lines */
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  resize: vertical;
+}
+.edit-control-label{
+    cursor: pointer;
+}
+
+.custom-outcome-input {
+  width: 90%;
+  /* Adjust the width to match the layout */
+  height: 150px;
+  /* Adjust the height as needed */
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  /* Add a border if you wish */
+  border-radius: 4px;
+  font-size: 1em;
+  resize: vertical;
+  /* Allows user to resize vertically */
+}
+
+/* Chat Styling */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f7f9fc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.editable-textarea {
+  width: 100%;
+  resize: none;
+  box-sizing: border-box;
+  font-size: 1em;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #ffffff;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.radio-label,
+.feedback-checkbox-label {
+    display: flex; /* Enable flexbox for alignment */
+    align-items: center; /* Vertically align items */
+    font-size: 1em;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+  .radio-label {
+        gap: 5px;
+   }
+/* Override default link styles to remove blue color and underlines */
+.radio-label,
+.feedback-checkbox-label,
+.edit-control-label {
+    color: #333;
+    text-decoration: none;
+    display: flex;
+}
+.radio-label input {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.feedback-checkbox-label input {
+    margin-right: 5px;
+    display: none;
+  }
+.feedback-toggle-container {
+   margin-bottom: 10px;
+    padding: 0px 10px;
+  }
+
+.chat-history-container {
+  flex-grow: 1;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0px;
+}
+
+.chat-history {
+    max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  border: 0px solid #e0e0e0;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.0);
+   display: flex;
+    flex-direction: column;
+}
+
+.chat-message {
+  display: inline-block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 70%;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 0.9em;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.chat-message.user {
+  background-color: #007bff;
+  color: white;
+    align-self: flex-end; /* Align messages to the right */
+    text-align: left;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+}
+
+.chat-message.user-message-align {
+  align-self: flex-end;
+  text-align: left;
+}
+
+.chat-message.opponent {
+  background-color: #e0e0e0;
+  color: black;
+  align-self: flex-start;
+  text-align: left;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+}
+
+.chat-message.feedback {
+  background-color: #f0e68c;
+  color: black;
+  align-self: flex-start;
+  text-align: left;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.chat-message .feedback-icon {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  cursor: pointer;
+  color: #ffd700;
+  width: 16px;
+  height: 16px;
+}
+
+.chat-message .feedback-icon.feedback-active {
+  color: #ff9800;
+}
+
+.chat-message .feedback-icon:hover {
+  color: #ff9800;
+}
+
+.feedback-bubble {
+  position: relative;
+  left: -10px;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #007bff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  width: max-content;
+  max-width: 90%;
+  font-size: 0.8em;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  padding-bottom: 20px;
+}
+
+.chat-message.user .feedback-bubble {
+  right: 0px;
+  left: auto;
+}
+
+.chat-message.feedback .feedback-bubble {
+  background-color: #fdecea;
+  padding: 0px 20px 0px;
+  border-radius: 8px;
+  position: relative;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #f5c6cb;
+}
+
+.chat-message.feedback .feedback-bubble:before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 15px;
+  width: 15px;
+  height: 15px;
+  border-top-left-radius: 5px;
+  border-top: 1px solid #f5c6cb;
+  border-left: 1px solid #f5c6cb;
+}
+
+.chat-message.feedback .feedback-bubble:after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 15px;
+  width: 15px;
+  height: 15px;
+  background-color: #f0e68c;
+}
+
+.chat-message.feedback .feedback-bubble .info-icon-container {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: -35px;
+  left: 16px;
+  background-color: #f0e68c;
+  padding: 4px 10px;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 -1px 0 #f5c6cb, 1px 0 0 #f5c6cb, -1px 0 0 #f5c6cb;
+  border-bottom: 0px solid #f5c6cb;
+}
+
+.info-icon-container .icon {
+  margin-right: 5px;
+  color: #c0392b;
+  margin-bottom: -1px;
+}
+
+.sender-name,
+.message-timestamp {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.user-input-container {
+  display: flex;
+  align-items: flex-end;
+  margin-top: 10px;
+  position: relative;
+  width: 100%;
+}
+
+.user-input-container>div {
+    display: flex;
+    flex-grow: 1;
+    align-items: flex-end;
+}
+
+.user-draft-textarea {
+  flex-grow: 1;
+  width: 100%;
+  resize: vertical;
+  min-height: calc(1.5em * 6);
+  padding: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box;
+}
+
+.feedback-toggle-container {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 0px;
+  margin-bottom: 10px;
+  justify-content: flex-end;
+}
+
+.feedback-checkbox-label input {
+  margin-right: 5px;
+  display: none;
+}
+
+.checkbox-icon-filled {
+  color: #007bff;
+  width: 16px;
+  height: 16px;
+}
+
+.checkbox-icon-empty {
+  color: #ccc;
+  width: 16px;
+  height: 16px;
+}
+
+.send-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+  height: 100%;
+  margin-left: 10px;
+  width: 18%;
+  white-space: nowrap;
+  min-height: calc(1.5em * 4.8);
+}
+
+.send-button:hover {
+  background-color: #0056b3;
+}
+
+.message-input-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 5px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  border-radius: 8px;
+  z-index: 10;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.chat-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.send-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+/* Response Options */
+.response-options-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  padding: 0px 10px;
+}
+
+.response-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.response-button {
+  flex-grow: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #007bff;
+  border: none;
+  outline: 1px solid #007bff;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 50px;
+}
+
+.response-button:hover {
+  background-color: #e6f0ff;
+  color: #0056b3;
+}
+
+.response-button.loading {  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Debriefing Styles */
+.debriefing-section {
+  margin-top: 10px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.debriefing-list {
+  margin-left: 20px;
+  padding: 0;
+  list-style-type: none;
+}
+
+.debriefing-examples {
+  margin-left: 20px;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.debriefing-section h4 {
+  color: #0073e6;
+  font-family: 'Jura', sans-serif;
+  text-transform: uppercase;
+  font-size: 32px;
+}
+
+.debriefing-section p {
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.debriefing-section strong {
+  font-weight: bold;
+}
+
+.feedback-box p,
+.chat-message>div>p {
+  white-space: pre-line;
+}
+
+.select-container {
+  display: inline-block;
+  /* Allows the container to adjust to content */
+  position: relative;
+}
+
+/* Additional styles for the select element as needed */
+.Select {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4;
+}
+
 🟪server.js
 require('dotenv').config();  
 const express = require('express');  
@@ -550,19 +1688,31 @@ const NegotiationModule = ({ onReturn }) => {
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
 
         // Ref for scrolling chat history
-        const chatHistoryContainerRef = useRef(null);
+    const chatHistoryContainerRef = useRef(null);
 
-        useEffect(() => {
-            console.log("useEffect for scrolling triggered, chatHistory length:", chatHistory.length);
-            const chatHistoryDiv = chatHistoryContainerRef.current;
-            if (chatHistoryDiv) {
-                console.log("chatHistoryContainerRef.current is:", chatHistoryDiv);
-                chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
-                console.log("Scrolled to bottom, scrollHeight:", chatHistoryDiv.scrollHeight, "scrollTop:", chatHistoryDiv.scrollTop);
-            } else {
-                console.log("chatHistoryContainerRef.current is null");
-            }
-        }, [chatHistory]);
+
+        // addMessageToHistory function (Modified)
+    const addMessageToHistory = (content, role) => {
+      const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+        const sanitizedContent = DOMPurify.sanitize(content);
+        const newMessage = {
+            content: sanitizedContent,
+            role,
+            name: roleName,
+            timestamp: generateSequentialTimestamp(),
+            id: Date.now(),
+            feedbackVisible: false
+        };
+
+          setChatHistory((prevHistory) => {
+          const updatedHistory = [...prevHistory, newMessage];
+            // After setting the state, we trigger the scroll
+          if(chatHistoryContainerRef.current)
+            chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+            return updatedHistory
+        });
+    };
+
 
     // Handler for changes to selected role
     const handleRoleChange = (newRole) => {
@@ -831,7 +1981,7 @@ const NegotiationModule = ({ onReturn }) => {
 
             addMessageToHistory(opponentMessageContent, 'opponent');
             setProgress(20);
-            generateResponseOptions(scenario?.context);
+             generateResponseOptions(scenario?.context);
         } catch (error) {
             console.error('Error generating opening message:', error);
             setErrorMessage('Failed to generate the opponent’s opening message. Please try again.');
@@ -897,7 +2047,7 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
     // Generate response options for the user
-    const generateResponseOptions = async (context) => {
+        const generateResponseOptions = async (context) => {
         if (!selectedRole || !desiredOutcome) {
             console.warn('Selected role or desired outcome not set. Skipping response option generation.');
             return;
@@ -920,6 +2070,11 @@ const NegotiationModule = ({ onReturn }) => {
             setIsSpinning(false);
             setIsResponseLoading(false);
         }
+    };
+
+     // Function to get the latest message for a particular role
+    const getLatestMessage = (role) => {
+        return chatHistory.filter((msg) => msg.role === role).slice(-1)[0]?.content || '';
     };
     // Generate user response based on selected strategy
     const generateUserResponse = async (strategyDescription) => {
@@ -953,28 +2108,8 @@ const NegotiationModule = ({ onReturn }) => {
         `;
         }
 
-    // Updated addMessageToHistory function
-const addMessageToHistory = (content, role) => {
-    const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
-    const sanitizedContent = DOMPurify.sanitize(content);
-    const newMessage = {
-        content: sanitizedContent,
-        role,
-        name: roleName,
-        timestamp: generateSequentialTimestamp(),
-        id: Date.now(),
-    };
-
-    setChatHistory((prevHistory) => [...prevHistory, newMessage]);
-};
-
-    // Get the latest message for a particular role
-    const getLatestMessage = (role) => {
-        return chatHistory.filter((msg) => msg.role === role).slice(-1)[0]?.content || '';
-    };
-
     // Create prompt for response options
-    const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
+        const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
         Based on the ongoing negotiation for the scenario: ${context},
         consider the latest opponent message: "${latestOpponentMessage}"
         and the user's previous message: "${previousUserMessage}".
@@ -1102,8 +2237,7 @@ const sendUserReply = async () => {
     // Add user message to chat history first
     addMessageToHistory(userDraft, 'user');
     setUserDraft(''); // Clear the user draft immediately after adding the message
-    setProgress((prev) => prev + 20);
-    setCurrentTurnIndex((prev) => prev + 1);
+    setProgress((prev) => prev + 20);    setCurrentTurnIndex((prev) => prev + 1);
     setIsUserTurn(false);
 
     // Get the delay time
@@ -1138,7 +2272,7 @@ const sendUserReply = async () => {
         }
         setIsUserTurn(true);
         setIsFetchingOpponent(false);
-        await generateResponseOptions(scenario?.context); // Regenerate response options here
+         generateResponseOptions(scenario?.context);
         if (progress >= 100) {
             finalizeSimulation();
         }
@@ -1527,7 +2661,7 @@ const sendUserReply = async () => {
                                             <CardContent className="chat-history-container" ref={chatHistoryContainerRef}>
                                                 <div className="chat-history">
                                                     {chatHistory.map((msg) => (
-                                                        <div key={msg.id} className={`chat-message ${msg.role} ${msg.role === 'user' ? 'user-message-align' : ''}`}>
+                                                        <div key={msg.id} className={`chat-message ${msg.role}`}>
                                                             {msg.role === 'feedback' && (
                                                                 <div className="feedback-box">
                                                                     <h4 className="feedback-title">
