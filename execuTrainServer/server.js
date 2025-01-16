@@ -180,6 +180,10 @@ app.post('/api/generate', async (req, res) => {
     });  
   }  
 });  
+
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
   
 console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);  
 console.log(`DALL-E Endpoint: ${dalleEndpoint}`);  
