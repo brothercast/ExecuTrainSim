@@ -32,7 +32,7 @@ start_service() {
         }
         
         echo "INFO: Installing npm dependencies for $service_name"
-        npm install || {
+        npm install --omit=dev || {
              echo "ERROR: Failed to install npm dependencies in $service_dir"
              exit 1
          }
