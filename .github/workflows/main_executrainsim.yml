@@ -39,11 +39,9 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           zip -r release.zip \
-            executrainsim \
-            execuTrainServer \
-            package.json \
-            package-lock.json \
-            startup.sh
+            . -x \
+            */node_modules/* \
+            */node_modules
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
