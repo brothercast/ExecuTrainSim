@@ -29,31 +29,36 @@ jobs:
           npm ci  # Clean install
           echo "Building frontend..."
           npm run build
+
       - name: Install Backend Dependencies
         working-directory: ./execuTrainServer
         run: |
           echo "Installing backend dependencies..."
           npm ci  # Clean install
-      - name: Prepare Deployment Package
+
+      - name: Zip artifact for deployment
         run: |
-          echo "Creating deployment directory..."
-          mkdir -p deploy
-          echo "Copying frontend build..."
-          cp -r executrainsim/build/* deploy
-          echo "Copying backend files..."
-          cp -r execuTrainServer/* deploy
+          zip -r release.zip \
+            executrainsim \
+            execuTrainServer \
+            package.json \
+            package-lock.json \
+            startup.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: combined-app
-          path: deploy
+          path: release.zip
 
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: combined-app
           path: .
+          
+      - name: Unzip artifact
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -64,11 +69,11 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.WEBAPP_NAME }}
-          package: ./deploy
+          package: .
 
       - name: Verify deployment
         run: |
-            sleep 60
+            sleep 120
             for i in {1..3}; do
               STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.WEBAPP_NAME }}.azurewebsites.net/health)
               if [[ "$STATUS_CODE" -eq 200 ]]; then
