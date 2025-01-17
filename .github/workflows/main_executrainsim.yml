@@ -1,57 +1,62 @@
-name: Azure Deploy - ExecuTrainSim (React App)
+# ✨ Workflow for Deploying the ExecuTrainSim React App ✨
+name: "⚛️ Azure Deploy: ExecuTrainSim - React App Deployment"
 
 on:
   push:
     branches:
-      - main # Or your main branch
+      - main # 🎯 Main branch trigger
     paths:
-      - 'executrainsim/**' # Trigger only for changes in executrainsim directory
+      - 'executrainsim/**' # ⚛️ Trigger on changes in app directory
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # 💻 Ubuntu runner
     steps:
-      - name: Checkout Repository Code
+      - name: "⬇️ Checkout Source Code"
         uses: actions/checkout@v4
         with:
-            fetch-depth: 0 # Ensures all history is available for git commands
+            fetch-depth: 0 # 📚 Full commit history
 
-      - name: Setup Node.js Environment
+      - name: "⚙️ Setup Node.js Environment"
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x' # Use Node.js 20.x
+          node-version: '20.x' # 🛠️ Node.js 20.x
 
-      - name: Install React App Dependencies
-        working-directory: ./executrainsim
+      - name: "📦 Install React App Dependencies"
+        working-directory: ./executrainsim # 📁 React app path
         run: |
-          echo "Installing React app dependencies..."
+          echo "✅ Starting: Installing React app dependencies..." # Log it
           npm install
+          echo "✅ Completed: Dependencies installed" # Log it
 
-      - name: Resolve Symbolic Links
-        working-directory: ./executrainsim
-        run: |
-          echo "Resolving symlinks in node_modules..."
-          find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
-            target=$(readlink "$symlink")
-            if [[ "$target" != /* ]]; then
-              absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
-              rm "$symlink"
-              cp -r "$absolute_target" "$(dirname "$symlink")"
-              echo "Resolved symlink: $symlink"
-            else
-               echo "Skipping absolute symlink: $symlink -> $target"
-            fi
-          done
 
-      - name: Build the React Application
-        working-directory: ./executrainsim
+      - name: "🔗 Resolve Symbolic Links in Dependencies"
+        working-directory: ./executrainsim # 📁 React app dir again
         run: |
-          echo "Building React app..."
+           echo "🔍 Resolving: Symbolic links in node_modules..."
+           find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
+               target=$(readlink "$symlink")
+                if [[ "$target" != /* ]]; then
+                    absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
+                    rm "$symlink"
+                    cp -r "$absolute_target" "$(dirname "$symlink")"
+                    echo "🔗 Resolved symlink: $symlink"
+                else
+                    echo "⏭️ Skipping absolute symlink: $symlink -> $target"
+               fi
+            done
+            echo "✅ Completed: All symbolic links resolved" # Log it
+
+      - name: "⚛️ Build the React Application"
+        working-directory: ./executrainsim # 📁 React app location
+        run: |
+          echo "🏗️ Starting: Building React app..." # Log it
           npm run build
+          echo "🏗️ Completed: React app build" # Log it
 
-      - name: Deploy React App to Azure Web App
+      - name: "🚀 Deploy React App to Azure Web App"
         uses: azure/webapps-deploy@v2
         with:
-          app-name: executrainsim # Replace with your actual Azure Web App name
-          package: executrainsim/build # Use the 'build' directory
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use Azure Web App Publish Profile secret
+          app-name: executrainsim # 🎯 Correct web app name here
+          package: executrainsim/build # 📁 Location to deploy (build dir)
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # 🔑 Publish profile from secrets
