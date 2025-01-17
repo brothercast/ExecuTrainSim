@@ -22,6 +22,11 @@ jobs:
         with:
           node-version: '20.x' # 🛠️ Ensure Node.js 20.x is used
 
+      - name: "🔐 Azure Login" # Add Azure Login Action
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use the publish profile secret
+
       - name: "📦 Install Server Dependencies"
         run: |
           echo "✅ Starting: Installing server dependencies..." # Log it
