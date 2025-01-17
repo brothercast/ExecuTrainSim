@@ -23,14 +23,14 @@ jobs:
           node-version: '20.x' # 🛠️ Ensure Node.js 20.x is used
 
       - name: "📦 Install Server Dependencies"
-        working-directory: ./executrainserver # 📁 Navigate to server's directory
+        working-directory: ./executrainserver  # 📁 **Corrected path**
         run: |
           echo "✅ Starting: Installing server dependencies..." # Log it
           npm install
           echo "✅ Completed: Dependencies installed" # Confirmation message
 
       - name: "🔗 Resolve Symbolic Links in Dependencies"
-        working-directory: ./executrainserver # 📁 Server dir again
+        working-directory: ./executrainserver # 📁 **Corrected path**
         run: |
            echo "🔍 Resolving: Symbolic links in node_modules..."
            find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
@@ -47,7 +47,7 @@ jobs:
             echo "✅ Completed: All symbolic links resolved" # Log it
 
       - name: "🏗️ Build the Server App"
-        working-directory: ./executrainserver # 📁 server path
+        working-directory: ./executrainserver  # 📁 **Corrected path**
         run: |
           echo "🔨 Starting: Building the server application..." # Log it
           npm run build # Or any build command
