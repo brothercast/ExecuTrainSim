@@ -25,33 +25,30 @@ jobs:
       - name: "📦 Install React App Dependencies"
         run: |
           echo "✅ Starting: Installing React app dependencies..." # Log it
-          cd ./executrainsim # 📁 Change directory first (correct path)
-          npm install
+          cd ./executrainsim && npm install # 📁 Change directory first, then npm
           echo "✅ Completed: Dependencies installed" # Log it
 
 
       - name: "🔗 Resolve Symbolic Links in Dependencies"
-        run: |
-           echo "🔍 Resolving: Symbolic links in node_modules..."
-           cd ./executrainsim # 📁 Change directory first (correct path)
-           find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
-               target=$(readlink "$symlink")
-                if [[ "$target" != /* ]]; then
-                    absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
-                    rm "$symlink"
-                    cp -rL "$absolute_target" "$(dirname "$symlink")"
+         run: |
+            echo "🔍 Resolving: Symbolic links in node_modules..."
+            cd ./executrainsim && find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do # 📁 Change directory first, then find
+                target=$(readlink "$symlink")
+                 if [[ "$target" != /* ]]; then
+                     absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
+                     rm "$symlink"
+                     cp -rL "$absolute_target" "$(dirname "$symlink")"
                     echo "🔗 Resolved symlink: $symlink"
                 else
-                    echo "⏭️ Skipping absolute symlink: $symlink -> $target"
-               fi
-            done
+                     echo "⏭️ Skipping absolute symlink: $symlink -> $target"
+                fi
+             done
             echo "✅ Completed: All symbolic links resolved" # Log it
 
       - name: "⚛️ Build the React Application"
         run: |
           echo "🏗️ Starting: Building React app..." # Log it
-          cd ./executrainsim # 📁 Change directory first (correct path)
-          npm run build
+          cd ./executrainsim && npm run build # 📁 Change directory first, then npm
           echo "🏗️ Completed: React app build" # Log it
 
       - name: "🚀 Deploy React App to Azure Web App"
