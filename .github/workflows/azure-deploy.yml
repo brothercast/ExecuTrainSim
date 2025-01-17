@@ -3,52 +3,55 @@ name: Azure Deploy - ExecuTrainServer
 on:
   push:
     branches:
-      - main # Or your main branch
+      - main  # Or your main branch
     paths:
-      - 'executrainserver/**' # Trigger only for changes in executrainserver
+      - 'executrainserver/**' # Trigger only for changes in executrainserver directory
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures all history is available for git commands
 
-      - name: Set up Node.js
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20.x' # Use Node.js 20.x
 
-      - name: Install Dependencies
-        working-directory: ./executrainserver
-        run: npm install
-
-      - name: Resolve Symlinks Recursively
+      - name: Install Server Dependencies
         working-directory: ./executrainserver
         run: |
+          echo "Installing server dependencies..."
+          npm install
+
+      - name: Resolve Symbolic Links
+        working-directory: ./executrainserver
+        run: |
+          echo "Resolving symlinks in node_modules..."
           find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
             target=$(readlink "$symlink")
-             # Check if target is an absolute path, if so, do nothing
-             if [[ "$target" != /* ]]; then
-               # Find the absolute path to the linked file/directory
-               absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
-               # Remove the symlink
+            if [[ "$target" != /* ]]; then
+              absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
               rm "$symlink"
-              # Copy the contents
               cp -r "$absolute_target" "$(dirname "$symlink")"
+              echo "Resolved symlink: $symlink"
             else
-                echo "Skipping absolute symlink: $symlink -> $target"
+              echo "Skipping absolute symlink: $symlink -> $target"
             fi
           done
 
-
-      - name: Build Server
+      - name: Build the Server Application
         working-directory: ./executrainserver
-        run: npm run build
+        run: |
+           echo "Building server application..."
+           npm run build # Or any build command if required
 
-      - name: Deploy to Azure Web App
+      - name: Deploy Server to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: executrainsim # Replace with your actual Azure Web App name
-          package: executrainserver # Use the directory name
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: executrainserver # The server's root directory for deployment
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use Azure Web App Publish Profile secret

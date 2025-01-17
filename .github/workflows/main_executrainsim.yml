@@ -1,52 +1,57 @@
-name: Deploy React App - ExecuTrainSim
+name: Azure Deploy - ExecuTrainSim (React App)
 
 on:
   push:
     branches:
       - main # Or your main branch
     paths:
-      - 'executrainsim/**' # Trigger only for changes in executrainsim
+      - 'executrainsim/**' # Trigger only for changes in executrainsim directory
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository Code
         uses: actions/checkout@v4
+        with:
+            fetch-depth: 0 # Ensures all history is available for git commands
 
-      - name: Set up Node.js
+      - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20.x' # Use Node.js 20.x
 
-      - name: Install Dependencies
-        working-directory: ./executrainsim
-        run: npm install
-
-      - name: Resolve Symlinks Recursively
+      - name: Install React App Dependencies
         working-directory: ./executrainsim
         run: |
-           find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
-             target=$(readlink "$symlink")
-             # Check if target is an absolute path, if so, do nothing
+          echo "Installing React app dependencies..."
+          npm install
+
+      - name: Resolve Symbolic Links
+        working-directory: ./executrainsim
+        run: |
+          echo "Resolving symlinks in node_modules..."
+          find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
+            target=$(readlink "$symlink")
             if [[ "$target" != /* ]]; then
-                # Find the absolute path to the linked file/directory
-                absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
-                # Remove the symlink
-                rm "$symlink"
-                # Copy the contents
-                cp -r "$absolute_target" "$(dirname "$symlink")"
+              absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
+              rm "$symlink"
+              cp -r "$absolute_target" "$(dirname "$symlink")"
+              echo "Resolved symlink: $symlink"
             else
-                echo "Skipping absolute symlink: $symlink -> $target"
+               echo "Skipping absolute symlink: $symlink -> $target"
             fi
           done
-      - name: Build React App
-        working-directory: ./executrainsim
-        run: npm run build
 
-      - name: Deploy to Azure Web App
+      - name: Build the React Application
+        working-directory: ./executrainsim
+        run: |
+          echo "Building React app..."
+          npm run build
+
+      - name: Deploy React App to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: executrainsim # Replace with your actual Azure Web App name
-          package: executrainsim/build # Use the build directory
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: executrainsim/build # Use the 'build' directory
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use Azure Web App Publish Profile secret
