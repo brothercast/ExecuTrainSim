@@ -25,7 +25,7 @@ jobs:
       - name: "📦 Install React App Dependencies"
         run: |
           echo "✅ Starting: Installing React app dependencies..." # Log it
-          cd executrainsim # 📁 Change directory first
+          cd ./executrainsim # 📁 Change directory first (correct path)
           npm install
           echo "✅ Completed: Dependencies installed" # Log it
 
@@ -33,7 +33,7 @@ jobs:
       - name: "🔗 Resolve Symbolic Links in Dependencies"
         run: |
            echo "🔍 Resolving: Symbolic links in node_modules..."
-           cd executrainsim  # 📁 Change directory first
+           cd ./executrainsim # 📁 Change directory first (correct path)
            find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
                target=$(readlink "$symlink")
                 if [[ "$target" != /* ]]; then
@@ -50,7 +50,7 @@ jobs:
       - name: "⚛️ Build the React Application"
         run: |
           echo "🏗️ Starting: Building React app..." # Log it
-          cd executrainsim  # 📁 Change directory first
+          cd ./executrainsim # 📁 Change directory first (correct path)
           npm run build
           echo "🏗️ Completed: React app build" # Log it
 

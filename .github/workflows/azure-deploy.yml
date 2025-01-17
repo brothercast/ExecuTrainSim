@@ -25,14 +25,14 @@ jobs:
       - name: "📦 Install Server Dependencies"
         run: |
           echo "✅ Starting: Installing server dependencies..." # Log it
-          cd executrainserver # 📁 Change directory first
+          cd ./executrainserver # 📁 Change directory first (correct path)
           npm install
           echo "✅ Completed: Dependencies installed" # Confirmation message
 
       - name: "🔗 Resolve Symbolic Links in Dependencies"
         run: |
            echo "🔍 Resolving: Symbolic links in node_modules..."
-           cd executrainserver # 📁 Change directory first
+           cd ./executrainserver # 📁 Change directory first (correct path)
            find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
                target=$(readlink "$symlink")
                 if [[ "$target" != /* ]]; then
@@ -49,7 +49,7 @@ jobs:
       - name: "🏗️ Build the Server App"
         run: |
           echo "🔨 Starting: Building the server application..." # Log it
-          cd executrainserver # 📁 Change directory first
+          cd ./executrainserver # 📁 Change directory first (correct path)
           npm run build # Or any build command
           echo "🔨 Completed: Application build"
 
