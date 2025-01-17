@@ -23,7 +23,7 @@ jobs:
           node-version: '20.x' # 🛠️ Node.js 20.x
 
       - name: "📦 Install React App Dependencies"
-        working-directory: ./executrainsim  # 📁 **Corrected path**
+        working-directory: /home/runner/work/ExecuTrainSim/ExecuTrainSim/executrainsim   # 📁 **Corrected path**
         run: |
           echo "✅ Starting: Installing React app dependencies..." # Log it
           npm install
@@ -31,7 +31,7 @@ jobs:
 
 
       - name: "🔗 Resolve Symbolic Links in Dependencies"
-        working-directory: ./executrainsim # 📁 **Corrected path**
+        working-directory: /home/runner/work/ExecuTrainSim/ExecuTrainSim/executrainsim   # 📁 **Corrected path**
         run: |
            echo "🔍 Resolving: Symbolic links in node_modules..."
            find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
@@ -39,7 +39,7 @@ jobs:
                 if [[ "$target" != /* ]]; then
                     absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
                     rm "$symlink"
-                    cp -r "$absolute_target" "$(dirname "$symlink")"
+                    cp -rL "$absolute_target" "$(dirname "$symlink")" # Copied recursively
                     echo "🔗 Resolved symlink: $symlink"
                 else
                     echo "⏭️ Skipping absolute symlink: $symlink -> $target"
@@ -48,7 +48,7 @@ jobs:
             echo "✅ Completed: All symbolic links resolved" # Log it
 
       - name: "⚛️ Build the React Application"
-        working-directory: ./executrainsim  # 📁 **Corrected path**
+        working-directory:  /home/runner/work/ExecuTrainSim/ExecuTrainSim/executrainsim   # 📁 **Corrected path**
         run: |
           echo "🏗️ Starting: Building React app..." # Log it
           npm run build
