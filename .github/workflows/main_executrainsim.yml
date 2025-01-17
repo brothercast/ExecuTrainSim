@@ -23,15 +23,23 @@ jobs:
         working-directory: ./executrainsim
         run: npm install
 
-      - name: Resolve Symlinks
+      - name: Resolve Symlinks Recursively
         working-directory: ./executrainsim
         run: |
-          find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
-            target=$(readlink "$symlink")
-            rm "$symlink"
-            cp -r "$target" "$(dirname "$symlink")"
+           find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
+             target=$(readlink "$symlink")
+             # Check if target is an absolute path, if so, do nothing
+            if [[ "$target" != /* ]]; then
+                # Find the absolute path to the linked file/directory
+                absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
+                # Remove the symlink
+                rm "$symlink"
+                # Copy the contents
+                cp -r "$absolute_target" "$(dirname "$symlink")"
+            else
+                echo "Skipping absolute symlink: $symlink -> $target"
+            fi
           done
-
       - name: Build React App
         working-directory: ./executrainsim
         run: npm run build
