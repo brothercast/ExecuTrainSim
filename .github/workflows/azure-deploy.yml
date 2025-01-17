@@ -23,22 +23,22 @@ jobs:
           node-version: '20.x' # 🛠️ Ensure Node.js 20.x is used
 
       - name: "📦 Install Server Dependencies"
-        working-directory: /home/runner/work/ExecuTrainSim/ExecuTrainSim/executrainserver   # 📁 **Corrected path**
         run: |
           echo "✅ Starting: Installing server dependencies..." # Log it
+          cd executrainserver # 📁 Change directory first
           npm install
           echo "✅ Completed: Dependencies installed" # Confirmation message
 
       - name: "🔗 Resolve Symbolic Links in Dependencies"
-        working-directory:  /home/runner/work/ExecuTrainSim/ExecuTrainSim/executrainserver  # 📁 **Corrected path**
         run: |
            echo "🔍 Resolving: Symbolic links in node_modules..."
+           cd executrainserver # 📁 Change directory first
            find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
                target=$(readlink "$symlink")
                 if [[ "$target" != /* ]]; then
                     absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
                     rm "$symlink"
-                    cp -rL "$absolute_target" "$(dirname "$symlink")" # Copied recursively
+                    cp -rL "$absolute_target" "$(dirname "$symlink")"
                     echo "🔗 Resolved symlink: $symlink"
                 else
                     echo "⏭️ Skipping absolute symlink: $symlink -> $target"
@@ -47,9 +47,9 @@ jobs:
             echo "✅ Completed: All symbolic links resolved" # Log it
 
       - name: "🏗️ Build the Server App"
-        working-directory:  /home/runner/work/ExecuTrainSim/ExecuTrainSim/executrainserver   # 📁 **Corrected path**
         run: |
           echo "🔨 Starting: Building the server application..." # Log it
+          cd executrainserver # 📁 Change directory first
           npm run build # Or any build command
           echo "🔨 Completed: Application build"
 
