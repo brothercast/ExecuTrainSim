@@ -17,11 +17,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x' # Changed to 20.x
+          node-version: '20.x'
 
       - name: Install Dependencies
         working-directory: ./executrainsim
         run: npm install
+
+      - name: Resolve Symlinks
+        working-directory: ./executrainsim
+        run: |
+          find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do
+            target=$(readlink "$symlink")
+            rm "$symlink"
+            cp -r "$target" "$(dirname "$symlink")"
+          done
 
       - name: Build React App
         working-directory: ./executrainsim
