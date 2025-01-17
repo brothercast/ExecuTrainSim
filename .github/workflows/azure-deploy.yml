@@ -4,9 +4,9 @@ name: "🚀 Azure Deploy: ExecuTrainServer - Server Deployment Pipeline"
 on:
   push:
     branches:
-      - main  # 🎯 Main branch trigger
-    paths:
-      - 'executrainserver/**' # 📁 Trigger on changes in server code directory
+      - main # 🎯 Main branch trigger
+    paths-ignore: # Explicitly include an ignore, but list no paths
+      - ''
 
 jobs:
   build-and-deploy:

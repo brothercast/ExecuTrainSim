@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - main # 🎯 Main branch trigger
-    paths:
-      - 'executrainsim/**' # ⚛️ Trigger on changes in app directory
+    paths-ignore: # Explicitly include an ignore, but list no paths
+      - ''
 
 jobs:
   build-and-deploy:
