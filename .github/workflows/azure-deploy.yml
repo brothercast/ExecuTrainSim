@@ -1,64 +1,57 @@
-name: "🚀 Azure Deploy: ExecuTrainSim Combined - Single Web App Deployment Pipeline"
+name: Deploy Node.js App to Azure
 
 on:
   push:
     branches:
-      - main # 🎯 Main branch trigger
+      - main
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 💻 Use Ubuntu for the runner
+    runs-on: ubuntu-latest
+
     steps:
-      - name: "⬇️ Checkout Source Code"
-        uses: actions/checkout@v4 # Ensure latest version
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: "⚙️ Set up Node.js Runtime"
-        uses: actions/setup-node@v4 # Ensure latest version
-        with:
-          node-version: '20.x' # 🛠️ Use Node.js 20.x
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
 
-      - name: "📦 Install Dependencies and Build"
-        run: |
-          echo "✅ Starting: Installing and Building..." # Log it
-          cd ./executrainsim && npm ci && npm run build # install and build the app
-          cd ../executrainserver && npm ci  # install the server
-          echo "✅ Completed: Dependencies installed and built" # Log it
+    - name: Install and Build
+      run: |
+        cd executrainsim
+        npm ci
+        npm run build
+        cd ../execuTrainServer
+        npm ci
 
-      - name: "📁 Create Deployment Folder"
-        run: |
-          echo "📁 Creating deployment folder..."
-          mkdir -p ./deploy
-          mkdir -p ./deploy/executrainsim
-          mkdir -p ./deploy/executrainserver
-          echo "✅ Completed: Deployment folder created."
+    - name: Archive production artifacts
+      run: |
+        mkdir -p ./deploy
+        cp -r ./executrainsim/build ./deploy/executrainsim
+        cp -r ./execuTrainServer ./deploy/execuTrainServer
 
-      - name: "📦 Archive Production Artifacts"
-        run: |
-          echo "📦 Copying server and app files..."
-          cd $GITHUB_WORKSPACE
-          cp -r "$GITHUB_WORKSPACE/executrainsim/build" "$GITHUB_WORKSPACE/deploy/executrainsim"
-          cp -r "$GITHUB_WORKSPACE/executrainserver" "$GITHUB_WORKSPACE/deploy/executrainserver"
-          echo "✅ Completed: Production artifacts archived" # Log it
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: node-app
+        path: ./deploy
 
-      - name: "📤 Upload Artifact"
-        uses: actions/upload-artifact@v3 # Ensure latest version
-        with:
-          name: node-app
-          path: ./deploy
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: node-app
+        path: .
 
-      - name: "📥 Download Artifact"
-        uses: actions/download-artifact@v3 # Ensure latest version
-        with:
-          name: node-app
-          path: ./
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: "🔐 Azure Login"
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use the publish profile secret
-
-      - name: "🚀 Deploy to Azure Web App"
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'executrainsim' # 🎯 Set correct Web App name
-          package: './deploy'  # 📁 
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'ExecuTrainSim'
+        slot-name: 'production'
+        package: ./deploy
