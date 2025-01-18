@@ -16,7 +16,7 @@ npm ci
 echo "App dependencies installed."
 
 
-# Navigate back to the root of the deploy directory
+# Navigate back to the root of the deploy directories
 echo "Navigating to the root of the deploy directory"
 cd /home/site/wwwroot/deploy
 
