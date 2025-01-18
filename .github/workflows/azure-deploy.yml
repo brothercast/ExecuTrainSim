@@ -28,6 +28,8 @@ jobs:
         run: |
           echo "📁 Creating deployment folder..."
           mkdir -p ./deploy
+          mkdir -p ./deploy/executrainsim
+          mkdir -p ./deploy/executrainserver
           echo "✅ Completed: Deployment folder created."
 
       - name: "📦 Archive Production Artifacts"
