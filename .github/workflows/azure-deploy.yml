@@ -35,6 +35,7 @@ jobs:
       - name: "📦 Archive Production Artifacts"
         run: |
           echo "📦 Copying server and app files..."
+          cd $GITHUB_WORKSPACE
           cp -r ./executrainsim/build ./deploy/executrainsim
           cp -r ./executrainserver ./deploy/executrainserver
           echo "✅ Completed: Production artifacts archived" # Log it
