@@ -35,8 +35,8 @@ jobs:
       - name: "📦 Archive Production Artifacts"
         run: |
           echo "📦 Copying server and app files..."
-          cp -r ./executrainsim/build/* ./deploy/executrainsim
-          cp -r ./executrainserver/* ./deploy/executrainserver
+          cp -r ./executrainsim/build ./deploy/executrainsim
+          cp -r ./executrainserver ./deploy/executrainserver
           echo "✅ Completed: Production artifacts archived" # Log it
 
       - name: "📤 Upload Artifact"
