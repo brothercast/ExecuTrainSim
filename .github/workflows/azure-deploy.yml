@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - main # 🎯 Main branch trigger
-    paths-ignore: # Explicitly include an ignore, but list no paths
-      - ''
+    paths-ignore:
+      - 'executrainsim/**'   # 🎯 Ignore changes in the app folder
 
 jobs:
   build-and-deploy:
@@ -14,9 +14,7 @@ jobs:
     steps:
       - name: "⬇️ Checkout Source Code"
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 📚 Get all commit history (just in case)
-
+        
       - name: "⚙️ Setup Node.js Runtime"
         uses: actions/setup-node@v4
         with:
@@ -32,32 +30,11 @@ jobs:
           echo "✅ Starting: Installing server dependencies..." # Log it
           cd ./executrainserver && npm install # 📁 Change directory first, then run npm
           echo "✅ Completed: Dependencies installed" # Confirmation message
-
-      - name: "🔗 Resolve Symbolic Links in Dependencies"
-        run: |
-           echo "🔍 Resolving: Symbolic links in node_modules..."
-           cd ./executrainserver && find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do # 📁 Change directory first, then find
-               target=$(readlink "$symlink")
-                if [[ "$target" != /* ]]; then
-                    absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
-                    rm "$symlink"
-                    cp -rL "$absolute_target" "$(dirname "$symlink")"
-                    echo "🔗 Resolved symlink: $symlink"
-                else
-                    echo "⏭️ Skipping absolute symlink: $symlink -> $target"
-               fi
-            done
-            echo "✅ Completed: All symbolic links resolved" # Log it
-
-      - name: "🏗️ Build the Server App"
-        run: |
-          echo "🔨 Starting: Building the server application..." # Log it
-          cd ./executrainserver && npm run build  # 📁 Change directory first, then npm
-          echo "🔨 Completed: Application build"
+          
 
       - name: "🚀 Deploy Server to Azure Web App"
         uses: azure/webapps-deploy@v2 # ☁️ Deployment action
         with:
           app-name: executrainsim # 🎯 Set correct Web App name
-          package: executrainserver # 📁 Location for the deployment
+          package: ./executrainserver # 📁 Location for the deployment
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # 🔑 Web app publish profile (from secrets)

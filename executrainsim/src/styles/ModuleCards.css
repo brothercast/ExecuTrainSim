@@ -1,5 +1,4 @@
 /* src/styles/ModuleCards.css */
-
 :root {
   --hover-easing: cubic-bezier(0.23, 1, 0.32, 1);
   --return-easing: cubic-bezier(0.445, 0.05, 0.55, 0.95);
@@ -25,43 +24,43 @@
   box-sizing: border-box;
 }
 
-.module-card-wrap {
+.card-wrap {
   margin: 10px;
   transform: perspective(800px);
   transform-style: preserve-3d;
   cursor: pointer;
 }
 
-.module-card-wrap:focus .module-card-info,
-.module-card-wrap:hover .module-card-info {
+.card-wrap:focus .card-info,
+.card-wrap:hover .card-info {
   transform: translateY(0);
 }
 
-.module-card-wrap:focus .module-card-info p,
-.module-card-wrap:hover .module-card-info p {
+.card-wrap:focus .card-info p,
+.card-wrap:hover .card-info p {
   opacity: 1;
 }
 
-.module-card-wrap:focus .module-card,
-.module-card-wrap:hover .module-card {
+.card-wrap:focus .card,
+.card-wrap:hover .card {
   transform: rotateY(10deg) translateY(-5px);
   box-shadow: rgba(0, 0, 0, 0.2) 0 6px 12px;
 }
 
-.module-card-wrap:focus .module-card::before,
-.module-card-wrap:hover .module-card::before {
+.card-wrap:focus .card::before,
+.card-wrap:hover .card::before {
   background: rgba(0, 0, 0, 0.1);
   transition: 5s var(--hover-easing);
   opacity: 1;
   transform: translateY(0);
 }
 
-.module-card-info,
-.module-card-info p {
+.card-info,
+.card-info p {
   transition: 0.6s var(--hover-easing);
 }
 
-.module-card {
+.card {
   position: relative;
   flex: 0 0 240px;
   width: 240px;
@@ -74,7 +73,7 @@
   transform-style: preserve-3d;
 }
 
-.module-card::before {
+.card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -82,66 +81,54 @@
   z-index: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: var(--card-color);
   background-blend-mode: overlay;
   opacity: 0;
   transform: translateY(100%);
   transition: 5s 1s var(--return-easing);
   border-radius: 12px;
 }
-
-.module-icon-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-  position: relative;
-  z-index: 1;
+.card-bg{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--card-color), rgba(255,255,255,0.3));
 }
 
-.module-title {
-  font-family: 'Jura', sans-serif;
-  font-size: 24px;
-  font-weight: bold;
-  color: #0073e6;
-  text-transform: uppercase;
-  position: relative;
-  z-index: 1;
-}
-
-.module-description {
-  position: relative;
-  font-size: 14px;
-  color: #666;
-  margin-top: 10px;
-  z-index: 1;
-  transition: 0.3s var(--return-easing);
-}
-
-.module-card img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  object-fit: contain;
-  position: relative;
-  z-index: 1;
-}
-
-.module-card-info {
+.card-info {
   padding: 20px;
   position: absolute;
   bottom: 0;
-  color: #333;
+  color: #fff;
   transform: translateY(40%);
   transition: 0.6s 1.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-.module-card-info * {
+.card-info * {
   position: relative;
   z-index: 1;
 }
 
-.module-card-info p {
+.card-info p {
   opacity: 0;
   transition: 0.6s 1.6s cubic-bezier(0.215, 0.61, 0.355, 1);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.card-info h1 {
+font-family: 'Jura', sans-serif;
+font-size: 24px;
+  font-weight: bold;
+text-transform: uppercase;
+position: relative;
+z-index: 1;
+}
+
+.card-info p {
+  font-size: 14px;
+  z-index: 1;
+  margin-top: 10px;
 }

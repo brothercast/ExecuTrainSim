@@ -1,64 +1,45 @@
-# ✨ Workflow for Deploying the ExecuTrainSim React App ✨
-name: "⚛️ Azure Deploy: ExecuTrainSim - React App Deployment"
+# ✨ Workflow for Deploying the ExecuTrainSim (React App) ✨
+name: "🚀 Azure Deploy: ExecuTrainSim - App Deployment Pipeline"
 
 on:
   push:
     branches:
       - main # 🎯 Main branch trigger
-    paths-ignore: # Explicitly include an ignore, but list no paths
-      - ''
+    paths-ignore:
+      - 'executrainserver/**' # 🎯 Ignore changes in the server folder
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 💻 Ubuntu runner
+    runs-on: ubuntu-latest # 💻 Use Ubuntu for the runner
     steps:
       - name: "⬇️ Checkout Source Code"
         uses: actions/checkout@v4
-        with:
-            fetch-depth: 0 # 📚 Full commit history
 
-      - name: "⚙️ Setup Node.js Environment"
+      - name: "⚙️ Setup Node.js Runtime"
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x' # 🛠️ Node.js 20.x
+          node-version: '20.x' # 🛠️ Ensure Node.js 20.x is used
 
       - name: "🔐 Azure Login" # Add Azure Login Action
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use the publish profile secret
 
-      - name: "📦 Install React App Dependencies"
+      - name: "📦 Install App Dependencies"
         run: |
-          echo "✅ Starting: Installing React app dependencies..." # Log it
-          cd ./executrainsim && npm install # 📁 Change directory first, then npm
-          echo "✅ Completed: Dependencies installed" # Log it
-
-
-      - name: "🔗 Resolve Symbolic Links in Dependencies"
+          echo "✅ Starting: Installing app dependencies..." # Log it
+          cd ./executrainsim && npm install # 📁 Change directory first, then run npm
+          echo "✅ Completed: Dependencies installed" # Confirmation message
+          
+      - name: "🏗️ Build the React App"
         run: |
-           echo "🔍 Resolving: Symbolic links in node_modules..."
-           cd ./executrainsim && find node_modules -type l -print0 | while IFS= read -r -d $'\0' symlink; do # 📁 Change directory first, then find
-               target=$(readlink "$symlink")
-                if [[ "$target" != /* ]]; then
-                    absolute_target=$(dirname "$symlink")/$(readlink "$symlink")
-                    rm "$symlink"
-                    cp -rL "$absolute_target" "$(dirname "$symlink")"
-                    echo "🔗 Resolved symlink: $symlink"
-                else
-                    echo "⏭️ Skipping absolute symlink: $symlink -> $target"
-               fi
-            done
-            echo "✅ Completed: All symbolic links resolved" # Log it
-
-      - name: "⚛️ Build the React Application"
-        run: |
-          echo "🏗️ Starting: Building React app..." # Log it
-          cd ./executrainsim && npm run build # 📁 Change directory first, then npm
-          echo "🏗️ Completed: React app build" # Log it
+          echo "🔨 Starting: Building the React application..."
+          cd ./executrainsim && npm run build
+          echo "🔨 Completed: Application build"
 
       - name: "🚀 Deploy React App to Azure Web App"
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v2 # ☁️ Deployment action
         with:
-          app-name: executrainsim # 🎯 Correct web app name here
-          package: executrainsim/build # 📁 Location to deploy (build dir)
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # 🔑 Publish profile from secrets
+          app-name: executrainsim-app # 🎯 Set correct Web App name
+          package: ./executrainsim/build # 📁 Location for the deployment
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # 🔑 Web app publish profile (from secrets)
