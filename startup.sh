@@ -1,19 +1,29 @@
 #!/bin/bash
 
-# Navigate to the correct directory for the server
-cd /home/site/wwwroot/deploy/executrainserver
+echo "Starting startup script..."
 
-# Install server dependencies using npm ci (faster for CI)
-echo "Installing server dependencies..."
+# Navigate to the correct directory for the server and install dependencies
+echo "Navigating to /home/site/wwwroot/deploy/executrainserver and installing dependencies..."
+cd /home/site/wwwroot/deploy/executrainserver
 npm ci
 echo "Server dependencies installed."
 
-# Navigate to the root of the deploy directory
+
+#Install the app's dependencies
+echo "Navigating to /home/site/wwwroot/deploy/executrainsim and installing dependencies..."
+cd /home/site/wwwroot/deploy/executrainsim
+npm ci
+echo "App dependencies installed."
+
+
+# Navigate back to the root of the deploy directory
+echo "Navigating to the root of the deploy directory"
 cd /home/site/wwwroot/deploy
 
-# Start the Node.js server using pm2
+# Start the Node.js server using pm2 (with absolute path)
 echo "Starting the server using pm2..."
-pm2 start executrainserver/server.js --name executrainserver
+pm2 start /home/site/wwwroot/deploy/executrainserver/server.js --name executrainserver
 echo "Server started."
 
-echo "Script completed."
+
+echo "Startup script completed."
