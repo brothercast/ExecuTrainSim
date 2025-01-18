@@ -16,21 +16,21 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
+        node-version: '20.x'
 
     - name: Install and Build
       run: |
         cd executrainsim
         npm ci
         npm run build
-        cd ../execuTrainServer
+        cd ../executrainserver
         npm ci
 
     - name: Archive production artifacts
       run: |
         mkdir -p ./deploy
         cp -r ./executrainsim/build ./deploy/executrainsim
-        cp -r ./execuTrainServer ./deploy/execuTrainServer
+        cp -r ./execuTrainserver ./deploy/execuTrainserver
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
