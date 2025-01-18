@@ -61,4 +61,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'executrainsim' # 🎯 Set correct Web App name
-          package: './deploy'  # 📁 Location for the deployment
+          package: './deploy'  # 📁 Location for the deployment 
