@@ -36,8 +36,8 @@ jobs:
         run: |
           echo "📦 Copying server and app files..."
           cd $GITHUB_WORKSPACE
-          cp -r ./executrainsim/build ./deploy/executrainsim
-          cp -r ./executrainserver ./deploy/executrainserver
+          cp -r "$GITHUB_WORKSPACE/executrainsim/build" "$GITHUB_WORKSPACE/deploy/executrainsim"
+          cp -r "$GITHUB_WORKSPACE/executrainserver" "$GITHUB_WORKSPACE/deploy/executrainserver"
           echo "✅ Completed: Production artifacts archived" # Log it
 
       - name: "📤 Upload Artifact"
@@ -61,4 +61,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'executrainsim' # 🎯 Set correct Web App name
-          package: './deploy'  # 📁 Location for the deployment 
+          package: './deploy'  # 📁 Location for the deployment
