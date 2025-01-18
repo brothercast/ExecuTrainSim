@@ -1,40 +1,57 @@
-# ✨ Workflow for Deploying the ExecuTrainServer ✨
-name: "🚀 Azure Deploy: ExecuTrainServer - Server Deployment Pipeline"
-
-on:
-  push:
-    branches:
-      - main # 🎯 Main branch trigger
-    paths-ignore:
-      - 'executrainsim/**'   # 🎯 Ignore changes in the app folder
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest # 💻 Use Ubuntu for the runner
-    steps:
-      - name: "⬇️ Checkout Source Code"
-        uses: actions/checkout@v4
-        
-      - name: "⚙️ Setup Node.js Runtime"
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x' # 🛠️ Ensure Node.js 20.x is used
-
-      - name: "🔐 Azure Login" # Add Azure Login Action
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Use the publish profile secret
-
-      - name: "📦 Install Server Dependencies"
-        run: |
-          echo "✅ Starting: Installing server dependencies..." # Log it
-          cd ./executrainserver && npm install # 📁 Change directory first, then run npm
-          echo "✅ Completed: Dependencies installed" # Confirmation message
-          
-
-      - name: "🚀 Deploy Server to Azure Web App"
-        uses: azure/webapps-deploy@v2 # ☁️ Deployment action
-        with:
-          app-name: executrainsim # 🎯 Set correct Web App name
-          package: ./executrainserver # 📁 Location for the deployment
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # 🔑 Web app publish profile (from secrets)
+name: Deploy Node.js App to Azure  
+  
+on:  
+  push:  
+    branches:  
+      - main  
+  
+jobs:  
+  build-and-deploy:  
+    runs-on: ubuntu-latest  
+  
+    steps:  
+    - name: Checkout code  
+      uses: actions/checkout@v3  # Update to the latest version  
+  
+    - name: Set up Node.js  
+      uses: actions/setup-node@v3  # Update to the latest version  
+      with:  
+        node-version: '18.x'  
+  
+    - name: Install and Build  
+      run: |  
+        cd executrainsim  
+        npm ci  # Use npm ci for faster installs in CI environments  
+        npm run build  
+        cd ../execuTrainServer  
+        npm ci  
+  
+    - name: Archive production artifacts  
+      run: |  
+        mkdir -p ./deploy  
+        cp -r ./executrainsim/build ./deploy/executrainsim  
+        cp -r ./execuTrainServer ./deploy/execuTrainServer  
+  
+    - name: Upload artifact  
+      uses: actions/upload-artifact@v3  # Update to the latest version  
+      with:  
+        name: node-app  
+        path: ./deploy  
+  
+    - name: Download artifact  
+      uses: actions/download-artifact@v3  # Update to the latest version  
+      with:  
+        name: node-app  
+        path: .  
+  
+    - name: Login to Azure  
+      uses: azure/login@v1  
+      with:  
+        creds: ${{ secrets.AZURE_CREDENTIALS }}  
+  
+    - name: Deploy to Azure Web App  
+      uses: azure/webapps-deploy@v2  
+      with:  
+        app-name: 'ExecuTrainSim'  
+        slot-name: 'production'  
+        package: ./deploy  
