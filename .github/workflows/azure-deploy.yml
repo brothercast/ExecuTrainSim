@@ -30,7 +30,7 @@ jobs:
       run: |
         mkdir -p ./deploy
         cp -r ./executrainsim/build ./deploy/executrainsim
-        cp -r ./execuTrainserver ./deploy/execuTrainserver
+        cp -r ./executrainserver ./deploy/executrainserver
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
