@@ -31,10 +31,10 @@ jobs:
         npm run build
         echo "NPM run build complete for executrainsim"
 
-        echo "Navigating to execuTrainServer directory and running npm ci"
-        cd ../execuTrainServer
+        echo "Navigating to executrainserver directory and running npm ci"
+        cd ../executrainserver
         npm ci
-        echo "NPM install complete for execuTrainServer"
+        echo "NPM install complete for executrainserver"
 
         echo "Install and build process complete."
 
@@ -50,12 +50,12 @@ jobs:
         echo "Copied executrainsim build to deploy directory"
 
         echo "Copying executrainserver to deploy directory"
-        cp -r ./execuTrainServer ./deploy/execuTrainServer
-        echo "Copied execuTrainServer to deploy directory"
+        cp -r ./executrainserver ./deploy/executrainserver
+        echo "Copied executrainserver to deploy directory"
 
         echo "Copying package.json files"
         cp -r ./executrainsim/package.json ./deploy/executrainsim/package.json
-        cp -r ./execuTrainServer/package.json ./deploy/execuTrainServer/package.json
+        cp -r ./executrainserver/package.json ./deploy/executrainserver/package.json
         echo "Copied package.json files"
         
         echo "Completed archiving production artifacts."
