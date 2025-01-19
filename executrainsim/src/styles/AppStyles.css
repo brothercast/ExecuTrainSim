@@ -1166,3 +1166,41 @@ h3 {
    transform: translateX(-50%); /* Center the needle */
       z-index: 2;
   }
+/* Personality Slider Styles */
+.form-slider {
+    margin-top: 10px;
+   margin-bottom: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-slider input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 10px;
+    border-radius: 5px;
+    background-image: linear-gradient(to right,  #f0a202, #ea3f07);
+  outline: none;
+}
+
+.form-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+     border: 1px solid black;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.form-slider input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 1px solid black;
+    border-radius: 50%;
+    cursor: pointer;
+}

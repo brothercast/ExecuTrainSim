@@ -16,22 +16,49 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.x'
+        node-version: '18.x'
 
     - name: Install and Build
       run: |
+        echo "Starting Install and Build process..."
+
+        echo "Navigating to executrainsim directory and running npm ci"
         cd executrainsim
         npm ci
+        echo "NPM install complete for executrainsim"
+
+        echo "Running npm run build for executrainsim"
         npm run build
-        cd ../executrainserver
+        echo "NPM run build complete for executrainsim"
+
+        echo "Navigating to execuTrainServer directory and running npm ci"
+        cd ../execuTrainServer
         npm ci
+        echo "NPM install complete for execuTrainServer"
+
+        echo "Install and build process complete."
+
 
     - name: Archive production artifacts
       run: |
+       echo "Starting to archive production artifacts..."
         mkdir -p ./deploy
-        cp -r ./executrainsim/build ./deploy/executrainsim
-        cp -r ./executrainserver ./deploy/executrainserver
+        echo "Created deploy directory"
 
+        echo "Copying executrainsim build to deploy directory"
+        cp -r ./executrainsim/build ./deploy/executrainsim
+        echo "Copied executrainsim build to deploy directory"
+
+        echo "Copying executrainserver to deploy directory"
+        cp -r ./execuTrainServer ./deploy/execuTrainServer
+        echo "Copied execuTrainServer to deploy directory"
+
+        echo "Copying package.json files"
+        cp -r ./executrainsim/package.json ./deploy/executrainsim/package.json
+        cp -r ./execuTrainServer/package.json ./deploy/execuTrainServer/package.json
+        echo "Copied package.json files"
+        
+        echo "Completed archiving production artifacts."
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:

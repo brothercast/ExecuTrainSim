@@ -1,3 +1,4 @@
+// NegotiationModule.js
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
@@ -1286,7 +1287,7 @@ const NegotiationModule = ({ onReturn }) => {
                                  )}
                                  {scenario && !negotiationStarted && (
                                      <div className="roles-customization">
-                                         <strong>Customize Roles:</strong>
+                                          <strong>Customize Roles:</strong>
                                          {roles.map((role, index) => (
                                              <input
                                                  key={index}
@@ -1297,38 +1298,38 @@ const NegotiationModule = ({ onReturn }) => {
                                              />
                                          ))}
                                          <div className="form-group">
-                                             <label>Set Opponent Personality:</label>
-                                             <div className="form-slider">
-                                                 <div style={{ width: '80%', position: 'relative' }}>
-                                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                                                         <span style={{ position: 'absolute', left: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap' }}>Collaborative</span>
-                                                         <span style={{ position: 'absolute', left: 'calc(50% - 20px)', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap' }}>Balanced</span>
-                                                         <span style={{ position: 'absolute', right: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap' }}>Aggressive</span>
-                                                     </div>
-                                                     <input
-                                                         type="range"
-                                                         min="0"
-                                                         max="3"
-                                                         step="1"
-                                                         value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
-                                                         onChange={handleOpponentPersonalityChange}
-                                                         style={{
-                                                             width: '100%',
-     
-                                                         }}
-                                                     />
-                                                 </div>
-                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
-                                                     <span style={{ fontSize: '0.8em' }}><Circle style={{ height: '10px', width: '10px' }} /></span>
-                                                     <span style={{ fontSize: '0.8em' }}><CircleDot style={{ height: '10px', width: '10px' }} /></span>
-                                                     <span style={{ fontSize: '0.8em' }}><Circle style={{ height: '10px', width: '10px' }} /></span>
-                                                     <span style={{ fontSize: '0.8em' }}><Circle style={{ height: '10px', width: '10px' }} /></span>
-                                                 </div>
-                                                 <div style={{ width: '80%', fontSize: '0.7em' }}>
-                                                     <span >Choose a personality for your opponent, which will affect their tone, communication style, and negotiation tactics. A collaborative opponent is more agreeable, while an aggressive opponent can be manipulative and unwilling to compromise.</span>
-                                                 </div>
-                                             </div>
-                                         </div>
+                                            <label>Set Opponent Personality:</label>
+                                            <div className="form-slider">
+                                                <div style={{ width: '80%', position: 'relative' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                                                        <span style={{ position: 'absolute', left: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap' }}>Collaborative</span>
+                                                        <span style={{ position: 'absolute', left: 'calc(50% - 20px)', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap' }}>Balanced</span>
+                                                        <span style={{ position: 'absolute', right: '0px', top: '-25px', fontSize: '0.8em', whiteSpace: 'nowrap' }}>Aggressive</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min="0"
+                                                        max="3"
+                                                        step="1"
+                                                        value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
+                                                        onChange={handleOpponentPersonalityChange}
+                                                        style={{
+                                                            width: '100%',
+
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
+                                                    <span style={{ fontSize: '0.8em' }}><Circle style={{ height: '10px', width: '10px' }} /></span>
+                                                    <span style={{ fontSize: '0.8em' }}><CircleDot style={{ height: '10px', width: '10px' }} /></span>
+                                                    <span style={{ fontSize: '0.8em' }}><Circle style={{ height: '10px', width: '10px' }} /></span>
+                                                    <span style={{ fontSize: '0.8em' }}><Circle style={{ height: '10px', width: '10px' }} /></span>
+                                                </div>
+                                                <div style={{ width: '80%', fontSize: '0.7em' }}>
+                                                    <span >Choose a personality for your opponent, which will affect their tone, communication style, and negotiation tactics. A collaborative opponent is more agreeable, while an aggressive opponent can be manipulative and unwilling to compromise.</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                      </div>
                                  )}
                              </CardContent>
@@ -1518,359 +1519,359 @@ const NegotiationModule = ({ onReturn }) => {
                                                                                                                           style={{ fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%' }}
                                                                                                                       />
                                                                                                                   ) : (
-                                                                                                                      <CardTitle>{scenario.title}</CardTitle>
-                                                                                                                  )}
-                                                                                                                  <div className="spinner-container">
-                                                                                                                      {isFetching && (                                                                 <BarLoader color="#0073e6" width="100%" />
-                                                                                                                      )}
-                                                                                                                  </div>
-                                                              
-                                                                                                                  <div
-                                                                                                                      className="scenario-description main-content-scenario-description"
-                                                                                                                      style={{ position: 'relative' }}
-                                                                                                                  >
-                                                                                                                      {isScenarioEditable ? (
-                                                                                                                          <textarea
-                                                                                                                              value={editableScenario.context}
-                                                                                                                              onChange={(e) => handleScenarioChange('context', e.target.value)}
-                                                                                                                              className="editable-scenario-context"
-                                                                                                                              style={{ minHeight: '100px', resize: 'vertical' }}
-                                                                                                                          />
-                                                                                                                      ) : (
-                                                                                                                          <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
-                                                                                                                      )}
-                                                              
-                                                                                                                  </div>
-                                                                                                                  {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
-                                                                                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
-                                                                                                                     <span onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
-                                                                                                                     </span>
-                                                                                                                 </div>
-                                                                                                             )}
-                                                                                                             {isScenarioEditable && (
-                                                                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap' }}>
-                                                                                                                     <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
-                                                                                                                         <Save style={{ marginLeft: '5px' }} />
-                                                                                                                     </span>
-                                                                                                                     <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
-                                                                                                                         <X style={{ marginLeft: '5px' }} />
-                                                                                                                     </span>
-                                                                                                                 </div>
-                                                                                                             )}
-                                                                                                         </div>
-                                                         
-                                                                                                     </CardHeader>
-                                                                                                     <CardContent>
-                                                                                                         <div>
-                                                                                                             <div className="form-group">
-                                                                                                                 <label>Select your role</label>
-                                                                                                                 <div className="radio-group">
-                                                                                                                     {roles.map((role, index) => (
-                                                                                                                         <label key={index} className="radio-label">
-                                                                                                                             <input
-                                                                                                                                 type="radio"
-                                                                                                                                 value={role}
-                                                                                                                                 checked={selectedRole === role}
-                                                                                                                                 onChange={() => setSelectedRole(role)}
-                                                                                                                             />
-                                                                                                                             {`${role} - ${scenario.roles[index].role}`}
-                                                                                                                         </label>
-                                                                                                                     ))}
-                                                                                                                 </div>
-                                                                                                             </div>
-                                                                                                             <div className="form-group">
-                                                                                                                 <label>Select your desired outcome</label>
-                                                                                                                 <select
-                                                                                                                     onChange={(e) => {
-                                                                                                                         setDesiredOutcome(e.target.value);
-                                                                                                                         if (e.target.value !== 'custom') {
-                                                                                                                             setCustomOutcomeInput('');
-                                                                                                                         }
-                                                                                                                     }}
-                                                                                                                     value={desiredOutcome}
-                                                                                                                 >
-                                                                                                                     <option value="">Choose outcome</option>
-                                                                                                                     {scenario.desiredOutcomes.map((outcome, index) => (
-                                                                                                                         <option key={index} value={outcome}>
-                                                                                                                             {outcome}
-                                                                                                                         </option>
-                                                                                                                     ))}
-                                                                                                                     <option value="custom">Custom Outcome</option>
-                                                                                                                 </select>
-                                                                                                                 {desiredOutcome === 'custom' && (
-                                                                                                                     <textarea
-                                                                                                                         value={customOutcomeInput}
-                                                                                                                         onChange={(e) => setCustomOutcomeInput(e.target.value)}
-                                                                                                                         className="custom-outcome-input"
-                                                                                                                         placeholder="Type your custom desired outcome..."
-                                                                                                                     />
-                                                                                                                 )}
-                                                                                                             </div>
-                                                                                                             <div className="form-group">
-                                                                                                                 <label>Select opponent difficulty level</label>
-                                                                                                                 <select
-                                                                                                                     onChange={(e) =>
-                                                                                                                         setOpponentDifficulty(e.target.value)
-                                                                                                                     }
-                                                                                                                     value={opponentDifficulty}
-                                                                                                                 >
-                                                                                                                     <option value="easy">Easy</option>
-                                                                                                                     <option value="medium">Medium</option>
-                                                                                                                     <option value="hard">Hard</option>
-                                                                                                                     <option value="expert">Expert</option>
-                                                                                                                 </select>
-                                                                                                             </div>
-                                                                                                             <Button
-                                                                                                                 onClick={() => {
-                                                                                                                     startNegotiation();
-                                                                                                                     setShowInstructions(false);
-                                                                                                                 }}
-                                                                                                                 className="start-button"
-                                                                                                             >
-                                                                                                                 Start Negotiation
-                                                                                                             </Button>
-                                                                                                         </div>
-                                                                                                     </CardContent>
-                                                                                                 </>
-                                                                                             )}
-                                                                                         </Card>
-                                                                                     ) : (
-                                                                                         <Card className="setup-card">
-                                                                                             <CardHeader>
-                                                                                                 <CardTitle className="header-title">
-                                                                                                     Setup Your Simulation
-                                                                                                 </CardTitle>
-                                                                                                 <div className="spinner-container">
-                                                                                                     {isFetching && <BarLoader color="#0073e6" width="100%" />}
-                                                                                                 </div>
-                                                                                             </CardHeader>
-                                                                                             <CardContent>
-                                                                                                 {!isCustomInputMode ? (
-                                                                                                     <>
-                                                                                                         <div className="form-group">
-                                                                                                             <label>Select negotiation type</label>
-                                                                                                             <select
-                                                                                                                 onChange={(e) => {
-                                                                                                                      setNegotiationType(e.target.value);
-                                                                                                                      if(e.target.value === 'custom') {
-                                                                                                                         setIsCustomInputMode(true);
-                                                                                                                     } else {
-                                                                                                                         setIsCustomInputMode(false);
-                                                                                                                     }
-                                                                                                                 }}
-                                                                                                                 value={negotiationType}
-                                                                                                             >
-                                                                                                                 <option value="">Choose negotiation type</option>
-                                                                                                                 {negotiationTypes.map((type) => (
-                                                                                                                     <option key={type.value} value={type.value}>
-                                                                                                                         {type.title}
-                                                                                                                     </option>
-                                                                                                                 ))}
-                                                                                                             </select>
-                                                                                                         </div>
-                                                                                                         {negotiationSubTypes[negotiationType] && (
-                                                                                                             <div className="form-group">
-                                                                                                                 <label>Select negotiation subtype</label>
-                                                                                                                 <select
-                                                                                                                     onChange={(e) => setNegotiationSubType(e.target.value)}
-                                                                                                                     value={negotiationSubType}
-                                                                                                                 >
-                                                                                                                     <option value="">Choose negotiation subtype</option>
-                                                                                                                     {negotiationSubTypes[negotiationType].map(
-                                                                                                                         (subType, index) => (
-                                                                                                                             <option key={index} value={subType}>
-                                                                                                                                 {subType}
-                                                                                                                             </option>
-                                                                                                                         )
-                                                                                                                     )}
-                                                                                                                 </select>
-                                                                                                             </div>
-                                                                                                         )}
-                                                                                                     </>
-                                                                                                 ) : (
-                                                                                                     <div className="form-group">
-                                                                                                         <label>Enter your custom negotiation scenario</label>
-                                                                                                         <div className="scenario-title-container">
-                                                                                                             <div className="scenario-description" style={{ position: 'relative' }}>
-                                                                                                                 <textarea
-                                                                                                                     value={customScenarioInput}
-                                                                                                                     onChange={(e) => setCustomScenarioInput(e.target.value)}
-                                                                                                                      onKeyDown={(e) => {
-                                                                                                                           if (e.key === 'Enter' && !e.shiftKey) {
-                                                                                                                             e.preventDefault(); // Prevent newline
-                                                                                                                              handleCustomScenarioSubmit();
+                                                                                                                                                                                                                                        <CardTitle>{scenario.title}</CardTitle>
+                                                                                                                    )}
+                                                                                                                    <div className="spinner-container">
+                                                                                                                        {isFetching && (                                                                 <BarLoader color="#0073e6" width="100%" />
+                                                                                                                        )}
+                                                                                                                    </div>
+                                                                
+                                                                                                                    <div
+                                                                                                                        className="scenario-description main-content-scenario-description"
+                                                                                                                        style={{ position: 'relative' }}
+                                                                                                                    >
+                                                                                                                        {isScenarioEditable ? (
+                                                                                                                            <textarea
+                                                                                                                                value={editableScenario.context}
+                                                                                                                                onChange={(e) => handleScenarioChange('context', e.target.value)}
+                                                                                                                                className="editable-scenario-context"
+                                                                                                                                style={{ minHeight: '100px', resize: 'vertical' }}
+                                                                                                                            />
+                                                                                                                        ) : (
+                                                                                                                            <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                                                                                                                        )}
+                                                                
+                                                                                                                    </div>
+                                                                                                                    {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
+                                                                                                                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
+                                                                                                                       <span onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
+                                                                                                                       </span>
+                                                                                                                   </div>
+                                                                                                               )}
+                                                                                                               {isScenarioEditable && (
+                                                                                                                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap' }}>
+                                                                                                                       <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
+                                                                                                                           <Save style={{ marginLeft: '5px' }} />
+                                                                                                                       </span>
+                                                                                                                       <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
+                                                                                                                           <X style={{ marginLeft: '5px' }} />
+                                                                                                                       </span>
+                                                                                                                   </div>
+                                                                                                               )}
+                                                                                                           </div>
+                                                           
+                                                                                                       </CardHeader>
+                                                                                                       <CardContent>
+                                                                                                           <div>
+                                                                                                               <div className="form-group">
+                                                                                                                   <label>Select your role</label>
+                                                                                                                   <div className="radio-group">
+                                                                                                                       {roles.map((role, index) => (
+                                                                                                                           <label key={index} className="radio-label">
+                                                                                                                               <input
+                                                                                                                                   type="radio"
+                                                                                                                                   value={role}
+                                                                                                                                   checked={selectedRole === role}
+                                                                                                                                   onChange={() => setSelectedRole(role)}
+                                                                                                                               />
+                                                                                                                               {`${role} - ${scenario.roles[index].role}`}
+                                                                                                                           </label>
+                                                                                                                       ))}
+                                                                                                                   </div>
+                                                                                                               </div>
+                                                                                                               <div className="form-group">
+                                                                                                                   <label>Select your desired outcome</label>
+                                                                                                                   <select
+                                                                                                                       onChange={(e) => {
+                                                                                                                           setDesiredOutcome(e.target.value);
+                                                                                                                           if (e.target.value !== 'custom') {
+                                                                                                                               setCustomOutcomeInput('');
                                                                                                                            }
                                                                                                                        }}
-                                                                                                                     placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
-                                                                                                                     className="custom-scenario-input"
-                                                                                                                 />
-                                                                                                             </div>
-                                                                                                         </div>
-                                                                                                     </div>
-                                                                                                 )}
-                                                                                                 {!isCustomInputMode ? (
-                                                                                                     <Button onClick={generateScenario} disabled={isFetching}>
-                                                                                                         {isFetching ? 'Generating...' : 'Generate Scenario'}
-                                                                                                     </Button>
-                                                                                                 ) : (
-                                                                                                     <>
-                                                                                                         {!isScenarioEditable && (
-                                                                                                             <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
-                                                                                                                 {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
-                                                                                                             </Button>
-                                                                                                         )}
-                                                                                                     </>
-                                                                                                 )}
-                                                                                             </CardContent>
-                                                                                         </Card>
-                                                                                     )
-                                                                                 ) : (
-                                                                                     debriefing && (
-                                                                                         <div className="debriefing-section">
-                                                                                             <h4 className="debriefing-title">Simulation Debriefing</h4>
-                                                                                             {radarData && (
-                                                                                                 <div style={{ width: '100%', height: 300 }}>
-                                                                                                     <ResponsiveContainer>
-                                                                                                         <RadarChart data={radarData}>
-                                                                                                             <PolarGrid />
-                                                                                                             <PolarAngleAxis dataKey="skill" />
-                                                                                                             <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                                                                                                             <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                                                                                                         </RadarChart>
-                                                                                                     </ResponsiveContainer>
-                                                                                                     <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
-                                                                                                         This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
-                                                                                                     </p>
-                                                                                                 </div>
-                                                                                             )}
-                                                                                             {performanceData.length > 0 && (
-                                                                                                 <div style={{ width: '100%', height: 300 }}>
-                                                                                                     <ResponsiveContainer>
-                                                                                                         <LineChart data={performanceData}>
-                                                                                                             <CartesianGrid strokeDasharray="3 3" />
-                                                                                                             <XAxis dataKey="turn" />
-                                                                                                             <YAxis />
-                                                                                                             <Tooltip />
-                                                                                                             <Legend />
-                                                                                                             <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
-                                                                                                         </LineChart>
-                                                                                                     </ResponsiveContainer>
-                                                                                                     <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
-                                                                                                 </div>
-                                                                                             )}
-                                                                                             <p>
-                                                                                                 <strong>Summary:</strong>
-                                                                                                 {debriefing.summary?.split('\n').map((line, i) => (
-                                                                                                     <p key={i}>{line}</p>
-                                                                                                 ))}
-                                                                                             </p>
-                                                                                             <p>
-                                                                                                 <strong>Outcome:</strong> {debriefing.outcome}
-                                                                                                 {debriefing.outcomeReason && (
-                                                                                                     <>
-                                                                                                         <br /><strong>Reason:</strong> {debriefing.outcomeReason}
-                                                                                                     </>
-                                                                                                 )}
-                                                                                             </p>
-                                                                                             <p>
-                                                                                                 <strong>Strengths:</strong>
-                                                                                                 {debriefing.strengths && debriefing.strengths.length > 0 ? (
-                                                                                                     <ul className="debriefing-list">
-                                                                                                         {debriefing.strengths.map((strength, i) => (
-                                                                                                             <li key={i}>
-                                                                                                                 {strength}
-                                                                                                                 {debriefing.tactics && debriefing.tactics[strength]?.examples &&
-                                                                                                                     <ul className="debriefing-examples">
-                                                                                                                         {debriefing.tactics[strength].examples.map((ex, idx) => (
-                                                                                                                             <li key={idx}>
-                                                                                                                                 {ex}
-                                                                                                                             </li>
-                                                                                                                         ))}
-                                                                                                                     </ul>
-                                                                                                                 }
-                                                                                                             </li>
-                                                                                                         ))}
-                                                                                                     </ul>
-                                                                                                 ) : 'None'}
-                                                                                             </p>
-                                                                                             <p>
-                                                                                                 <strong>Areas for Improvement:</strong>
-                                                                                                 {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
-                                                                                                     <ul className="debriefing-list">
-                                                                                                         {debriefing.areasForImprovement.map((area, i) => (
-                                                                                                             <li key={i}>
-                                                                                                                 {area}
-                                                                                                                 {debriefing.tactics && debriefing.tactics[area]?.examples &&
-                                                                                                                     <ul className="debriefing-examples">
-                                                                                                                         {debriefing.tactics[area].examples.map((ex, idx) => (
-                                                                                                                             <li key={idx}>
-                                                                                                                                 {ex}
-                                                                                                                             </li>
-                                                                                                                         ))}
-                                                                                                                     </ul>
-                                                                                                                 }
-                                                                                                             </li>
-                                                                                                         ))}
-                                                                                                     </ul>
-                                                                                                 ) : 'None'}
-                                                                                             </p>
-                                                                                             <p>
-                                                                                                 <strong>Overall Score:</strong> {debriefing.overallScore}
-                                                                                             </p>
-                                                                                             <p>
-                                                                                                 <strong>Letter Grade:</strong> {debriefing.letterGrade}
-                                                                                             </p>
-                                                                                             <p>
-                                                                                                 <strong>Recommendations:</strong> {debriefing.advice}
-                                                                                             </p>
-                                                                                             <Button onClick={() => setShowTranscript(!showTranscript)}>
-                                                                                                 {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
-                                                                                             </Button>
-                                                                                             {showTranscript && (
-                                                                                                 <div className="transcript">
-                                                                                                     <h5>Full Transcript:</h5>
-                                                                                                     {chatHistory
-                                                                                                         .filter(msg => msg.role === 'user' || msg.role === 'opponent')
-                                                                                                         .map((msg, index) => (
-                                                                                                             <div key={index}>
-                                                                                                                 <strong>{msg.name}:</strong> <div dangerouslySetInnerHTML={{ __html: msg.content }} />
-                                                                                                             </div>
-                                                                                                         ))}
-                                                                                                 </div>
-                                                                                             )}
-                                                                                             <div className="action-buttons">
-                                                                                                 <Button onClick={() => setSimulationComplete(false)}>
-                                                                                                     Try Different Choices
-                                                                                                 </Button>
-                                                                                                 <Button onClick={resetNegotiation}>
-                                                                                                     Run as Different Type
-                                                                                                 </Button>
-                                                                                             </div>
-                                                                                         </div>
-                                                                                     )
-                                                                                 )}
-                                                                             </div>
-                                                                         </section>
-                                                                     </main>
-                                                                 </div>
-                                                             );
-                                                         };
-                                                         
-                                                         // Metadata for the component
-                                                         export const metadata = {
-                                                             title: 'Negotiation Simulator',
-                                                             description: 'Flex your negotiation skills against a skilled opponent.',
-                                                             imageUrl: '../images/NegotiationModule.png',
-                                                             instructions: `
-                                                         <h2>Gameplay Overview</h2>
-                                                         <p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
-                                                         <h3>Simulation Mechanism</h3>
-                                                         <p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>
-                                                         <p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>
-                                                         <h3>Outcome and Debriefing</h3>
-                                                         <p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
-                                                         `,
-                                                             component: NegotiationModule
-                                                         };
-                                                         
-                                                         export default NegotiationModule;
+                                                                                                                       value={desiredOutcome}
+                                                                                                                   >
+                                                                                                                       <option value="">Choose outcome</option>
+                                                                                                                       {scenario.desiredOutcomes.map((outcome, index) => (
+                                                                                                                           <option key={index} value={outcome}>
+                                                                                                                               {outcome}
+                                                                                                                           </option>
+                                                                                                                       ))}
+                                                                                                                       <option value="custom">Custom Outcome</option>
+                                                                                                                   </select>
+                                                                                                                   {desiredOutcome === 'custom' && (
+                                                                                                                       <textarea
+                                                                                                                           value={customOutcomeInput}
+                                                                                                                           onChange={(e) => setCustomOutcomeInput(e.target.value)}
+                                                                                                                           className="custom-outcome-input"
+                                                                                                                           placeholder="Type your custom desired outcome..."
+                                                                                                                       />
+                                                                                                                   )}
+                                                                                                               </div>
+                                                                                                               <div className="form-group">
+                                                                                                                   <label>Select opponent difficulty level</label>
+                                                                                                                   <select
+                                                                                                                       onChange={(e) =>
+                                                                                                                           setOpponentDifficulty(e.target.value)
+                                                                                                                       }
+                                                                                                                       value={opponentDifficulty}
+                                                                                                                   >
+                                                                                                                       <option value="easy">Easy</option>
+                                                                                                                       <option value="medium">Medium</option>
+                                                                                                                       <option value="hard">Hard</option>
+                                                                                                                       <option value="expert">Expert</option>
+                                                                                                                   </select>
+                                                                                                               </div>
+                                                                                                               <Button
+                                                                                                                   onClick={() => {
+                                                                                                                       startNegotiation();
+                                                                                                                       setShowInstructions(false);
+                                                                                                                   }}
+                                                                                                                   className="start-button"
+                                                                                                               >
+                                                                                                                   Start Negotiation
+                                                                                                               </Button>
+                                                                                                           </div>
+                                                                                                       </CardContent>
+                                                                                                   </>
+                                                                                               )}
+                                                                                           </Card>
+                                                                                       ) : (
+                                                                                           <Card className="setup-card">
+                                                                                               <CardHeader>
+                                                                                                   <CardTitle className="header-title">
+                                                                                                       Setup Your Simulation
+                                                                                                   </CardTitle>
+                                                                                                   <div className="spinner-container">
+                                                                                                       {isFetching && <BarLoader color="#0073e6" width="100%" />}
+                                                                                                   </div>
+                                                                                               </CardHeader>
+                                                                                               <CardContent>
+                                                                                                   {!isCustomInputMode ? (
+                                                                                                       <>
+                                                                                                           <div className="form-group">
+                                                                                                               <label>Select negotiation type</label>
+                                                                                                               <select
+                                                                                                                   onChange={(e) => {
+                                                                                                                        setNegotiationType(e.target.value);
+                                                                                                                        if(e.target.value === 'custom') {
+                                                                                                                           setIsCustomInputMode(true);
+                                                                                                                       } else {
+                                                                                                                           setIsCustomInputMode(false);
+                                                                                                                       }
+                                                                                                                   }}
+                                                                                                                   value={negotiationType}
+                                                                                                               >
+                                                                                                                   <option value="">Choose negotiation type</option>
+                                                                                                                   {negotiationTypes.map((type) => (
+                                                                                                                       <option key={type.value} value={type.value}>
+                                                                                                                           {type.title}
+                                                                                                                       </option>
+                                                                                                                   ))}
+                                                                                                               </select>
+                                                                                                           </div>
+                                                                                                           {negotiationSubTypes[negotiationType] && (
+                                                                                                               <div className="form-group">
+                                                                                                                   <label>Select negotiation subtype</label>
+                                                                                                                   <select
+                                                                                                                       onChange={(e) => setNegotiationSubType(e.target.value)}
+                                                                                                                       value={negotiationSubType}
+                                                                                                                   >
+                                                                                                                       <option value="">Choose negotiation subtype</option>
+                                                                                                                       {negotiationSubTypes[negotiationType].map(
+                                                                                                                           (subType, index) => (
+                                                                                                                               <option key={index} value={subType}>
+                                                                                                                                   {subType}
+                                                                                                                               </option>
+                                                                                                                           )
+                                                                                                                       )}
+                                                                                                                   </select>
+                                                                                                               </div>
+                                                                                                           )}
+                                                                                                       </>
+                                                                                                   ) : (
+                                                                                                       <div className="form-group">
+                                                                                                           <label>Enter your custom negotiation scenario</label>
+                                                                                                           <div className="scenario-title-container">
+                                                                                                               <div className="scenario-description" style={{ position: 'relative' }}>
+                                                                                                                   <textarea
+                                                                                                                       value={customScenarioInput}
+                                                                                                                       onChange={(e) => setCustomScenarioInput(e.target.value)}
+                                                                                                                        onKeyDown={(e) => {
+                                                                                                                             if (e.key === 'Enter' && !e.shiftKey) {
+                                                                                                                               e.preventDefault(); // Prevent newline
+                                                                                                                                handleCustomScenarioSubmit();
+                                                                                                                             }
+                                                                                                                         }}
+                                                                                                                       placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
+                                                                                                                       className="custom-scenario-input"
+                                                                                                                   />
+                                                                                                               </div>
+                                                                                                           </div>
+                                                                                                       </div>
+                                                                                                   )}
+                                                                                                   {!isCustomInputMode ? (
+                                                                                                       <Button onClick={generateScenario} disabled={isFetching}>
+                                                                                                           {isFetching ? 'Generating...' : 'Generate Scenario'}
+                                                                                                       </Button>
+                                                                                                   ) : (
+                                                                                                       <>
+                                                                                                           {!isScenarioEditable && (
+                                                                                                               <Button onClick={handleCustomScenarioSubmit} disabled={isFetchingScenario}>
+                                                                                                                   {isFetchingScenario ? 'Generating Custom Scenario...' : 'Generate Custom Scenario'}
+                                                                                                               </Button>
+                                                                                                           )}
+                                                                                                       </>
+                                                                                                   )}
+                                                                                               </CardContent>
+                                                                                           </Card>
+                                                                                       )
+                                                                                   ) : (
+                                                                                       debriefing && (
+                                                                                           <div className="debriefing-section">
+                                                                                               <h4 className="debriefing-title">Simulation Debriefing</h4>
+                                                                                               {radarData && (
+                                                                                                   <div style={{ width: '100%', height: 300 }}>
+                                                                                                       <ResponsiveContainer>
+                                                                                                           <RadarChart data={radarData}>
+                                                                                                               <PolarGrid />
+                                                                                                               <PolarAngleAxis dataKey="skill" />
+                                                                                                               <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                                                                                                               <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                                                                                                           </RadarChart>
+                                                                                                       </ResponsiveContainer>
+                                                                                                       <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
+                                                                                                           This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
+                                                                                                       </p>
+                                                                                                   </div>
+                                                                                               )}
+                                                                                               {performanceData.length > 0 && (
+                                                                                                   <div style={{ width: '100%', height: 300 }}>
+                                                                                                       <ResponsiveContainer>
+                                                                                                           <LineChart data={performanceData}>
+                                                                                                               <CartesianGrid strokeDasharray="3 3" />
+                                                                                                               <XAxis dataKey="turn" />
+                                                                                                               <YAxis />
+                                                                                                               <Tooltip />
+                                                                                                               <Legend />
+                                                                                                               <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                                                                                           </LineChart>
+                                                                                                       </ResponsiveContainer>
+                                                                                                       <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
+                                                                                                   </div>
+                                                                                               )}
+                                                                                               <p>
+                                                                                                   <strong>Summary:</strong>
+                                                                                                   {debriefing.summary?.split('\n').map((line, i) => (
+                                                                                                       <p key={i}>{line}</p>
+                                                                                                   ))}
+                                                                                               </p>
+                                                                                               <p>
+                                                                                                   <strong>Outcome:</strong> {debriefing.outcome}
+                                                                                                   {debriefing.outcomeReason && (
+                                                                                                       <>
+                                                                                                           <br /><strong>Reason:</strong> {debriefing.outcomeReason}
+                                                                                                       </>
+                                                                                                   )}
+                                                                                               </p>
+                                                                                               <p>
+                                                                                                   <strong>Strengths:</strong>
+                                                                                                   {debriefing.strengths && debriefing.strengths.length > 0 ? (
+                                                                                                       <ul className="debriefing-list">
+                                                                                                           {debriefing.strengths.map((strength, i) => (
+                                                                                                               <li key={i}>
+                                                                                                                   {strength}
+                                                                                                                   {debriefing.tactics && debriefing.tactics[strength]?.examples &&
+                                                                                                                       <ul className="debriefing-examples">
+                                                                                                                           {debriefing.tactics[strength].examples.map((ex, idx) => (
+                                                                                                                               <li key={idx}>
+                                                                                                                                   {ex}
+                                                                                                                               </li>
+                                                                                                                           ))}
+                                                                                                                       </ul>
+                                                                                                                   }
+                                                                                                               </li>
+                                                                                                           ))}
+                                                                                                       </ul>
+                                                                                                   ) : 'None'}
+                                                                                               </p>
+                                                                                               <p>
+                                                                                                   <strong>Areas for Improvement:</strong>
+                                                                                                   {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
+                                                                                                       <ul className="debriefing-list">
+                                                                                                           {debriefing.areasForImprovement.map((area, i) => (
+                                                                                                               <li key={i}>
+                                                                                                                   {area}
+                                                                                                                   {debriefing.tactics && debriefing.tactics[area]?.examples &&
+                                                                                                                       <ul className="debriefing-examples">
+                                                                                                                           {debriefing.tactics[area].examples.map((ex, idx) => (
+                                                                                                                               <li key={idx}>
+                                                                                                                                   {ex}
+                                                                                                                               </li>
+                                                                                                                           ))}
+                                                                                                                       </ul>
+                                                                                                                   }
+                                                                                                               </li>
+                                                                                                           ))}
+                                                                                                       </ul>
+                                                                                                   ) : 'None'}
+                                                                                               </p>
+                                                                                               <p>
+                                                                                                   <strong>Overall Score:</strong> {debriefing.overallScore}
+                                                                                               </p>
+                                                                                               <p>
+                                                                                                   <strong>Letter Grade:</strong> {debriefing.letterGrade}
+                                                                                               </p>
+                                                                                               <p>
+                                                                                                   <strong>Recommendations:</strong> {debriefing.advice}
+                                                                                               </p>
+                                                                                               <Button onClick={() => setShowTranscript(!showTranscript)}>
+                                                                                                   {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
+                                                                                               </Button>
+                                                                                               {showTranscript && (
+                                                                                                   <div className="transcript">
+                                                                                                       <h5>Full Transcript:</h5>
+                                                                                                       {chatHistory
+                                                                                                           .filter(msg => msg.role === 'user' || msg.role === 'opponent')
+                                                                                                           .map((msg, index) => (
+                                                                                                               <div key={index}>
+                                                                                                                   <strong>{msg.name}:</strong> <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                                                                                               </div>
+                                                                                                           ))}
+                                                                                                   </div>
+                                                                                               )}
+                                                                                               <div className="action-buttons">
+                                                                                                   <Button onClick={() => setSimulationComplete(false)}>
+                                                                                                       Try Different Choices
+                                                                                                   </Button>
+                                                                                                   <Button onClick={resetNegotiation}>
+                                                                                                       Run as Different Type
+                                                                                                   </Button>
+                                                                                               </div>
+                                                                                           </div>
+                                                                                       )
+                                                                                   )}
+                                                                               </div>
+                                                                           </section>
+                                                                       </main>
+                                                                   </div>
+                                                               );
+                                                           };
+                                                           
+                                                           // Metadata for the component
+                                                           export const metadata = {
+                                                               title: 'Negotiation Simulator',
+                                                               description: 'Flex your negotiation skills against a skilled opponent.',
+                                                               imageUrl: '../images/NegotiationModule.png',
+                                                               instructions: `
+                                                           <h2>Gameplay Overview</h2>
+                                                           <p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
+                                                           <h3>Simulation Mechanism</h3>
+                                                           <p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>
+                                                           <p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>
+                                                           <h3>Outcome and Debriefing</h3>
+                                                           <p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
+                                                           `,
+                                                               component: NegotiationModule
+                                                           };
+                                                           
+                                                           export default NegotiationModule;
