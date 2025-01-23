@@ -1,2 +1,3 @@
-[config]
-SCM_DO_BUILD_DURING_DEPLOYMENT=true
+az ad sp create-for-rbac --name "Executrainsim-github-action" --role contributor \ --scopes /subscriptions/2ae2dbc5-a75a-4fdf-b0f6-bf431a0f8e5d/resourceGroups/executrainsimgroup/providers/Microsoft.Web/sites/ExecuTrainSim \ --sdk-auth
+
+az ad sp create-for-rbac --name "GitHubActions" --role contributor --scopes /subscriptions/073d6342-bc79-41ba-a03d-34ffce3235ce

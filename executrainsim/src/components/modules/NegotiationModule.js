@@ -162,18 +162,23 @@ const getRandomDelay = () => Math.floor(Math.random() * (9000 - 4000 + 1)) + 400
 const parseAiJson = (apiResponse) => {
     if (!apiResponse) {
         console.error('parseAiJson: No response data to parse.');
-        return null; // Return null if no response
+        return null;
     }
 
     try {
-        if (typeof apiResponse === 'string') {
+       if (typeof apiResponse === 'string') {
             const cleaned = apiResponse.replace(/```json|```/g, '').trim();
-            return JSON.parse(cleaned);
+             try {
+                  return JSON.parse(cleaned);
+               } catch (parseError) {
+                    console.log("Recommendation returned a string")
+                    return apiResponse
+                }
         }
         return apiResponse; // Assume it's already parsed
     } catch (err) {
         console.error('Failed to parse AI JSON:', err, apiResponse);
-        return null; // Return null if parsing fails
+        return null;
     }
 };
 
@@ -1070,24 +1075,25 @@ const NegotiationModule = ({ onReturn }) => {
          };
      
          const generateRecommendation = async () => {
-             const userRole = scenario.roles.find((r) => r.name === selectedRole);
-             const transcript = chatHistory.filter(msg => msg.role !== 'feedback');
-             const analysisPrompt = `
-               Given this negotiation transcript: "${JSON.stringify(transcript)}", and the context of the scenario: "${scenario.context}" evaluate the user's performance, playing as ${userRole.name}. Provide clear, concise and actionable advice on what specific strategies to improve next time, in the format: "string".
-                Return the advice in a single, continuous string.
-             `;
-             try {
-                 const rawRecommendationResponse = await fetchOpenAIResponse({
-                     messages: [{ role: 'system', content: analysisPrompt }],
+            const userRole = scenario.roles.find((r) => r.name === selectedRole);
+            const transcript = chatHistory.filter(msg => msg.role !== 'feedback');
+            const analysisPrompt = `
+                 Given this negotiation transcript: "${JSON.stringify(transcript)}", and the context of the scenario: "${scenario.context}" evaluate the user's performance, playing as ${userRole.name}. Provide clear, concise and actionable advice on what specific strategies to improve next time, in the format: "string".
+                  Return the advice in a single, continuous string.
+               `;
+            try {
+                const rawRecommendationResponse = await fetchOpenAIResponse({
+                   messages: [{ role: 'system', content: analysisPrompt }],
                  }, '/api/generate');
-                 const parsedRecommendation = parseAiJson(rawRecommendationResponse);
+                const parsedRecommendation = parseAiJson(rawRecommendationResponse);
                  return parsedRecommendation;
-             }
-             catch (error) {
-                 console.error('Failed to generate recommendation:', error);
-                 return "Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.";
-             }
-         }
+            }
+            catch (error) {
+                   console.error('Failed to generate recommendation:', error);
+                return "Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.";
+            }
+    }
+    
          // Reset all state variables for new simulations
          const resetNegotiation = () => {
              setScenario(null);

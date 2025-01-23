@@ -1,3 +1,4 @@
+# azure-deploy.yml
 name: Deploy Node.js App to Azure
 
 on:
@@ -16,60 +17,23 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'
+        node-version: '20.x'
 
     - name: Install and Build
       run: |
         echo "Starting Install and Build process..."
-
         echo "Navigating to executrainsim directory and running npm ci"
         cd executrainsim
         npm ci
         echo "NPM install complete for executrainsim"
-
         echo "Running npm run build for executrainsim"
         npm run build
         echo "NPM run build complete for executrainsim"
-
         echo "Navigating to executrainserver directory and running npm ci"
         cd ../executrainserver
         npm ci
         echo "NPM install complete for executrainserver"
-
         echo "Install and build process complete."
-
-
-    - name: Archive production artifacts
-      run: |
-       echo "Starting to archive production artifacts..."
-        mkdir -p ./deploy
-        echo "Created deploy directory"
-
-        echo "Copying executrainsim build to deploy directory"
-        cp -r ./executrainsim/build ./deploy/executrainsim
-        echo "Copied executrainsim build to deploy directory"
-
-        echo "Copying executrainserver to deploy directory"
-        cp -r ./executrainserver ./deploy/executrainserver
-        echo "Copied executrainserver to deploy directory"
-
-        echo "Copying package.json files"
-        cp -r ./executrainsim/package.json ./deploy/executrainsim/package.json
-        cp -r ./executrainserver/package.json ./deploy/executrainserver/package.json
-        echo "Copied package.json files"
-        
-        echo "Completed archiving production artifacts."
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: node-app
-        path: ./deploy
-
-    - name: Download artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: node-app
-        path: .
 
     - name: Login to Azure
       uses: azure/login@v1
@@ -81,4 +45,4 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        package: ./deploy
+        package: .
