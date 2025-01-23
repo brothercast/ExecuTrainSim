@@ -1,4 +1,4 @@
-# azure-deploy.yml
+# azure-deploy.yml - Refactored for Simplicity and Robustness
 name: Deploy Node.js App to Azure
 
 on:
@@ -45,4 +45,4 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        package: .
+        package: . # Deploy from the workspace root
