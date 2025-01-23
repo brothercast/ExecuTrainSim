@@ -145,6 +145,10 @@ const negotiationSubTypes = {
 
 };
 
+const logMessage = (message, data) => {
+    console.log(`[DEBUG] ${message}:`, data);
+};
+
 // Timestamp logic for messages
 let lastTimestamp = new Date();
 const generateSequentialTimestamp = () => {
@@ -165,14 +169,14 @@ const parseAiJson = (apiResponse) => {
     }
 
     try {
-       if (typeof apiResponse === 'string') {
+        if (typeof apiResponse === 'string') {
             const cleaned = apiResponse.replace(/```json|```/g, '').trim();
-             try {
-                  return JSON.parse(cleaned);
-               } catch (parseError) {
-                    console.log("Recommendation returned a string")
-                    return apiResponse
-                }
+            try {
+                return JSON.parse(cleaned);
+            } catch (parseError) {
+                console.log("Recommendation returned a string")
+                return apiResponse
+            }
         }
         return apiResponse; // Assume it's already parsed
     } catch (err) {
@@ -593,6 +597,10 @@ const NegotiationModule = ({ onReturn }) => {
     const generateOpponentSystemPrompt = (scenario, player, opponent, difficulty, chatHistory) => {
         const settings = getOpponentPersonalitySettings(opponentPersonality);
         const chatHistoryString = chatHistory.map(msg => `${msg.name}: ${msg.content}`).join("\n");
+          if (!scenario || !player || !opponent) {
+              console.error('System prompt lacks required parameters.');
+              return ''; // or some other default prompt, or throw an error
+          }
 
         return `
             You are ${opponent.name}, the ${opponent.role} in a ${scenario.type} negotiation (${scenario.subType}).
@@ -779,34 +787,39 @@ const NegotiationModule = ({ onReturn }) => {
             if (!userRole || !opponentRole) {
                 throw new Error('Roles not correctly set.');
             }
-            const systemPrompt = generateOpponentSystemPrompt(scenario, player, opponent, opponentDifficulty, chatHistory);
+            const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
             const opponentPrompt = `
                  As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
                  `;
-     
+                logMessage('System Prompt:', systemPrompt)
+             logMessage('Opponent Prompt:', opponentPrompt)
+
             const rawResponse = await fetchOpenAIResponse(
                 {
                     messages: [
                         { role: 'system', content: systemPrompt },
                         { role: 'user', content: opponentPrompt },
-                        { role: 'user', content: lastUserMessage }, // Directly use the last user message
+                          { role: 'user', content: lastUserMessage },
                     ],
                     temperature: 0.7,
                     max_tokens: 500,
                 },
                 '/api/generate'
             );
-     
+
             if (!rawResponse) {
                 throw new Error('No response from AI server');
             }
-     
+
+             logMessage('Raw Opponent Response', rawResponse);
             const parsed = parseAiJson(rawResponse);
+             logMessage('Parsed Opponent Response', parsed);
             const finalMessage = parsed?.message;
             if (!finalMessage) {
                 throw new Error('Opponent response is empty or invalid JSON.');
             }
+             logMessage('Final Opponent Message', finalMessage);
             const initialScore = 0;
             addMessageToHistory(finalMessage.trim(), 'opponent', initialScore);
             const outcome = await assessNegotiationOutcome();
@@ -816,11 +829,13 @@ const NegotiationModule = ({ onReturn }) => {
             }
             return finalMessage.trim();
         } catch (error) {
+             logMessage('Error generating opponent response:', error);
             console.error('Failed to generate opponent response:', error);
             setErrorMessage('Failed to generate opponent response. Please try again.');
             return null;
         }
     };
+
     // Send user reply and process AI response
     const sendUserReply = async () => {
         if (!userDraft.trim()) {
@@ -831,12 +846,12 @@ const NegotiationModule = ({ onReturn }) => {
         const userMessage = userDraft;
         setUserDraft('');
         setIsUserTurn(false);
-     
+
         // Get the delay time
         const delay = getRandomDelay();
         const feedbackDelay = delay * 0.5;
         const animationDelay = delay * 0.25;
-     
+
         // Start loader animation
         setTimeout(() => {
             setIsFetchingOpponent(true);
@@ -854,7 +869,7 @@ const NegotiationModule = ({ onReturn }) => {
                 }, feedbackDelay);
             }
         }
-     
+
         // Add user message to chat history after delay
         addMessageToHistory(userMessage, 'user');
         const outcome = await assessNegotiationOutcome();
@@ -862,12 +877,12 @@ const NegotiationModule = ({ onReturn }) => {
             finalizeSimulation();
             return;
         }
-     
+
         // Send Response
         setTimeout(async () => {
             // Directly pass the user's message to generateOpponentResponse
             const opponentMessageContent = await generateOpponentResponse(userMessage);
-            if (opponentMessageContent) {
+             if (opponentMessageContent) {
                 const initialScore = 0;
                 addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
             } else {
@@ -883,9 +898,10 @@ const NegotiationModule = ({ onReturn }) => {
             }
             updateProgress(scaledProgress);
             setCurrentTurnIndex((prev) => prev + 1);
-     
+
         }, delay);
     };
+
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
         setChatHistory((prevHistory) =>

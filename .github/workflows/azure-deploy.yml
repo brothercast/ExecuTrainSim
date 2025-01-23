@@ -1,4 +1,4 @@
-# azure-deploy.yml - Refactored for Simplicity and Robustness
+# azure-deploy.yml - Refactored for Simplicity and Robustness (Corrected Packaging)
 name: Deploy Node.js App to Azure
 
 on:
@@ -19,30 +19,40 @@ jobs:
       with:
         node-version: '20.x'
 
-    - name: Install and Build
+    - name: Install and Build - executrainsim (React App)
       run: |
-        echo "Starting Install and Build process..."
-        echo "Navigating to executrainsim directory and running npm ci"
+        echo "Starting Install and Build process for executrainsim..."
         cd executrainsim
         npm ci
-        echo "NPM install complete for executrainsim"
-        echo "Running npm run build for executrainsim"
         npm run build
-        echo "NPM run build complete for executrainsim"
-        echo "Navigating to executrainserver directory and running npm ci"
-        cd ../executrainserver
+        echo "Build process for executrainsim complete."
+
+    - name: Install - executrainserver (Node.js Server)
+      run: |
+        echo "Starting Install process for executrainserver..."
+        cd executrainserver
         npm ci
-        echo "NPM install complete for executrainserver"
-        echo "Install and build process complete."
+        echo "Install process for executrainserver complete."
 
     - name: Login to Azure
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy to Azure Web App
+    - name: Deploy React App to Azure Web App (Static Content)
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'ExecuTrainSim'
+        app-name: 'ExecuTrainSim' # Your Web App Name
         slot-name: 'production'
-        package: . # Deploy from the workspace root
+        package: executrainsim/build # Deploy only the built React app
+
+    - name: Deploy Node.js Server to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'ExecuTrainSim' # Your Web App Name
+        slot-name: 'production'
+        package: executrainserver  # Deploy the Node.js server directory
+        app-settings-json: | # Optional: If you have server settings
+          {
+            "PORT": "3000" # Or whatever port your server uses
+          }

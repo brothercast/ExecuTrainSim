@@ -20,7 +20,12 @@ const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;
   
 // Define API endpoints  
 const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;  
-const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;  
+const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`; 
+
+const logMessage = (message, data) => {
+  console.log(`[DEBUG] ${message}:`, JSON.stringify(data, null, 2));
+};
+
   
 // Initialize Azure OpenAI Client  
 const getClient = () => {  
@@ -59,50 +64,53 @@ process.stdin.on('keypress', (str, key) => {
 });  
   
 // ChatGPT Text Generation Endpoint  
-app.post('/api/generate', async (req, res) => {  
-  const { messages, temperature, max_tokens } = req.body;  
-  
-  console.log('API Generate Request:', JSON.stringify(req.body, null, 2)); // Log request body  
-  
-  try {  
-    const response = await axios.post(chatGptEndpoint, {  
-      model: azureDeploymentName,  
-      messages,  
-      temperature,  
-      max_tokens  
-    }, {  
-      headers: {  
-        'Content-Type': 'application/json',  
-        'api-key': azureApiKey  
-      }  
-    });  
-  
-    console.log('API Generate Response:', JSON.stringify(response.data, null, 2)); // Log response data  
-  
-    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {  
-      let scenarioData = response.data.choices[0].message.content;  
-      scenarioData = scenarioData.replace(/```json|```/g, '');  
-  
-      try {  
-        const parsedScenario = JSON.parse(scenarioData);  
-        res.json(parsedScenario);  
-      } catch (parseError) {  
-        res.status(500).json({  
-          error: 'Failed to parse JSON response',  
-          details: parseError.message  
-        });  
-      }  
-    } else {  
-      throw new Error('Unexpected response structure');  
-    }  
-  } catch (error) {  
-    console.error('API Generate Error:', error);  
-    res.status(500).json({  
-      error: 'Failed to generate scenario',  
-      details: error.response ? error.response.data : error.message  
-    });  
-  }  
-});  
+app.post('/api/generate', async (req, res) => {
+  const { messages, temperature, max_tokens } = req.body;
+
+    logMessage('API Generate Request:', req.body); // Log request body
+
+  try {
+    const response = await axios.post(chatGptEndpoint, {
+      model: azureDeploymentName,
+      messages,
+      temperature,
+      max_tokens
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': azureApiKey
+      }
+    });
+
+      logMessage('API Generate Response:', response.data); // Log response data
+
+    if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {
+      let scenarioData = response.data.choices[0].message.content;
+      scenarioData = scenarioData.replace(/```json|```/g, '');
+
+      try {
+        const parsedScenario = JSON.parse(scenarioData);
+        res.json(parsedScenario);
+      } catch (parseError) {
+          logMessage('Failed to parse JSON response:', {error: parseError.message, scenarioData});
+        res.status(500).json({
+          error: 'Failed to parse JSON response',
+          details: parseError.message
+        });
+      }
+    } else {
+        logMessage('Unexpected response structure', response.data)
+      throw new Error('Unexpected response structure');
+    }
+  } catch (error) {
+    console.error('API Generate Error:', error);
+      logMessage('API Generate Error:', error);
+    res.status(500).json({
+      error: 'Failed to generate scenario',
+      details: error.response ? error.response.data : error.message
+    });
+  }
+});
   
 // DALL-E Image Generation Endpoint  
 app.post('/api/dalle/image', async (req, res) => {  
