@@ -62,7 +62,4 @@ jobs:
         enable-oryx-build: true  # Enable Oryx build logging (more verbose)
         deployment-type: zip     # Explicitly set deployment type to zip
         verbose: true           # Enable verbose logging for the deployment action itself
-         environment-variables: # Optional: Set environment variables that might influence logging on Azure
-           WEBSITE_LOGGING_ENABLED: '1'
-           WEBSITE_VERBOSE_LOGGING: '1'
-           APPSETTING_WEBSITE_LOGGING_ENABLED: 'true' # App settings can also enable logging
+         
