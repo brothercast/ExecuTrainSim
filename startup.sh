@@ -1,7 +1,7 @@
-# startup.sh (Modified - Bypass PM2 - FOR TESTING ONLY)
+# startup.sh (Modified - Using pm2-runtime --delay 30 'npm start' - FOR TESTING)
 #!/bin/bash
 
-echo "Starting startup script - Bypassing PM2 for test..."
+echo "Starting startup script - Using pm2-runtime --delay 30 'npm start' test..."
 set -x
 
 # Function to log and exit with an error message
@@ -31,14 +31,15 @@ else
   echo "package.json not found in /home/site/wwwroot. Skipping npm ci (assuming dependencies are deployed)."
 fi
 
-# --- Start the Node.js server using DIRECT node command (Bypassing PM2) ---
-echo "Starting the server with direct node command (bypassing pm2)..."
-node server.js --update-env --log "/home/LogFiles/pm2.log"  || { # We are ignoring pm2 log path now, but keeping --update-env just in case it does anything
-  echo "ERROR: node failed to start server!"
-  error_exit "node failed to start."
+# --- Start the Node.js server using pm2-runtime with npm start ---
+echo "Starting the server with pm2-runtime --delay 30 'npm start'..."
+pm2-runtime --delay 30 'npm start' --name executrainserver --update-env --log "/home/LogFiles/pm2.log" || { # Use pm2-runtime with npm start command
+  echo "ERROR: pm2-runtime failed to start server!"
+  pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
+  error_exit "pm2-runtime failed to start."
 }
 
-echo "Successfully started server with direct node, listening on port $PORT"
+echo "Successfully started server with pm2-runtime, listening on port $PORT"
 # Output port information in the logs
 echo "Application is running and listening on port $PORT"
 
