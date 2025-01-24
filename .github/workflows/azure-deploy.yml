@@ -1,4 +1,4 @@
-# azure-deploy.yml (Optimized - Enhanced Deployment Logging)
+# azure-deploy.yml (Optimized - Corrected Verbose Logging via app-settings)
 name: Deploy Node.js App to Azure
 
 on:
@@ -53,13 +53,15 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy to Azure Web App (Enhanced Logging)
+    - name: Deploy to Azure Web App (Enhanced Logging - Corrected)
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
         package: deployment-package
-        enable-oryx-build: true  # Enable Oryx build logging (more verbose)
-        deployment-type: zip     # Explicitly set deployment type to zip
-        verbose: true           # Enable verbose logging for the deployment action itself
-         
+        app-settings: | # Correct way to set app settings for logging
+          WEBSITE_LOGGING_ENABLED: 1
+          WEBSITE_VERBOSE_LOGGING: 1
+          APPSETTING_WEBSITE_LOGGING_ENABLED: true
+          # ENABLE_ORYX_BUILD: true # (Oryx build might not be configurable this way) # Removed - likely not a valid app setting
+          # DEPLOYMENT_TYPE: zip      # (Deployment type is usually inferred)       # Removed - likely not a valid app setting
