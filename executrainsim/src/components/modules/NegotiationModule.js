@@ -1,3 +1,4 @@
+// NegotiationModule.js
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
@@ -219,7 +220,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isResponseLoading, setIsResponseLoading] = useState(false);
     const [radarData, setRadarData] = useState(null);
     const [performanceData, setPerformanceData] = useState([]);
-    const [showFeedback, setShowFeedback] = useState(false);
+    const [showFeedback, setShowFeedback] = useState(true);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
     const [feedbackVisible, setFeedbackVisible] = useState(false);
     const [feedbackTargetId, setFeedbackTargetId] = useState(null);
@@ -264,8 +265,8 @@ const NegotiationModule = ({ onReturn }) => {
         },
 
     });
-
     const [progress, setProgress] = useState(0);
+
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
 
@@ -756,7 +757,9 @@ const NegotiationModule = ({ onReturn }) => {
                 - Assertiveness: How effectively the user stated their position.
                 - Adaptability: How well the user changed strategy or incorporated new information.
                 - Empathy: How well the user understood the other party's feelings and needs.
-                - Strategic Thinking: How effectively the user advanced their goals in a strategic manner.
+                - Strategic Thinking: How effectively// NegotiationModule.js - continued from previous code block
+
+                the user advanced their goals in a strategic manner.
                 - Communication: How clearly and concisely the user delivered their message.
                 - Compromise: How open and willing the user was to find a middle ground.
             Return the feedback and scores in JSON format:
@@ -844,70 +847,72 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
     // Send user reply and process AI response
-    const sendUserReply = async () => {
+     const sendUserReply = async () => {
         if (!userDraft.trim()) {
-            setErrorMessage('Please type a reply before sending.');
-            return;
+          setErrorMessage('Please type a reply before sending.');
+          return;
         }
         setErrorMessage('');
         const userMessage = userDraft;
         setUserDraft('');
         setIsUserTurn(false);
-
+    
         // Get the delay time
         const delay = getRandomDelay();
         const feedbackDelay = delay * 0.5;
         const animationDelay = delay * 0.25;
-
+    
         // Start loader animation
-        setTimeout(() => {
-            setIsFetchingOpponent(true);
-        }, animationDelay);
+          setTimeout(() => {
+          setIsFetchingOpponent(true);
+          }, animationDelay);
         // Generate feedback if the toggle is on and add it separately
         let feedbackContent = null;
+         let scores;
+    
         if (showFeedback) {
-            const rawFeedback = await generateFeedback(userMessage);
-            if (rawFeedback) {
-                feedbackContent = rawFeedback.feedback;
-                // Add scores from feedback to chat history
-                const scores = rawFeedback.scores;
-                setTimeout(() => {
-                    addMessageToHistory(feedbackContent, 'feedback', scores);
-                }, feedbackDelay);
-            }
+          const rawFeedback = await generateFeedback(userMessage);
+          if (rawFeedback) {
+            feedbackContent = rawFeedback.feedback;
+            // Add scores from feedback to chat history
+             scores = rawFeedback.scores;
+            setTimeout(() => {
+             addMessageToHistory(feedbackContent, 'feedback', scores);
+            }, feedbackDelay);
+          }
         }
-
+    
         // Add user message to chat history after delay
         addMessageToHistory(userMessage, 'user');
         const outcome = await assessNegotiationOutcome();
         if (outcome && outcome.outcome !== 'Draw') {
-            finalizeSimulation();
-            return;
+          finalizeSimulation();
+          return;
         }
-
+    
         // Send Response
         setTimeout(async () => {
-            // Directly pass the user's message to generateOpponentResponse
-            const opponentMessageContent = await generateOpponentResponse(userMessage);
-             if (opponentMessageContent) {
-                const initialScore = 0;
-                addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
-            } else {
-                console.error("Opponent message is null or undefined.");
-                setErrorMessage('Failed to generate opponent message.');
-            }
-            setIsUserTurn(true);
-            setIsFetchingOpponent(false);
-            generateResponseOptions(scenario?.context);
-            let scaledProgress = (performanceScore / scenario.goal) * 100
+          // Directly pass the user's message to generateOpponentResponse
+          const opponentMessageContent = await generateOpponentResponse(userMessage);
+           if (opponentMessageContent) {
+            const initialScore = 0;
+            addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
+          } else {
+            console.error("Opponent message is null or undefined.");
+            setErrorMessage('Failed to generate opponent message.');
+          }
+          setIsUserTurn(true);
+          setIsFetchingOpponent(false);
+          generateResponseOptions(scenario?.context);
+          let scaledProgress = (performanceScore / scenario.goal) * 100
             if (scaledProgress > 100) {
                 scaledProgress = 100
             }
-            updateProgress(scaledProgress);
-            setCurrentTurnIndex((prev) => prev + 1);
-
+            updateProgress(scaledProgress, scores);
+          setCurrentTurnIndex((prev) => prev + 1);
+    
         }, delay);
-    };
+      };
 
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
@@ -1138,7 +1143,7 @@ const NegotiationModule = ({ onReturn }) => {
         setRadarData(null)
         setResponseOptions([]);
         setButtonRevealComplete(true)
-        setShowFeedback(false); // Also reset the feedback toggle
+        setShowFeedback(true); // Also reset the feedback toggle
         setIsScenarioEditable(false); // Reset scenario edit state
         setEditableScenario(null)
         setCustomOutcomeInput('');
@@ -1159,18 +1164,22 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
     //  Update the progress to factor in scores
-    const updateProgress = (newProgress) => {
-        setPerformanceScore((prev) => {
-            const updatedValue = prev + newProgress;
-            return updatedValue
-        });
+      const updateProgress = (newProgress, scores = null) => {
+        let scoreSum = 0;
+        if (scores) {
+          scoreSum = Object.values(scores).reduce((sum, score) => sum + score, 0);
+          setPerformanceScore((prev) => {
+            const updatedValue = prev + scoreSum;
+            return updatedValue;
+          });
+        }
         setPerformanceData((prevData) => [...prevData, { turn: currentTurnIndex, score: performanceScore }])
         let scaledProgress = (performanceScore / scenario.goal) * 100
         if (scaledProgress > 100) {
             scaledProgress = 100
         }
         setProgress(scaledProgress);
-    };
+      };
     // Return the JSX that constructs the UI
     return (
         <div className="app-container">
@@ -1392,50 +1401,45 @@ const NegotiationModule = ({ onReturn }) => {
                                                                     <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                     {msg.scores && (
                                                                         <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px', alignItems: 'center', justifyContent: 'flex-start', gap: '10px' }}>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                <span style={{ color: msg.scores.Assertiveness > 0 ? 'green' : 'red' }}><ArrowUp style={{ height: '16px', width: '16px' }} />
-                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none' }} />
-                                                                                </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Assertiveness">
+                                                                                 <span style={{ color: msg.scores.Assertiveness > 0 ? 'green' : 'red' }}>
+                                                                                    {msg.scores.Assertiveness > 0 ?  <ArrowUp style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none' }} />}
+                                                                                 </span>
                                                                                 <span>Assertiveness: <span style={{}}>{msg.scores.Assertiveness > 0 ? "+" : msg.scores.Assertiveness < 0 ? "-" : ""}{msg.scores.Assertiveness}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                <span style={{ color: msg.scores.Adaptability > 0 ? 'green' : 'red' }}>
-                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
-                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Adaptability < 0 ? 'inline' : 'none' }} />
-                                                                                </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Adaptability">
+                                                                                 <span style={{ color: msg.scores.Adaptability > 0 ? 'green' : 'red' }}>
+                                                                                     {msg.scores.Adaptability > 0 ? <ArrowUp style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Adaptability < 0 ? 'inline' : 'none' }} />}
+                                                                                 </span>
                                                                                 <span>Adaptability: <span style={{}}>{msg.scores.Adaptability > 0 ? "+" : msg.scores.Adaptability < 0 ? "-" : ""}{msg.scores.Adaptability}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Empathy">
                                                                                 <span style={{ color: msg.scores.Empathy > 0 ? 'green' : 'red' }}>
-                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
-                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none' }} />
-                                                                                </span>
+                                                                                 {msg.scores.Empathy > 0 ? <ArrowUp style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none' }} />}
+                                                                                 </span>
                                                                                 <span>Empathy: <span style={{}}>{msg.scores.Empathy > 0 ? "+" : msg.scores.Empathy < 0 ? "-" : ""}{msg.scores.Empathy}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                <span style={{ color: msg.scores['Strategic Thinking'] > 0 ? 'green' : 'red' }}>
-                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
-                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Thinking'] < 0 ? 'inline' : 'none' }} />
-                                                                                </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Strategic Thinking">
+                                                                                 <span style={{ color: msg.scores['Strategic Thinking'] > 0 ? 'green' : 'red' }}>
+                                                                                    {msg.scores['Strategic Thinking'] > 0 ? <Lightbulb style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Thinking'] < 0 ? 'inline' : 'none' }} />}
+                                                                                 </span>
                                                                                 <span>Strategic Thinking: <span style={{}}>{msg.scores['Strategic Thinking'] > 0 ? "+" : msg.scores['Strategic Thinking'] < 0 ? "-" : ""}{msg.scores['Strategic Thinking']}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                <span style={{ color: msg.scores.Communication > 0 ? 'green' : 'red' }}>
-                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
-                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Communication < 0 ? 'inline' : 'none' }} />
-                                                                                </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Communication">
+                                                                                 <span style={{ color: msg.scores.Communication > 0 ? 'green' : 'red' }}>
+                                                                                     {msg.scores.Communication > 0 ?  <MessageCircle style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Communication < 0 ? 'inline' : 'none' }} />}
+                                                                                 </span>
                                                                                 <span>Communication: <span style={{}}>{msg.scores.Communication > 0 ? "+" : msg.scores.Communication < 0 ? "-" : ""}{msg.scores.Communication}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                                                                <span style={{ color: msg.scores.Compromise > 0 ? 'green' : 'red' }}>
-                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
-                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Compromise < 0 ? 'inline' : 'none' }} />
-                                                                                </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Compromise">
+                                                                                  <span style={{ color: msg.scores.Compromise > 0 ? 'green' : 'red' }}>
+                                                                                   {msg.scores.Compromise > 0 ?   <Hand style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Compromise < 0 ? 'inline' : 'none' }} />}
+                                                                                   </span>
                                                                                 <span>Compromise: <span style={{}}>{msg.scores.Compromise > 0 ? "+" : msg.scores.Compromise < 0 ? "-" : ""}{msg.scores.Compromise}</span>
                                                                                 </span>
                                                                             </span>
@@ -1519,7 +1523,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                             placeholder="Type your reply here or select an option above..."
                                                             onKeyDown={(e) => {
                                                                 if (e.key === 'Enter' && !e.shiftKey) {
-                                                                    e.preventDefault(); // Prevent newline
+                                                                    e.preventDefault();
                                                                     sendUserReply();
                                                                 }
                                                             }}
@@ -1760,8 +1764,9 @@ const NegotiationModule = ({ onReturn }) => {
                             debriefing && (
                                 <div className="debriefing-section">
                                     <h4 className="debriefing-title">Simulation Debriefing</h4>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between'}}>
                                     {radarData && (
-                                        <div style={{ width: '100%', height: 300 }}>
+                                        <div style={{ width: '48%', height: 300 }}>
                                             <ResponsiveContainer>
                                                 <RadarChart data={radarData}>
                                                     <PolarGrid />
@@ -1775,8 +1780,8 @@ const NegotiationModule = ({ onReturn }) => {
                                             </p>
                                         </div>
                                     )}
-                                    {performanceData.length > 0 && (
-                                        <div style={{ width: '100%', height: 300 }}>
+                                     {performanceData.length > 0 && (
+                                        <div style={{ width: '48%', height: 300 }}>
                                             <ResponsiveContainer>
                                                 <LineChart data={performanceData}>
                                                     <CartesianGrid strokeDasharray="3 3" />
@@ -1790,6 +1795,7 @@ const NegotiationModule = ({ onReturn }) => {
                                             <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
                                         </div>
                                     )}
+                                    </div>
                                     <p>
                                         <strong>Summary:</strong>
                                         {debriefing.summary?.split('\n').map((line, i) => (

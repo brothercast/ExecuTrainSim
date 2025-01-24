@@ -1,4 +1,4 @@
-# azure-deploy.yml (Optimized Version)
+# azure-deploy.yml (Force Clean Package and Casing)
 name: Deploy Node.js App to Azure
 
 on:
@@ -38,12 +38,15 @@ jobs:
     - name: Prepare Deployment Package
       run: |
         echo "Creating deployment package..."
+        rm -rf deployment-package  # Ensure clean package directory - DELETE if exists
         mkdir deployment-package
-        cp -r executrainserver/* deployment-package/
-        mkdir deployment-package/executrainsim-build  # Create the subdirectory for React build
+        cp -r executrainserver/* deployment-package/  # Copy server - ensure lowercase source
+        mkdir deployment-package/executrainsim-build
         cp -r executrainsim/build/* deployment-package/executrainsim-build/
-        cp startup.sh deployment-package/             # Copy startup.sh script itself
+        cp startup.sh deployment-package/
         echo "Deployment package created."
+        echo "Listing contents of deployment-package BEFORE deployment:" # Debugging
+        ls -l deployment-package # Debugging: List package contents
 
     - name: Login to Azure
       uses: azure/login@v1
