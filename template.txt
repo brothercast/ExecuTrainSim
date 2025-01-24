@@ -123,6 +123,7 @@ export default App;
 🎨 AppStyles.css:
 /* styles/AppStyles.css */
 
+/* -------------------- Global Styles -------------------- */
 body {
   font-family: 'Arial', sans-serif;
   background-color: #f4f7fa;
@@ -130,6 +131,7 @@ body {
   padding: 0;
 }
 
+/* -------------------- Container Styles -------------------- */
 .container {
   width: 100%;
   display: flex;
@@ -146,6 +148,7 @@ body {
   align-items: center;
 }
 
+/* -------------------- Header Styles -------------------- */
 .app-header {
   display: flex;
   align-items: center;
@@ -173,41 +176,51 @@ body {
   font-family: 'Jura', sans-serif;
 }
 
-.hamburger-icon {
-  cursor: pointer;
-  margin-left: 20px;
-}
+/* -------------------- Hamburger Menu (Removed from previous example) -------------------- */
 
-.dropdown-menu {
-  position: absolute;
-  top: 50px;
-  right: 20px;
-  background-color: white;
-  border: 1px solid #ccc;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-}
-
-.dropdown-menu div {
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.dropdown-menu div:hover {
-  background-color: #f0f0f0;
-}
-
+/* -------------------- Content Grid Layout Styles -------------------- */
 .content-grid {
   display: flex;
   margin-top: 20px;
   padding-top: 80px;
 }
 
+/* -------------------- Left Column Styles -------------------- */
 .left-column {
   width: 35%;
   padding: 0 20px 20px;
 }
 
+.left-column-setup-container {
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+.roles-customization {
+    margin-bottom: 15px;
+}
+.roles-customization strong {
+    display: block;
+    margin-bottom: 5px
+}
+
+.editable-role {
+    margin-bottom: 2.5px;
+    margin-top: 2.5px;
+    width: 90%;
+    display: block;
+}
+/* Scenario Titles and Descriptions in Left Column */
+.left-column-scenario-title {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.left-column-scenario-description {
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+/* -------------------- Main Content Styles -------------------- */
 .main-content {
   width: 65%;
   background-color: #ffffff;
@@ -218,8 +231,8 @@ body {
   flex-direction: column;
   box-sizing: border-box;
   overflow: hidden;
-    position: relative;
-    height: auto;
+  position: relative;
+  height: auto;
 }
 
 .main-content-flex {
@@ -228,13 +241,52 @@ body {
   flex-grow: 1;
 }
 
-.chat-area {
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 100%);
-  overflow-y: auto;
-    display: flex;
-    flex-direction: column; /* Make sure this is a column */
+/* Scenario Titles and Descriptions in Main Content Area */
+.main-content-scenario-description {
+  font-size: 1em;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
+.editable-scenario-context {
+  font-size: 1em;
+  margin-bottom: 10px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 150px;
+}
+
+.editable-scenario-title {
+  font-size: 2.5em;
+  font-family: 'Jura', sans-serif;
+  width: 100%;
+  color: black;
+  margin-bottom: 10px;
+  border: none;
+  background-color: transparent;
+  min-width: 100%;
+  box-sizing: border-box;
+  text-transform: uppercase;
+}
+
+
+/* Chat Area Styling */
+.chat-area {
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 40%, rgba(255, 255, 255, 0.6) 100%);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column; /* Make sure this is a column */
+}
 
 .chat-area-wrapper {
   display: flex;
@@ -245,6 +297,7 @@ body {
   padding: 0px;
 }
 
+/* -------------------- Module Description Styles -------------------- */
 .module-description h2 {
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
@@ -262,11 +315,7 @@ body {
 .module-description ol {
   margin-bottom: 0.5rem;
 }
-
-.details-card {
-  margin-bottom: 20px;
-}
-
+/* -------------------- Module Card Styles -------------------- */
 .module-cards-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -311,6 +360,7 @@ body {
   color: #666;
 }
 
+/* -------------------- Module Container Styles -------------------- */
 .module-container {
   display: flex;
 }
@@ -319,6 +369,7 @@ body {
   text-align: center;
 }
 
+/* -------------------- Form Styles -------------------- */
 .custom-role-input {
   margin-top: 10px;
   padding: 10px 20px;
@@ -326,6 +377,19 @@ body {
   box-sizing: border-box;
 }
 
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+/* -------------------- Progress Info Styles -------------------- */
 .progress-info {
   display: flex;
   align-items: center;
@@ -342,6 +406,7 @@ body {
   font-weight: bold;
 }
 
+/* -------------------- User Settings Styles -------------------- */
 .user-settings {
   margin-top: 15px;
 }
@@ -359,7 +424,18 @@ body {
   margin-top: 10px;
   width: calc(100% - 40px);
 }
-
+.custom-scenario-input {
+  width: 90%;
+  height: auto; /* Let the height adjust dynamically based on content */
+  min-height: calc(1.5em * 8); /* Set a minimum height of 8 lines */
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  resize: vertical;
+}
+/* -------------------- Scenario Card Styles -------------------- */
 .scenario-card {
   border: 2px solid #ddd;
   border-radius: 8px;
@@ -378,71 +454,8 @@ h3 {
   margin-bottom: 10px;
 }
 
-/* Style for scenario titles in the left column */
-.left-column-scenario-title {
-  font-size: 1.1rem;
-  /* Slightly smaller than the main area titles */
-  margin-bottom: 5px;
-  /* Reduced bottom margin */
-}
 
-/* Style for scenario descriptions in the left column */
-.left-column-scenario-description {
-  font-size: 0.85rem;
-  /* Slightly smaller font size */
-  margin-bottom: 10px;
-  /* Reduced bottom margin */
-  line-height: 1.3;
-  /* Slightly reduced line height */
-}
-
-/* Style for scenario descriptions in the main content area */
-.main-content-scenario-description {
-  font-size: 1em;
-  /* Smaller font size */
-  margin-bottom: 10px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  /* Added to preserve newlines */
-  word-wrap: break-word;
-}
-
-.editable-scenario-context {
-  font-size: 1em;
-  margin-bottom: 10px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  width: 100%;
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
-  box-sizing: border-box;
-  resize: vertical;
-  min-height: 150px;
-  
-}
-.editable-scenario-title {
-  font-size: 2.5em;
-    font-family: 'Jura', sans-serif;
-    /* Smaller font size */
-      width: 100%;
-  color: black;
-  margin-bottom: 10px;
-    border: none;
-    background-color: transparent;
-  min-width: 100%;
-    box-sizing: border-box;
-  text-transform: uppercase;
-}
-
-.scenario-context {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-
+/* -------------------- Scenario Edit Icons Styles -------------------- */
 .scenario-edit-icon {
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
@@ -450,9 +463,9 @@ h3 {
 }
 .scenario-edit-icon:hover {
    transform: scale(1.1);
-  }
+}
 
-  .save-button,
+.save-button,
 .cancel-button {
     cursor: pointer;
     transition: transform 0.2s ease-in-out;
@@ -464,7 +477,7 @@ h3 {
 .cancel-button:hover {
    transform: scale(1.1);
 }
-
+/* -------------------- Reload Icon Styles -------------------- */
 .reload-icon {
   cursor: pointer;
   margin-left: 10px;
@@ -478,6 +491,7 @@ h3 {
   transform: rotate(90deg);
 }
 
+/* -------------------- Card Title and Setup Styles -------------------- */
 .Card-title,
 .debriefing-title {
   text-transform: uppercase;
@@ -490,6 +504,7 @@ h3 {
   border: 2px solid #ccc;
 }
 
+/* -------------------- Chevron Marker Styles -------------------- */
 .chevron-marker {
   width: 20px;
   height: 20px;
@@ -498,21 +513,13 @@ h3 {
   margin-right: 10px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
+/* -------------------- Your Answer Styles -------------------- */
 .your-answer {
   top: -15px;
   margin-bottom: 40px;
 }
 
+/* -------------------- Feedback Styles -------------------- */
 .feedback-section {
   margin-top: 10px;
 }
@@ -572,11 +579,13 @@ h3 {
   margin-right: 5px;
 }
 
+/* -------------------- Scenario and Question Styles -------------------- */
 .scenario-description,
 .question-title {
   margin-bottom: 15px;
 }
 
+/* -------------------- Options Container Styles -------------------- */
 .options-container {
   display: flex;
   flex-direction: column;
@@ -592,6 +601,7 @@ h3 {
   text-align: left;
 }
 
+/* -------------------- Restart Button Styles -------------------- */
 .restart-button {
   display: block;
   margin: 20px auto;
@@ -608,6 +618,7 @@ h3 {
   background-color: darkred;
 }
 
+/* -------------------- Custom Answer Styles -------------------- */
 .custom-answer-section {
   margin-top: 15px;
 }
@@ -630,6 +641,7 @@ h3 {
   resize: vertical;
 }
 
+/* -------------------- Debriefing Section Styles -------------------- */
 .debriefing-section {
   margin-top: 10px;
   background-color: #f8f9fa;
@@ -638,7 +650,33 @@ h3 {
   display: flex;
   flex-direction: column;
 }
+.debriefing-list {
+  margin-left: 20px;
+  padding: 0;
+  list-style-type: none;
+}
 
+.debriefing-examples {
+  margin-left: 20px;
+  padding: 0;
+  list-style-type: disc;
+}
+
+.debriefing-section h4 {
+    color: #0073e6;
+    font-family: 'Jura', sans-serif;
+    text-transform: uppercase;
+    font-size: 32px;
+}
+.debriefing-section p {
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.debriefing-section strong {
+    font-weight: bold;
+}
+/* -------------------- Stars Container Styles -------------------- */
 .stars-container {
   display: flex;
   align-items: center;
@@ -656,16 +694,19 @@ h3 {
   color: #ffd700;
 }
 
+/* -------------------- Action Button Styles -------------------- */
 .action-buttons {
   margin-top: 20px;
   display: flex;
   gap: 10px;
 }
 
+/* -------------------- Icon Styles -------------------- */
 .icon {
   margin-right: 5px;
 }
 
+/* -------------------- Image Styles -------------------- */
 .image-container img,
 .image-placeholder,
 .scenario-image {
@@ -689,6 +730,7 @@ h3 {
   border: 2px solid #ccc;
 }
 
+/* -------------------- Step Box Styles -------------------- */
 .step-box {
   background-color: #e0e0e0;
   padding: 15px;
@@ -705,6 +747,7 @@ h3 {
   text-align: center;
 }
 
+/* -------------------- Navigation Button Styles -------------------- */
 .navigation-buttons {
   display: flex;
   gap: 10px;
@@ -726,6 +769,7 @@ h3 {
   color: #007bff;
 }
 
+/* -------------------- Responsive Design -------------------- */
 @media (max-width: 768px) {
   .content-grid {
     flex-direction: column;
@@ -759,6 +803,7 @@ h3 {
   }
 }
 
+/* -------------------- Error Styles -------------------- */
 .error-box {
   background-color: #fdecea;
   padding: 0px 20px 0px;
@@ -789,6 +834,7 @@ h3 {
   color: #c0392b;
 }
 
+/* -------------------- Spinner Container Styles -------------------- */
 .spinner-container {
   width: 100%;
   height: 20px;
@@ -798,43 +844,17 @@ h3 {
   margin-bottom: 10px;
 }
 
-.editable-role {
-  margin-bottom: 2.5px;
-  margin-top: 2.5px;
-  width: 90%;
-  display: block;
-}
-
-.custom-scenario-input {
-  width: 90%;
-  height: auto; /* Let the height adjust dynamically based on content */
-  min-height: calc(1.5em * 8); /* Set a minimum height of 8 lines */
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1em;
-  resize: vertical;
-}
-.edit-control-label{
-    cursor: pointer;
-}
-
+/* -------------------- Custom Outcome Styles -------------------- */
 .custom-outcome-input {
   width: 90%;
-  /* Adjust the width to match the layout */
   height: 150px;
-  /* Adjust the height as needed */
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #ccc;
-  /* Add a border if you wish */
   border-radius: 4px;
   font-size: 1em;
   resize: vertical;
-  /* Allows user to resize vertically */
 }
-
 /* Chat Styling */
 .chat-container {
   display: flex;
@@ -856,43 +876,42 @@ h3 {
   border-radius: 4px;
   background-color: #ffffff;
 }
-
+/* -------------------- Radio Input Styles -------------------- */
 .radio-group {
   display: flex;
   flex-direction: column;
   margin-top: 10px;
   gap: 5px;
 }
-
 .radio-label,
 .feedback-checkbox-label {
-    display: flex; /* Enable flexbox for alignment */
-    align-items: center; /* Vertically align items */
-    font-size: 1em;
-    color: #333;
-    margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  font-size: 1em;
+  color: #333;
+  margin-bottom: 5px;
+}
+.radio-label {
+        gap: 5px;
 }
 
-  .radio-label {
-        gap: 5px;
-   }
 /* Override default link styles to remove blue color and underlines */
 .radio-label,
 .feedback-checkbox-label,
 .edit-control-label {
-    color: #333;
-    text-decoration: none;
-    display: flex;
+  color: #333;
+  text-decoration: none;
+  display: flex;
 }
 .radio-label input {
-    margin-right: 5px;
-    cursor: pointer;
+  margin-right: 5px;
+  cursor: pointer;
 }
 
 .feedback-checkbox-label input {
-    margin-right: 5px;
-    display: none;
-  }
+  margin-right: 5px;
+  display: none;
+}
 .feedback-toggle-container {
    margin-bottom: 10px;
     padding: 0px 10px;
@@ -1127,18 +1146,17 @@ h3 {
 .send-button:hover {
   background-color: #0056b3;
 }
-
 .message-input-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 5px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #ffffff;
-  border-radius: 8px;
-  z-index: 10;
-  box-sizing: border-box;
-  flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 5px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    z-index: 10;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .chat-avatar {
@@ -1148,18 +1166,7 @@ h3 {
   margin-right: 10px;
 }
 
-.send-button {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-left: 10px;
-}
-
-/* Response Options */
+/* -------------------- Response Options -------------------- */
 .response-options-container {
   display: flex;
   flex-direction: column;
@@ -1180,8 +1187,7 @@ h3 {
   border-radius: 8px;
   background-color: #ffffff;
   color: #007bff;
-  border: none;
-  outline: 1px solid #007bff;
+  border: none;   outline: 1px solid #007bff;
   text-align: center;
   display: flex;
   align-items: center;
@@ -1197,56 +1203,126 @@ h3 {
   color: #0056b3;
 }
 
-.response-button.loading {  pointer-events: none;
+.response-button.loading {
+  pointer-events: none;
   opacity: 0.6;
 }
 
-/* Debriefing Styles */
-.debriefing-section {
+/* -------------------- Progress Meter -------------------- */
+.meter-container {
+    width: 90%;
+    height: 20px;
+    background-color: #f0f0f0; /* Light gray background */
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    overflow: hidden; /* Prevents gradient overflow */
+    position: relative;
+  }
+
+.meter-gradient {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to right, red, yellow, green);
+    border-radius: 10px;
+    z-index: 1;
+  }
+  .meter-needle {
+     position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px; /* Width of the needle */
+      height: 100%;
+    background-color: black; /* Color of the needle */
+   transform: translateX(-50%); /* Center the needle */
+      z-index: 2;
+  }
+
+  /* -------------------- Personality Slider -------------------- */
+.form-slider {
   margin-top: 10px;
-  background-color: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+   width: 100%; /* Make the slider full-width */
+box-sizing: border-box; /* Include padding and border in the total width */
+}
+.form-slider .form-slider-labels {
+display: flex;
+  justify-content: space-between;
+width: 100%;
+    position: relative;
+}
+.form-slider .form-slider-labels > span {
+position: absolute;
+top: -25px;
+font-size: 0.8em;
+white-space: nowrap;
+
+}
+.form-slider .form-slider-labels > span:first-child {
+left: 0;
+}
+.form-slider .form-slider-labels > span:nth-child(2){
+left: calc(50% - 20px);
+}
+.form-slider .form-slider-labels > span:last-child {
+right: 0;
 }
 
-.debriefing-list {
-  margin-left: 20px;
-  padding: 0;
-  list-style-type: none;
+.form-slider .form-slider-dots {
+display: none; /* Remove the dots by hiding this div */
+}
+.form-slider .form-slider-dots > span > svg{
+  height: 10px;
+  width: 10px
+}
+.form-slider .form-slider-description {
+ width: 100%;
+    font-size: 0.7em;
+     margin-top: 8px; /* Add space between slider and description */
+}
+.form-slider input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+   appearance: none;
+  height: 10px;
+  border-radius: 5px;
+  background-image: linear-gradient(to right, #007bff, #fff, #ff8c00);  /* Updated gradient here */
+  outline: none;
 }
 
-.debriefing-examples {
-  margin-left: 20px;
-  padding: 0;
-  list-style-type: disc;
+.form-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+   border: 1px solid black;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-.debriefing-section h4 {
-  color: #0073e6;
-  font-family: 'Jura', sans-serif;
-  text-transform: uppercase;
-  font-size: 32px;
+.form-slider input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 1px solid black;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
-.debriefing-section p {
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-
-.debriefing-section strong {
-  font-weight: bold;
-}
-
+/* -------------------- Feedback box <p> and Chat message <div><p> fix -------------------- */
 .feedback-box p,
 .chat-message>div>p {
-  white-space: pre-line;
+    white-space: pre-line;
 }
-
+/* -------------------- Select Container Styles -------------------- */
 .select-container {
-  display: inline-block;
-  /* Allows the container to adjust to content */
+  display: inline-block; /* Allows the container to adjust to content */
   position: relative;
 }
 
@@ -1466,11 +1542,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import SlotMachineText from '../effects/SlotMachineText';
 import Select, { SelectItem } from '../ui/Select';
-import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X } from 'lucide-react';
+import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X, ArrowUp, ArrowDown, Circle, CircleDot, ArrowLeft, ArrowRight, Activity, Layout, MessageSquare, UserCheck, Users, Flag, MessageCircle, Hand, Lightbulb } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
-//import '../../styles/NegotiationModule.css';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import DOMPurify from 'dompurify';
 
 // Define API Base URLs
@@ -1608,6 +1683,10 @@ const negotiationSubTypes = {
 
 };
 
+const logMessage = (message, data) => {
+    console.log(`[DEBUG] ${message}:`, data);
+};
+
 // Timestamp logic for messages
 let lastTimestamp = new Date();
 const generateSequentialTimestamp = () => {
@@ -1624,18 +1703,23 @@ const getRandomDelay = () => Math.floor(Math.random() * (9000 - 4000 + 1)) + 400
 const parseAiJson = (apiResponse) => {
     if (!apiResponse) {
         console.error('parseAiJson: No response data to parse.');
-        return null; // Return null if no response
+        return null;
     }
 
     try {
         if (typeof apiResponse === 'string') {
             const cleaned = apiResponse.replace(/```json|```/g, '').trim();
-            return JSON.parse(cleaned);
+            try {
+                return JSON.parse(cleaned);
+            } catch (parseError) {
+                console.log("Recommendation returned a string")
+                return apiResponse
+            }
         }
         return apiResponse; // Assume it's already parsed
     } catch (err) {
         console.error('Failed to parse AI JSON:', err, apiResponse);
-        return null; // Return null if parsing fails
+        return null;
     }
 };
 
@@ -1645,14 +1729,14 @@ const NegotiationModule = ({ onReturn }) => {
     const [negotiationType, setNegotiationType] = useState('');
     const [negotiationSubType, setNegotiationSubType] = useState('');
     const [desiredOutcome, setDesiredOutcome] = useState('');
-       const [customOutcomeInput, setCustomOutcomeInput] = useState('');
+    const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     const [opponentDifficulty, setOpponentDifficulty] = useState('medium');
     const [scenario, setScenario] = useState(null);
     const [roles, setRoles] = useState(['Role 1', 'Role 2']);
     const [selectedRole, setSelectedRole] = useState('');
     const [chatHistory, setChatHistory] = useState([]);
     const [userDraft, setUserDraft] = useState('');
-    const [progress, setProgress] = useState(0);
+    const [performanceScore, setPerformanceScore] = useState(0);
     const [simulationComplete, setSimulationComplete] = useState(false);
     const [debriefing, setDebriefing] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
@@ -1672,6 +1756,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isSpinning, setIsSpinning] = useState(false);
     const [isResponseLoading, setIsResponseLoading] = useState(false);
     const [radarData, setRadarData] = useState(null);
+    const [performanceData, setPerformanceData] = useState([]);
     const [showFeedback, setShowFeedback] = useState(false);
     const [feedbackMessage, setFeedbackMessage] = useState(null);
     const [feedbackVisible, setFeedbackVisible] = useState(false);
@@ -1682,18 +1767,52 @@ const NegotiationModule = ({ onReturn }) => {
     const [isCustomInputMode, setIsCustomInputMode] = useState(false);
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
-     const [customSetupStage, setCustomSetupStage] = useState('selection');
-    
+    const [customSetupStage, setCustomSetupStage] = useState('selection');
+    const [opponentPersonality, setOpponentPersonality] = useState('balanced');
+    const [opponentPersonalitySetting, setOpponentPersonalitySetting] = useState({
+        collaborative: {
+            tone: 'friendly, casual, and lighthearted',
+            complexity: 'simple negotiation tactics, often making concessions',
+            strategy: 'accommodating and quick to compromise, focus on common ground',
+            reactivity: 'responds positively to user\'s points, often conceding or agreeing, seeks harmony and common ground. Uses casual, friendly language and humor to build rapport.',
+        },
+        slightlyCollaborative: {
+            tone: 'generally friendly and accommodating but occasionally firm',
+             complexity: 'simple negotiation tactics with some strategic thinking, and less often making concessions',
+            strategy: 'mostly accommodating but will attempt to get a slightly better deal, while focusing on common ground',
+            reactivity: 'responds generally positively to user\'s points, will occasionally concede or agree, seeks harmony and common ground. Uses relatable, and friendly language.',
+        },
+        balanced: {
+            tone: 'professional, but still friendly and relatable',
+            complexity: 'standard negotiation strategies, sometimes challenges user but ultimately seeking mutual benefit',
+            strategy: 'firm but fair, seeking mutual benefit, will defend points well',
+            reactivity: 'responds directly to the user’s points, maintains a strong position, uses balanced responses that take both positions into account. Uses relatable and friendly language.',
+        },
+         slightlyAggressive: {
+           tone: 'assertive but generally respectful with occasional challenges',
+            complexity: 'standard negotiation strategies with some advanced tactics, sometimes challenges user directly',
+            strategy: 'prioritizes own interests but also seeks mutual benefit, often challenges user’s points but will sometimes concede without a major benefit',
+            reactivity: 'responds directly to the user’s points, but will sometimes aggressively undermine the user’s points, occasionally conceding without a major benefit, and sometimes seeks to exploit any weakness, using challenging but respectful language.',
+        },
+        aggressive: {
+            tone: 'highly assertive, sometimes combative',
+            complexity: 'advanced negotiation tactics, often uses challenging statements',
+            strategy: 'prioritizes own interests, will use direct challenges and put downs',
+            reactivity: 'attempts to dominate the conversation, actively undermines the user’s points, will not concede without a major benefit, and seeks to exploit any weakness. Can use sarcasm or put downs.',
+        },
+
+    });
+
+    const [progress, setProgress] = useState(0);
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
 
-        // Ref for scrolling chat history
+    // Ref for scrolling chat history
     const chatHistoryContainerRef = useRef(null);
 
-
-        // addMessageToHistory function (Modified)
-    const addMessageToHistory = (content, role) => {
-      const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
+    // addMessageToHistory function (Modified)
+    const addMessageToHistory = (content, role, scores) => {
+        const roleName = role === 'user' ? selectedRole : scenario?.roles.find((r) => r.name !== selectedRole)?.name || 'Unknown';
         const sanitizedContent = DOMPurify.sanitize(content);
         const newMessage = {
             content: sanitizedContent,
@@ -1701,14 +1820,15 @@ const NegotiationModule = ({ onReturn }) => {
             name: roleName,
             timestamp: generateSequentialTimestamp(),
             id: Date.now(),
-            feedbackVisible: false
+            feedbackVisible: false,
+            scores: scores,
         };
 
-          setChatHistory((prevHistory) => {
-          const updatedHistory = [...prevHistory, newMessage];
+        setChatHistory((prevHistory) => {
+            const updatedHistory = [...prevHistory, newMessage];
             // After setting the state, we trigger the scroll
-          if(chatHistoryContainerRef.current)
-            chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+            if (chatHistoryContainerRef.current)
+                chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
             return updatedHistory
         });
     };
@@ -1717,6 +1837,18 @@ const NegotiationModule = ({ onReturn }) => {
     // Handler for changes to selected role
     const handleRoleChange = (newRole) => {
         setNegotiationRole(newRole);
+    };
+
+    // Handler for the Opponent Personality Slider
+    const handleOpponentPersonalityChange = (event) => {
+        const index = parseInt(event.target.value, 10);
+        const personalityKeys = Object.keys(opponentPersonalitySetting);
+        setOpponentPersonality(personalityKeys[index]);
+    };
+
+
+    const getOpponentPersonalitySettings = (personality) => {
+        return opponentPersonalitySetting[personality] || opponentPersonalitySetting['balanced'];
     };
 
     // Function to generate Dalle Image
@@ -1750,7 +1882,7 @@ const NegotiationModule = ({ onReturn }) => {
     // Generic function to fetch responses from API
     const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {
         setIsFetching(true);
-        if(isUserAction){
+        if (isUserAction) {
             setIsUserReplyLoading(true)
         } else {
             setIsFetchingOpponent(true);
@@ -1766,15 +1898,15 @@ const NegotiationModule = ({ onReturn }) => {
             return response.data;
         } catch (error) {
             console.error('Error fetching from OpenAI:', error.message);
-            if(error.response) {
+            if (error.response) {
                 console.error('API Error Details:', error.response.data);
             }
             setErrorMessage('Failed to communicate with the server. Please check the console for details.');
             return null;
         } finally {
-            if(isUserAction){
+            if (isUserAction) {
                 setIsUserReplyLoading(false)
-            } else{
+            } else {
                 setIsFetchingOpponent(false);
             }
 
@@ -1785,10 +1917,10 @@ const NegotiationModule = ({ onReturn }) => {
     // Function to generate initial negotiation scenario
     const generateScenario = async () => {
         try {
-              if(negotiationType === 'custom'){
-                   setIsCustomInputMode(true);
-                   return;
-               }
+            if (negotiationType === 'custom') {
+                setIsCustomInputMode(true);
+                return;
+            }
 
             const selectedType = negotiationTypes.find((type) => type.value === negotiationType)?.title;
             const selectedSubType = negotiationSubTypes[negotiationType]?.find(
@@ -1807,12 +1939,14 @@ const NegotiationModule = ({ onReturn }) => {
               two distinct roles with realistic names, and their respective objectives.
               Ensure that the roles have conflicting objectives to drive negotiation dynamics.
               Include potential challenges each role might face.
+                Include a simple goal as a singular value that the user can achieve.
               Generate 4-6 role-agnostic desired outcomes based on the context.
               Respond empathetically and adaptively to user tone and style.
               Return the scenario in JSON with the format:
               {
                   "scenario": {
                       "title": "string",
+                       "goal": "number",
                       "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
@@ -1834,7 +1968,6 @@ const NegotiationModule = ({ onReturn }) => {
                 setSimulationComplete(false);
                 setScenarioGenerated(true); // Set the scenario generated flag
                 await generateImage(parsedScenario.scenario.title, parsedScenario.scenario.context);
-
             } else {
                 setErrorMessage('Failed to generate scenario. Please try again.');
             }
@@ -1843,21 +1976,23 @@ const NegotiationModule = ({ onReturn }) => {
             setErrorMessage('An error occurred while generating the scenario.');
         }
     };
-      const handleCustomScenarioSubmit = async () => {
+    const handleCustomScenarioSubmit = async () => {
         setIsFetchingScenario(true);
-      try {
-         const prompt = `
+        try {
+            const prompt = `
              Create a custom negotiation scenario based on the following user input: ${customScenarioInput}.
               Provide a detailed description of the scenario, including the context,
               two distinct roles with realistic names, and their respective objectives.
               Ensure that the roles have conflicting objectives to drive negotiation dynamics.
               Include potential challenges each role might face.
+               Include a simple goal as a singular value that the user can achieve.
               Generate 4-6 role-agnostic desired outcomes based on the context.
               Respond empathetically and adaptively to user tone and style.
                Return the scenario in JSON with the format:
               {
                   "scenario": {
                       "title": "string",
+                       "goal": "number",
                       "context": "<p>string</p><p>string</p>...",
                       "roles": [
                           { "name": "string", "role": "string", "objective": "string" }
@@ -1866,41 +2001,40 @@ const NegotiationModule = ({ onReturn }) => {
                   }
               }
           `;
-           const rawScenarioData = await fetchOpenAIResponse(
+            const rawScenarioData = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: prompt }] },
                 '/api/generate'
             );
-          const parsedScenario = parseAiJson(rawScenarioData);
-          if(parsedScenario?.scenario){
-             setScenario(parsedScenario.scenario);
-              setRoles(parsedScenario.scenario.roles.map((r) => r.name));
-             setEditableScenario(parsedScenario.scenario);
+            const parsedScenario = parseAiJson(rawScenarioData);
+            if (parsedScenario?.scenario) {
+                setScenario(parsedScenario.scenario);
+                setRoles(parsedScenario.scenario.roles.map((r) => r.name));
+                setEditableScenario(parsedScenario.scenario);
                 setSimulationComplete(false);
                 setScenarioGenerated(true); // Set the scenario generated flag
-                 await generateImage(parsedScenario.scenario.title, parsedScenario.scenario.context);
+                await generateImage(parsedScenario.scenario.title, parsedScenario.scenario.context);
             }
-              else {
+            else {
                 setErrorMessage('Failed to generate custom scenario. Please try again.');
             }
         }
         catch (error) {
-           console.error('generateScenario Error:', error);
+            console.error('generateScenario Error:', error);
             setErrorMessage('An error occurred while generating the custom scenario.');
         }
-        finally{
-          setIsFetchingScenario(false);
-          setIsCustomInputMode(false);
+        finally {
+            setIsFetchingScenario(false);
             setCustomSetupStage('results');
         }
-  };
+    };
     const handleScenarioEditToggle = () => {
-         setIsScenarioEditable(!isScenarioEditable);
+        setIsScenarioEditable(!isScenarioEditable);
     };
     const handleCancelScenarioEdit = () => {
-            setEditableScenario(scenario);
-           setIsScenarioEditable(false);
+        setEditableScenario(scenario);
+        setIsScenarioEditable(false);
     }
-     const handleScenarioChange = (field, value) => {
+    const handleScenarioChange = (field, value) => {
         setEditableScenario(prev => ({
             ...prev,
             [field]: value
@@ -1908,7 +2042,7 @@ const NegotiationModule = ({ onReturn }) => {
     };
     const handleSaveScenario = () => {
         // Remove <p> tags and convert new lines to paragraphs
-         const cleanedContext = editableScenario.context
+        const cleanedContext = editableScenario.context
             .replace(/<p>|<\/p>/g, '')
             .split('\n')
             .map(paragraph => paragraph.trim())
@@ -1919,10 +2053,10 @@ const NegotiationModule = ({ onReturn }) => {
         // Update the scenario with edited values
         setEditableScenario(prev => ({
             ...prev,
-           context: cleanedContext
+            context: cleanedContext
         }));
         setScenario(prev => ({
-                ...prev,
+            ...prev,
             context: cleanedContext,
             title: editableScenario.title
         }));
@@ -1936,7 +2070,7 @@ const NegotiationModule = ({ onReturn }) => {
             setErrorMessage('Please select a role and desired outcome.');
             return;
         }
-         if(desiredOutcome === 'custom' && !customOutcomeInput.trim()){
+        if (desiredOutcome === 'custom' && !customOutcomeInput.trim()) {
             setErrorMessage("Please enter a custom outcome")
             return
         }
@@ -1952,11 +2086,11 @@ const NegotiationModule = ({ onReturn }) => {
             }
 
             const opponentObjectivePrompt = `
-        Generate a specific objective for the role of ${opponentRole.role} in the context of the negotiation.
-        Return your answer in JSON with the format:
-        {
-          "opponentObjective": "string"
-        }
+            Generate a specific objective for the role of ${opponentRole.role} in the context of the negotiation.
+            Return your answer in JSON with the format:
+            {
+            "opponentObjective": "string"
+            }
       `;
             const rawObjectiveResponse = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: opponentObjectivePrompt }], temperature: 0.7, max_tokens: 150 },
@@ -1967,10 +2101,12 @@ const NegotiationModule = ({ onReturn }) => {
             opponentRole.objective = opponentObjective;
 
             const openingPrompt = `
-        As ${opponentRole.name}, in your role as "${opponentRole.role}", provide a very short, direct opening message to ${userRole.name} to start the negotiation.
-        The message should set the stage for negotiation and be appropriate for a chat interface, and not a long email. Use a familiar yet professional tone that reflects the context: "${scenario.context}".
-        Return the response in JSON format: { "message": "<p>string</p><p>string</p>..." }
-      `;
+          As ${opponentRole.name}, in your role as "${opponentRole.role}", provide a direct and specific opening message to ${userRole.name} to start the negotiation.
+          This message must include a concrete offer (or initial demand), and a deadline, to clearly establish the negotiation parameters upfront.
+          Include a specific value/term/price that would be acceptable to you, and a time-bound constraint.
+          The message should set the stage for negotiation and be appropriate for a chat interface, and not a long email. Use a familiar yet professional tone that reflects the context: "${scenario.context}".
+           Return the response in JSON format: { "message": "<p>string</p><p>string</p>..." }
+       `;
 
             const rawOpeningResponse = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: openingPrompt }], temperature: 0.7, max_tokens: 500 },
@@ -1978,16 +2114,19 @@ const NegotiationModule = ({ onReturn }) => {
             );
             const parsedOpening = parseAiJson(rawOpeningResponse);
             const opponentMessageContent = parsedOpening?.message || 'Unable to fetch opening message.';
-
-            addMessageToHistory(opponentMessageContent, 'opponent');
-            setProgress(20);
-             generateResponseOptions(scenario?.context);
+            const initialScore = 0
+            addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
+            let scaledProgress = (performanceScore / scenario.goal) * 100
+            if (scaledProgress > 100) {
+                scaledProgress = 100
+            }
+            setProgress(scaledProgress);
+            generateResponseOptions(scenario?.context);
         } catch (error) {
             console.error('Error generating opening message:', error);
             setErrorMessage('Failed to generate the opponent’s opening message. Please try again.');
         }
     };
-
     // Function to update the roles in the state
     const updateRoles = (newRole, index) => {
         const newRoles = [...roles];
@@ -2001,53 +2140,31 @@ const NegotiationModule = ({ onReturn }) => {
 
     // Generate prompt for opponent
     const generateOpponentSystemPrompt = (scenario, player, opponent, difficulty, chatHistory) => {
-         const difficultySettings = {
-            easy: {
-                tone: 'friendly, casual, and lighthearted',
-                complexity: 'simple negotiation tactics, often making concessions',
-                strategy: 'accommodating and quick to compromise, focus on common ground',
-                reactivity: 'responds positively to user\'s points, often conceding or agreeing, seeks harmony and common ground. Uses casual, friendly language and humor to build rapport.',
-            },
-            medium: {
-                tone: 'professional, but still friendly and relatable',
-                complexity: 'standard negotiation strategies, sometimes challenges user but ultimately seeking mutual benefit',
-                strategy: 'firm but fair, seeking mutual benefit, will defend points well',
-                reactivity: 'responds directly to the user’s points, maintains a strong position, uses balanced responses that take both positions into account. Uses relatable and friendly language.',
-            },
-            hard: {
-                tone: 'strategic, but still relatable and somewhat challenging',
-                complexity: 'advanced negotiation tactics, uses strategic framing of arguments',
-                strategy: 'aggressive, aiming for maximum advantage, not open to compromise initially',
-                reactivity: 'challenges user’s points using their own arguments, remains steadfast, and is difficult to persuade, seeks to dominate the conversation, but will concede some ground if there is a strong reason. May use playful challenges or teasing.',
-            },
-            expert: {
-                tone: 'highly strategic, and can be challenging or manipulative',
-                complexity: 'complex and multifaceted negotiation strategies, often uses psychological tactics',
-                strategy: 'ruthless, prioritizing own interests, will use psychological tactics to sway the user',
-                 reactivity: 'attempts to dominate the conversation, actively undermines the user’s points, will not concede without a major benefit, and seeks to exploit any weakness. Can use sarcasm or put downs.',
-            },
-        };
-        const settings = difficultySettings[difficulty] || difficultySettings['medium'];
+        const settings = getOpponentPersonalitySettings(opponentPersonality);
         const chatHistoryString = chatHistory.map(msg => `${msg.name}: ${msg.content}`).join("\n");
+          if (!scenario || !player || !opponent) {
+              console.error('System prompt lacks required parameters.');
+              return ''; // or some other default prompt, or throw an error
+          }
 
         return `
             You are ${opponent.name}, the ${opponent.role} in a ${scenario.type} negotiation (${scenario.subType}).
-            Your goal is to ${opponent.objective}.
+            Your goal is to ${opponent.objective}. You are negotiating with ${player.name} who is in the role of ${player.role}.
              Engage in a conversational style typical of roommates discussing a pet. Use casual, colloquial language, avoiding overly formal phrases.
              Do not use conversational filler or rephrase previous statements too frequently. Vary your sentence structure and word choice to prevent repetitive phrases.
             Maintain a ${settings.tone} tone and employ ${settings.complexity} and utilize the strategy of being ${settings.strategy}.
+           **When starting a new negotiation, always offer a concrete proposal to begin negotiation as your first message. This should be a specific and measurable offer related to the type of negotiation**. You must include a deadline. This does not apply to any response messages, only the first one.
             **You will analyze the user's last message and address the key points they have raised, responding to the specifics of their argument. The difficulty level indicates your flexibility in this response, with an 'easy' opponent being more likely to concede and an 'expert' opponent being more likely to challenge each point.**
             Keep your responses concise and directly address the points raised by ${player.name}.
             Do not reveal your negotiation strategy or desired outcome explicitly.
             Base your responses solely on the conversation history provided, and do not repeat points already addressed:
 
-            ${chatHistoryString}
-
+             ${chatHistoryString}
         `;
     };
 
     // Generate response options for the user
-        const generateResponseOptions = async (context) => {
+    const generateResponseOptions = async (context) => {
         if (!selectedRole || !desiredOutcome) {
             console.warn('Selected role or desired outcome not set. Skipping response option generation.');
             return;
@@ -2072,16 +2189,16 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
 
-     // Function to get the latest message for a particular role
+    // Function to get the latest message for a particular role
     const getLatestMessage = (role) => {
         return chatHistory.filter((msg) => msg.role === role).slice(-1)[0]?.content || '';
     };
     // Generate user response based on selected strategy
     const generateUserResponse = async (strategyDescription) => {
-          const userRole = scenario.roles.find((r) => r.name === selectedRole);
+        const userRole = scenario.roles.find((r) => r.name === selectedRole);
         const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
 
-         const prompt = generateUserResponsePrompt(strategyDescription, userRole, opponentRole)
+        const prompt = generateUserResponsePrompt(strategyDescription, userRole, opponentRole)
         try {
             const rawResponse = await fetchOpenAIResponse({
                 messages: [{ role: 'system', content: prompt }],
@@ -2093,8 +2210,8 @@ const NegotiationModule = ({ onReturn }) => {
             handleError('Failed to generate user draft. Please try again.', error);
         }
     };
- const generateUserResponsePrompt = (strategyDescription, userRole, opponentRole) => {
-            return `
+    const generateUserResponsePrompt = (strategyDescription, userRole, opponentRole) => {
+        return `
             As ${userRole.name}, respond to ${opponentRole.name} using the strategy: "${strategyDescription}".
             In the context of the negotiation: "${scenario.context}", provide a short, direct, and professional message, appropriate for a chat interface (like Teams or Slack).
             Focus on moving the negotiation forward by making thoughtful replies that consider the opponent's points of view.
@@ -2106,17 +2223,28 @@ const NegotiationModule = ({ onReturn }) => {
                 "message": "<p>Your concise message here</p><p>And another paragraph here</p>"
             }
         `;
-        }
+    }
 
     // Create prompt for response options
-        const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
+    const createResponseOptionsPrompt = (context, latestOpponentMessage, previousUserMessage) => `
         Based on the ongoing negotiation for the scenario: ${context},
         consider the latest opponent message: "${latestOpponentMessage}"
         and the user's previous message: "${previousUserMessage}".
         Generate four strategic response options, each representing a different high-level negotiation tactic or strategy that the user could employ.
          Each option should describe a general approach the user could take, not specific messages or phrases.
-        Consider the different negotiation tactics and strategies like:
-        - Value-Based Approach: Focus on the value that your service offers, rather than just focusing on price.\\n        - Anchoring:  Set the tone of the negotiation and establish your desired outcome by suggesting an initial number or point that is beneficial to you.\\n        - Concessions: Show flexibility by offering something of value in return for something else of value to you.\\n        - Delaying: Slow down the negotiation to give yourself time to think and to create a sense of urgency for the other party.\\n        - Information Gathering: Ask pointed questions that help you to understand the other party's needs and limitations.\\n        - Collaboration: Build mutual trust and find common ground in the negotiation.\\n         - Highlighting Success: Show past successful projects to increase confidence in your ability to deliver in this project.\\n        Return the response in the JSON format:\\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
+          The response options should be general negotiation strategies or tactics such as the following:
+           - Counter Offer
+           - Ask for More
+           - Play Hardball
+           - Concede
+           - Collaboration
+           - Delay
+           - Bargain
+           - Emotional Appeal
+           - Information Gathering
+            - Value-Based Approach
+          Do not mention specific numbers or phrases.  Focus on high level strategies.
+        Return the response in the JSON format:\\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
     // Handle user message API response
     const handleUserResponse = (rawResponse) => {
         const parsed = parseAiJson(rawResponse);
@@ -2131,7 +2259,7 @@ const NegotiationModule = ({ onReturn }) => {
         console.error(message, error);
         setErrorMessage(message);
     };
-  // Handles response option API response
+    // Handles response option API response
     const handleResponseOptions = (rawResponse) => {
         if (!rawResponse) {
             console.error('Received empty response from API.');
@@ -2151,133 +2279,173 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
 
-// Generate feedback for user response
-const generateFeedback = async (userMessage) => {
-    const userRole = scenario.roles.find((r) => r.name === selectedRole);
-    const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
-
-    const feedbackPrompt = `
-    Analyze the user's message: "${userMessage}" as ${userRole.name} in the role of ${userRole.role}, in the context of the current negotiation, with a focus on negotiation tactics.
-     Consider the opponent's position as ${opponentRole.name} in the role of ${opponentRole.role}.
-    Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between roommates.
-    Focus on how the user could improve in the future by exploring common ground and advancing the negotiation goals, or by being more emotionally responsive.
-     Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
-     Return the feedback in JSON format:
-    {
-       "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>"
-     }
-`;
-
-    try {
-        const rawFeedbackResponse = await fetchOpenAIResponse(
-            { messages: [{ role: 'system', content: feedbackPrompt }] },
-            '/api/generate'
-        );
-        const parsedFeedback = parseAiJson(rawFeedbackResponse);
-        return parsedFeedback?.feedback;
-    } catch (error) {
-        console.error('Failed to generate feedback:', error);
-        setErrorMessage('Failed to generate feedback. Please try again.');
-        return null;
-    }
-};
-
-// Updated generateOpponentResponse function
-const generateOpponentResponse = async (lastUserMessage) => {
-    try {
+    // Generate feedback for user response
+    const generateFeedback = async (userMessage) => {
         const userRole = scenario.roles.find((r) => r.name === selectedRole);
         const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
-        if (!userRole || !opponentRole) {
-            throw new Error('Roles not correctly set.');
-        }
-        const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
-        const opponentPrompt = `
-            As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to ${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
+        const feedbackPrompt = `
+            Analyze the user's message: "${userMessage}" as ${userRole.name} in the role of ${userRole.role}, in the context of the current negotiation, with a focus on negotiation tactics.
+            Consider the opponent's position as ${opponentRole.name} in the role of ${opponentRole.role}.
+            Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between roommates.
+            Focus on how the user could improve in the future by exploring common ground and advancing the negotiation goals, or by being more emotionally responsive.
+            Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
+            Score the user's message on the following categories using a scale from -2 to +2:
+                - Assertiveness: How effectively the user stated their position.
+                - Adaptability: How well the user changed strategy or incorporated new information.
+                - Empathy: How well the user understood the other party's feelings and needs.
+                - Strategic Thinking: How effectively the user advanced their goals in a strategic manner.
+                - Communication: How clearly and concisely the user delivered their message.
+                - Compromise: How open and willing the user was to find a middle ground.
+            Return the feedback and scores in JSON format:
+            {
+            "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>",
+                "scores": {
+                    "Assertiveness": number,
+                    "Adaptability": number,
+                    "Empathy": number,
+                    "Strategic Thinking": number,
+                    "Communication": number,
+                    "Compromise": number
+                }
+            }
         `;
 
-        const rawResponse = await fetchOpenAIResponse(
-            {
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: opponentPrompt },
-                    { role: 'user', content: lastUserMessage }, // Directly use the last user message
-                ],
-                temperature: 0.7,
-                max_tokens: 500,
-            },
-            '/api/generate'
-        );
+        try {
+            const rawFeedbackResponse = await fetchOpenAIResponse(
+                { messages: [{ role: 'system', content: feedbackPrompt }] },
+                '/api/generate'
+            );
+            const parsedFeedback = parseAiJson(rawFeedbackResponse);
+            return parsedFeedback;
+        } catch (error) {
+            console.error('Failed to generate feedback:', error);
+            setErrorMessage('Failed to generate feedback. Please try again.');
+            return null;
+        }
+    };
+    // Updated generateOpponentResponse function
+    const generateOpponentResponse = async (lastUserMessage) => {
+        try {
+            const userRole = scenario.roles.find((r) => r.name === selectedRole);
+            const opponentRole = scenario.roles.find((r) => r.name !== selectedRole);
+            if (!userRole || !opponentRole) {
+                throw new Error('Roles not correctly set.');
+            }
+            const systemPrompt = generateOpponentSystemPrompt(scenario, userRole, opponentRole, opponentDifficulty, chatHistory);
 
-        if (!rawResponse) {
-            throw new Error('No response from AI server');
+            const opponentPrompt = `
+                 As ${opponentRole.name}, in the role of ${opponentRole.role}, respond to${userRole.name} in the negotiation. The message must be short and to the point, fitting for a chat interface, and should address the tone and content of the user's last message: "${lastUserMessage}". Also, utilize the system prompt you were provided to maintain consistency. Return the message in JSON with the format: { "message": "<p>string</p><p>string</p>..." }.
+                 `;
+                logMessage('System Prompt:', systemPrompt)
+             logMessage('Opponent Prompt:', opponentPrompt)
+
+            const rawResponse = await fetchOpenAIResponse(
+                {
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: opponentPrompt },
+                          { role: 'user', content: lastUserMessage },
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500,
+                },
+                '/api/generate'
+            );
+
+            if (!rawResponse) {
+                throw new Error('No response from AI server');
+            }
+
+             logMessage('Raw Opponent Response', rawResponse);
+            const parsed = parseAiJson(rawResponse);
+             logMessage('Parsed Opponent Response', parsed);
+            const finalMessage = parsed?.message;
+            if (!finalMessage) {
+                throw new Error('Opponent response is empty or invalid JSON.');
+            }
+             logMessage('Final Opponent Message', finalMessage);
+            const initialScore = 0;
+            addMessageToHistory(finalMessage.trim(), 'opponent', initialScore);
+            const outcome = await assessNegotiationOutcome();
+            if (outcome && outcome.outcome !== 'Draw') {
+                finalizeSimulation();
+                return;
+            }
+            return finalMessage.trim();
+        } catch (error) {
+             logMessage('Error generating opponent response:', error);
+            console.error('Failed to generate opponent response:', error);
+            setErrorMessage('Failed to generate opponent response. Please try again.');
+            return null;
+        }
+    };
+
+    // Send user reply and process AI response
+    const sendUserReply = async () => {
+        if (!userDraft.trim()) {
+            setErrorMessage('Please type a reply before sending.');
+            return;
+        }
+        setErrorMessage('');
+        const userMessage = userDraft;
+        setUserDraft('');
+        setIsUserTurn(false);
+
+        // Get the delay time
+        const delay = getRandomDelay();
+        const feedbackDelay = delay * 0.5;
+        const animationDelay = delay * 0.25;
+
+        // Start loader animation
+        setTimeout(() => {
+            setIsFetchingOpponent(true);
+        }, animationDelay);
+        // Generate feedback if the toggle is on and add it separately
+        let feedbackContent = null;
+        if (showFeedback) {
+            const rawFeedback = await generateFeedback(userMessage);
+            if (rawFeedback) {
+                feedbackContent = rawFeedback.feedback;
+                // Add scores from feedback to chat history
+                const scores = rawFeedback.scores;
+                setTimeout(() => {
+                    addMessageToHistory(feedbackContent, 'feedback', scores);
+                }, feedbackDelay);
+            }
         }
 
-        const parsed = parseAiJson(rawResponse);
-        const finalMessage = parsed?.message;
-        if (!finalMessage) {
-            throw new Error('Opponent response is empty or invalid JSON.');
-        }
-        return finalMessage.trim();
-    } catch (error) {
-        console.error('Failed to generate opponent response:', error);
-        setErrorMessage('Failed to generate opponent response. Please try again.');
-        return null;
-    }
-};
-
-// Send user reply and process AI response
-const sendUserReply = async () => {
-    if (!userDraft.trim()) {
-        setErrorMessage('Please type a reply before sending.');
-        return;
-    }
-    setErrorMessage('');
-    const userMessage = userDraft;
-    // Add user message to chat history first
-    addMessageToHistory(userDraft, 'user');
-    setUserDraft(''); // Clear the user draft immediately after adding the message
-    setProgress((prev) => prev + 20);    setCurrentTurnIndex((prev) => prev + 1);
-    setIsUserTurn(false);
-
-    // Get the delay time
-    const delay = getRandomDelay();
-    const feedbackDelay = delay * 0.5;
-    const animationDelay = delay * 0.25;
-
-    // Start loader animation
-    setTimeout(() => {
-        setIsFetchingOpponent(true);
-    }, animationDelay);
-
-    //    // Generate feedback if the toggle is on and add it separately
-    if (showFeedback) {
-        const feedbackContent = await generateFeedback(userMessage);
-        if (feedbackContent) {
-            setTimeout(() => {
-                addMessageToHistory(feedbackContent, 'feedback');
-            }, feedbackDelay);
-        }
-    }
-
-    // Send Response
-    setTimeout(async () => {
-        // Directly pass the user's message to generateOpponentResponse
-        const opponentMessageContent = await generateOpponentResponse(userMessage);
-        if (opponentMessageContent) {
-            addMessageToHistory(opponentMessageContent, 'opponent');
-        } else {
-            console.error("Opponent message is null or undefined.");
-            setErrorMessage('Failed to generate opponent message.');
-        }
-        setIsUserTurn(true);
-        setIsFetchingOpponent(false);
-         generateResponseOptions(scenario?.context);
-        if (progress >= 100) {
+        // Add user message to chat history after delay
+        addMessageToHistory(userMessage, 'user');
+        const outcome = await assessNegotiationOutcome();
+        if (outcome && outcome.outcome !== 'Draw') {
             finalizeSimulation();
+            return;
         }
-    }, delay);
-};
+
+        // Send Response
+        setTimeout(async () => {
+            // Directly pass the user's message to generateOpponentResponse
+            const opponentMessageContent = await generateOpponentResponse(userMessage);
+             if (opponentMessageContent) {
+                const initialScore = 0;
+                addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
+            } else {
+                console.error("Opponent message is null or undefined.");
+                setErrorMessage('Failed to generate opponent message.');
+            }
+            setIsUserTurn(true);
+            setIsFetchingOpponent(false);
+            generateResponseOptions(scenario?.context);
+            let scaledProgress = (performanceScore / scenario.goal) * 100
+            if (scaledProgress > 100) {
+                scaledProgress = 100
+            }
+            updateProgress(scaledProgress);
+            setCurrentTurnIndex((prev) => prev + 1);
+
+        }, delay);
+    };
 
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
@@ -2290,17 +2458,17 @@ const sendUserReply = async () => {
         );
         setFeedbackVisible(false);
     };
-
+     
     // Handles the complete button animation
     const handleButtonAnimationComplete = () => {
         setButtonRevealComplete(true);
     };
-
+     
     // Toggle showing feedback
     const toggleFeedback = () => {
         setShowFeedback(!showFeedback);
     };
-
+     
     // Click event for feedback box
     const handleFeedbackClick = (messageId) => {
         setChatHistory(prevHistory =>
@@ -2314,20 +2482,22 @@ const sendUserReply = async () => {
     // Assess the final outcome of the negotiation
     const assessNegotiationOutcome = async () => {
         let finalOutcome = desiredOutcome;
-         if (desiredOutcome === 'custom') {
+        if (desiredOutcome === 'custom') {
             if (!customOutcomeInput.trim()) {
                 return { outcome: 'Draw', reason: 'No custom desired outcome was entered.' };
             }
             finalOutcome = customOutcomeInput
-         }
+        }
+     
         const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
         const outcomeCheckPrompt = `
-        Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. Return the result in JSON format:
-        {
-            "outcome": "Win" | "Lose" | "Draw",
-            "reason": "Your objective justification."
-        }
-        `;
+                     Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. In the case of a win, check if the opponent has explicitly agreed with a contract or proposal by name. Return the result in JSON format:
+                     {
+                         "outcome": "Win" | "Lose" | "Draw",
+                         "reason": "Your objective justification."
+                     }
+                 `;
+     
         try {
             const rawResponse = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: outcomeCheckPrompt }] },
@@ -2337,51 +2507,51 @@ const sendUserReply = async () => {
                 throw new Error("Received empty response from server.");
             }
             const parsedResponse = parseAiJson(rawResponse);
-            return parsedResponse
-        }
-        catch (error) {
+            return parsedResponse;
+     
+        } catch (error) {
             console.error('Failed to assess negotiation outcome', error);
             return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
         }
-    }
+    };
     // Analyze the negotiation transcript
     const analyzeNegotiation = async () => {
         const userRole = scenario.roles.find((r) => r.name === selectedRole);
         const analysisPrompt = `
-                Analyze the following negotiation transcript, paying special attention to how the user, playing as ${userRole.name}, in the role of the ${userRole.role}, navigated the negotiation.
-                Evaluate ${userRole.name}’s performance based on several key negotiation tactics and provide a score on a scale of 1-10 for each tactic.
-                For each tactic, provide 2-3 specific examples from the transcript to illustrate where ${userRole.name} demonstrated that tactic effectively or ineffectively.
-                Provide an overall summary that describes ${userRole.name}’s strategy in the negotiation, and specific examples of when they employed those strategies well, or not so well. Start your summary with a sentence directly addressing ${userRole.name}, by name and role, before proceeding to the rest of your summary.
-                Provide concise and actionable recommendations to improve ${userRole.name}’s performance in these areas, making the language encouraging.
-                Return the result in JSON format with the following structure, ensuring that keys appear in Sentence Case, and recommendations are offered as a string array:
-                 {
-                     "Summary": "string",
-                     "Tactics": {
-                          "Assertiveness": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                          "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                          "Empathy": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                         "Strategic Thinking": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                         "Communication": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                          "Compromise": { "score": number, "examples": ["string"], "recommendations": ["string"] }
-                     }
-                 }
-
-                The negotiation transcript:
-                ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
-              `;
+                     Analyze the following negotiation transcript, paying special attention to how the user, playing as ${userRole.name}, in the role of the ${userRole.role}, navigated the negotiation.
+                     Evaluate ${userRole.name}’s performance based on several key negotiation tactics and provide a score on a scale of 1-10 for each tactic.
+                     For each tactic, provide 2-3 specific examples from the transcript to illustrate where ${userRole.name} demonstrated that tactic effectively or ineffectively.
+                     Provide an overall summary that describes ${userRole.name}’s strategy in the negotiation, and specific examples of when they employed those strategies well, or not so well. Start your summary with a sentence directly addressing ${userRole.name}, by name and role, before proceeding to the rest of your summary.
+                     Provide concise and actionable recommendations to improve ${userRole.name}’s performance in these areas, making the language encouraging.
+                      Return the result in JSON format with the following structure, ensuring that keys appear in Sentence Case, and recommendations are offered as a string array:
+                      {
+                          "Summary": "string",
+                          "Tactics": {
+                               "Assertiveness": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                               "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                               "Empathy": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                              "Strategic Thinking": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                              "Communication": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                               "Compromise": { "score": number, "examples": ["string"], "recommendations": ["string"] }
+                          }
+                      }
+     
+                     The negotiation transcript:
+                     ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
+                 `;
         try {
             const rawAnalysisResponse = await fetchOpenAIResponse({
                 messages: [{ role: 'system', content: analysisPrompt }],
             }, '/api/generate');
             const parsedAnalysis = parseAiJson(rawAnalysisResponse);
-
+     
             if (parsedAnalysis) {
                 console.log('Parsed Analysis:', parsedAnalysis)
                 const sentenceCaseKeys = (obj) => {
                     if (typeof obj !== 'object' || obj === null) {
                         return obj;
                     }
-                    if(Array.isArray(obj)){
+                    if (Array.isArray(obj)) {
                         return obj.map(sentenceCaseKeys)
                     }
                     const newObj = {};
@@ -2393,27 +2563,26 @@ const sendUserReply = async () => {
                     }
                     return newObj
                 };
-
+     
                 const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
-
+     
                 setDebriefing((prev) => ({
                     ...prev,
                     summary: formattedAnalysis.Summary,
                     tactics: formattedAnalysis.Tactics,
                 }));
-
                 const radarData = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
                     skill: name,
                     score: value.score,
                 }));
-
+     
                 setRadarData(radarData)
                 return formattedAnalysis;
             } else {
                 setErrorMessage('Failed to analyze negotiation. Please try again.');
                 return null;
             }
-
+     
         } catch (error) {
             setErrorMessage('Failed to analyze negotiation. Please try again.');
             console.error('Error analyzing negotiation:', error);
@@ -2424,20 +2593,27 @@ const sendUserReply = async () => {
     const finalizeSimulation = async () => {
         const outcomeData = await assessNegotiationOutcome();
         const analysisData = await analyzeNegotiation()
-
+        const recommendationData = await generateRecommendation();
+     
         const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
             if (msg.role === 'user') {
-                return acc + 1;
+                return acc + 1
+            }
+            if (msg.role === 'feedback') {
+                if (msg.scores) {
+                    const scoreSum = Object.values(msg.scores).reduce((sum, score) => sum + score, 0);
+                    return acc + scoreSum
+                }
             }
             return acc;
         }, 0);
-
         const totalMessages = chatHistory.length;
         const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
-
-        if (analysisData && outcomeData) {
+     
+        if (analysisData && outcomeData && recommendationData) {
             const outcome = outcomeData.outcome;
             const outcomeReason = outcomeData.reason;
+     
             setDebriefing((prev) => ({
                 ...prev,
                 strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
@@ -2448,12 +2624,12 @@ const sendUserReply = async () => {
                     .map(([key]) => key) : ['None'],
                 overallScore: Math.round(effectivenessScore),
                 letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
-                advice: outcome === 'Win' ? 'Continue refining your strategies. Your approach was effective in this negotiation.' : outcome === 'Lose' ? 'Consider revising your approach for better results. Take a closer look at the areas needing improvement.' : 'Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.',
+                advice: recommendationData,
                 transcript: chatHistory,
                 outcome: outcome,
                 outcomeReason: outcomeReason,
                 summary: analysisData.Summary,
-                tactics: analysisData.Tactics
+                tactics: analysisData.Tactics,
             }));
         } else {
             setErrorMessage('Failed to generate a proper summary. Please try again.');
@@ -2461,6 +2637,26 @@ const sendUserReply = async () => {
         }
         setSimulationComplete(true);
     };
+     
+    const generateRecommendation = async () => {
+        const userRole = scenario.roles.find((r) => r.name === selectedRole);
+        const transcript = chatHistory.filter(msg => msg.role !== 'feedback');
+        const analysisPrompt = `
+                 Given this negotiation transcript: "${JSON.stringify(transcript)}", and the context of the scenario: "${scenario.context}" evaluate the user's performance, playing as ${userRole.name}. Provide clear, concise and actionable advice on what specific strategies to improve next time, in the format: "string".
+                  Return the advice in a single, continuous string.
+               `;
+        try {
+            const rawRecommendationResponse = await fetchOpenAIResponse({
+                messages: [{ role: 'system', content: analysisPrompt }],
+            }, '/api/generate');
+            const parsedRecommendation = parseAiJson(rawRecommendationResponse);
+            return parsedRecommendation;
+        }
+        catch (error) {
+            console.error('Failed to generate recommendation:', error);
+            return "Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.";
+        }
+    }
     // Reset all state variables for new simulations
     const resetNegotiation = () => {
         setScenario(null);
@@ -2469,6 +2665,7 @@ const sendUserReply = async () => {
         setChatHistory([]);
         setUserDraft('');
         setProgress(0);
+        setPerformanceScore(0)
         setSimulationComplete(false);
         setDebriefing(null);
         setErrorMessage('');
@@ -2480,10 +2677,11 @@ const sendUserReply = async () => {
         setResponseOptions([]);
         setButtonRevealComplete(true)
         setShowFeedback(false); // Also reset the feedback toggle
-         setIsScenarioEditable(false); // Reset scenario edit state
+        setIsScenarioEditable(false); // Reset scenario edit state
         setEditableScenario(null)
         setCustomOutcomeInput('');
-         setCustomSetupStage('selection');
+        setCustomSetupStage('selection');
+        setPerformanceData([]);
     };
     // Function to go to previous turn
     const goToPreviousTurn = () => {
@@ -2498,7 +2696,19 @@ const sendUserReply = async () => {
             setCurrentTurnIndex(prevIndex => prevIndex + 1);
         }
     };
-
+    //  Update the progress to factor in scores
+    const updateProgress = (newProgress) => {
+        setPerformanceScore((prev) => {
+            const updatedValue = prev + newProgress;
+            return updatedValue
+        });
+        setPerformanceData((prevData) => [...prevData, { turn: currentTurnIndex, score: performanceScore }])
+        let scaledProgress = (performanceScore / scenario.goal) * 100
+        if (scaledProgress > 100) {
+            scaledProgress = 100
+        }
+        setProgress(scaledProgress);
+    };
     // Return the JSX that constructs the UI
     return (
         <div className="app-container">
@@ -2507,7 +2717,7 @@ const sendUserReply = async () => {
                     <span className="header-title">Negotiation Challenge</span>
                 </div>
             </header>
-
+    
             <main className="content-grid">
                 <aside className="left-column">
                     {/* CONDITIONAL RENDERING OF STEP BOX HERE */}
@@ -2515,9 +2725,8 @@ const sendUserReply = async () => {
                         <div className="step-box">
                             <ChevronLeft
                                 onClick={goToPreviousTurn}
-                                className={`nav-arrow ${
-                                    currentTurnIndex <= 1 && simulationComplete ? 'disabled' : ''
-                                }`}
+                                className={`nav-arrow ${currentTurnIndex <= 1 && simulationComplete ? 'disabled' : ''
+                                    }`}
                                 title="Previous Turn"
                             />
                             <span className="step-text">
@@ -2541,68 +2750,86 @@ const sendUserReply = async () => {
                             {negotiationStarted && simulationComplete && (
                                 <ChevronRight
                                     onClick={goToNextTurn}
-                                    className={`nav-arrow ${
-                                        simulationComplete &&
+                                    className={`nav-arrow ${simulationComplete &&
                                         currentTurnIndex >= Math.ceil(chatHistory.length / 2)
-                                            ? 'disabled'
-                                            : ''
-                                    }`}
+                                        ? 'disabled'
+                                        : ''
+                                        }`}
                                     title="Next Turn"
                                 />
                             )}
                         </div>
                     )}
+                    {negotiationStarted && scenario && (
+                        <div className="scenario-info">
+                            {/* Scenario details rendered here for left column */}
+                            <h3 style={{ position: 'relative' }} className="left-column-scenario-title">
+                                {scenario.title}
+                            </h3>
+                            <div
+                                className="scenario-description left-column-scenario-description"
+                                style={{ position: 'relative' }}
+                            >
+                                <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                            </div>
+                        </div>
+                    )}
                     <Card className="details-card">
                         <CardContent>
+                            {scenario && images[0] ? (
+                                <img
+                                    src={images[0]}
+                                    alt="Scenario Illustration"
+                                    className="scenario-image"
+                                />
+                            ) : (
+                                <img
+                                    src="../images/NegotiationModule.png"
+                                    alt="Scenario Illustration"
+                                    className="scenario-image"
+                                />
+                            )}
+                            {negotiationStarted && scenario && (
+                                <div>
+                                    <div className="role-info" style={{ marginBottom: '5px' }}>
+                                        <strong>Your Role:</strong>
+                                        <div className="role-details">
+                                            {selectedRoleObject
+                                                ? `${selectedRoleObject.name} - ${selectedRoleObject.role}`
+                                                : 'Role not selected'}
+                                        </div>
+                                    </div>
+                                    <p style={{ marginBottom: '5px' }}>
+                                        <strong>Desired Outcome:</strong> {desiredOutcome === 'custom' ? customOutcomeInput : desiredOutcome}
+                                    </p>
+                                    <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', padding: '10px', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                        <h3 style={{ position: 'relative', padding: '0px', textAlign: 'center' }}>
+                                            Performance Meter
+                                        </h3>
+                                        <div className="meter-container">
+                                            <div className="meter-gradient">
+                                                <div className="meter-needle"
+                                                    style={{
+                                                        left: `${progress}%`,
+                                                    }}>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative', marginTop: '5px' }}>
+                                                <span style={{ color: 'black', position: 'absolute', left: '0%', top: '20px', }}>Lose</span>
+                                                <span style={{ color: 'black', position: 'absolute', left: 'calc(50% - 20px)', top: '20px' }}>Draw</span>
+                                                <span style={{ color: 'black', position: 'absolute', right: '0%', top: '20px' }}>Win</span>
+                                            </div>
+                                            <p style={{ fontSize: '0.8em', textAlign: 'center' }}>Your Goal: {scenario.goal}. Current Progress: {progress}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {negotiationStarted && scenario ? (
                                 <div>
-                                    <div className="scenario-info">
-                                        {/* Scenario details rendered here for left column */}
-                                        <h3 style={{ position: 'relative' }} className="left-column-scenario-title">
-                                            {scenario.title}
-                                        </h3>
-                                        <div
-                                            className="scenario-description left-column-scenario-description"
-                                            style={{ position: 'relative' }}
-                                        >
-                                            <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
-                                        </div>
-                                        <div className="role-info">
-                                            <strong>Your Role:</strong>
-                                            <div className="role-details">
-                                                {selectedRoleObject
-                                                    ? `${selectedRoleObject.name} - ${selectedRoleObject.role}`
-                                                    : 'Role not selected'}
-                                            </div>
-                                        </div>
-                                        <p>
-                                            <strong>Desired Outcome:</strong> {desiredOutcome === 'custom' ? customOutcomeInput : desiredOutcome}
-                                        </p>
-                                        {scenario && images[0] && (
-                                            <img
-                                                src={images[0]}
-                                                alt="Scenario Illustration"
-                                                className="scenario-image"
-                                                style={{ marginTop: '10px', width: '100%' }}
-                                            />
-                                        )}
-                                    </div>
+        
                                 </div>
                             ) : (
                                 <>
-                                    {scenario && images[0] ? (
-                                        <img
-                                            src={images[0]}
-                                            alt="Scenario Illustration"
-                                            className="scenario-image"
-                                        />
-                                    ) : (
-                                        <img
-                                            src="../images/NegotiationModule.png"
-                                            alt="Scenario Illustration"
-                                            className="scenario-image"
-                                        />
-                                    )}
                                     {!scenario && (
                                         <div className="module-description">
                                             <h2>Negotiation Simulator</h2>
@@ -2628,23 +2855,56 @@ const sendUserReply = async () => {
                                 </>
                             )}
                             {scenario && !negotiationStarted && (
-                                <div className="roles-customization">
-                                    <strong>Customize Roles:</strong>
-                                    {roles.map((role, index) => (
-                                        <input
-                                            key={index}
-                                            type="text"
-                                            className="editable-role"
-                                            value={role}
-                                            onChange={(e) => updateRoles(e.target.value, index)}
-                                        />
-                                    ))}
+                                <div className="left-column-setup-container">
+                                    <div className="roles-customization">
+                                        <strong style={{ display: 'block', marginBottom: '5px' }}>Customize Roles:</strong>
+                                        {roles.map((role, index) => (
+                                            <div key={index} className="form-group">
+                                                <input
+                                                    type="text"
+                                                    className="editable-role"
+                                                    value={role}
+                                                    onChange={(e) => updateRoles(e.target.value, index)}
+                                                />
+                                            </div>
+
+                                            ))}
+                                        </div>
+                                        <div className="form-group">
+         <label style={{ marginBottom: '10px' }}>Set Opponent Personality:</label>
+         <div className="form-slider">
+            <div className="form-slider-labels">
+               <span>Collaborative</span>
+               
+               <span>Balanced</span>
+               
+               <span>Aggressive</span>
+             </div>
+              <input
+                    type="range"
+                    min="0"
+                    max={Object.keys(opponentPersonalitySetting).length - 1}
+                    step="2"
+                   value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality) > 4 ? 2 : Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
+                   onChange={handleOpponentPersonalityChange}
+                    style={{
+                      width: '100%',
+                     }}
+                />
+               
+            <div className="form-slider-description">
+                                                <span>Choose a personality for your opponent, which will affect their tone, communication style,
+                                                    and negotiation tactics. A collaborative opponent is more agreeable,
+                                                    while an aggressive opponent can be manipulative and unwilling to compromise.</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
                 </aside>
-
+    
                 <section className="main-content">
                     <div className="main-content-flex">
                         {errorMessage && (
@@ -2668,6 +2928,58 @@ const sendUserReply = async () => {
                                                                         <Info className="icon" /> Feedback
                                                                     </h4>
                                                                     <div dangerouslySetInnerHTML={{ __html: msg.content }} />
+                                                                    {msg.scores && (
+                                                                        <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px', alignItems: 'center', justifyContent: 'flex-start', gap: '10px' }}>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <span style={{ color: msg.scores.Assertiveness > 0 ? 'green' : 'red' }}><ArrowUp style={{ height: '16px', width: '16px' }} />
+                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none' }} />
+                                                                                </span>
+                                                                                <span>Assertiveness: <span style={{}}>{msg.scores.Assertiveness > 0 ? "+" : msg.scores.Assertiveness < 0 ? "-" : ""}{msg.scores.Assertiveness}</span>
+                                                                                </span>
+                                                                            </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <span style={{ color: msg.scores.Adaptability > 0 ? 'green' : 'red' }}>
+                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
+                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Adaptability < 0 ? 'inline' : 'none' }} />
+                                                                                </span>
+                                                                                <span>Adaptability: <span style={{}}>{msg.scores.Adaptability > 0 ? "+" : msg.scores.Adaptability < 0 ? "-" : ""}{msg.scores.Adaptability}</span>
+                                                                                </span>
+                                                                            </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <span style={{ color: msg.scores.Empathy > 0 ? 'green' : 'red' }}>
+                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
+                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none' }} />
+                                                                                </span>
+                                                                                <span>Empathy: <span style={{}}>{msg.scores.Empathy > 0 ? "+" : msg.scores.Empathy < 0 ? "-" : ""}{msg.scores.Empathy}</span>
+                                                                                </span>
+                                                                            </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <span style={{ color: msg.scores['Strategic Thinking'] > 0 ? 'green' : 'red' }}>
+                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
+                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Thinking'] < 0 ? 'inline' : 'none' }} />
+                                                                                </span>
+                                                                                <span>Strategic Thinking: <span style={{}}>{msg.scores['Strategic Thinking'] > 0 ? "+" : msg.scores['Strategic Thinking'] < 0 ? "-" : ""}{msg.scores['Strategic Thinking']}</span>
+                                                                                </span>
+                                                                            </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <span style={{ color: msg.scores.Communication > 0 ? 'green' : 'red' }}>
+                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
+                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Communication < 0 ? 'inline' : 'none' }} />
+                                                                                </span>
+                                                                                <span>Communication: <span style={{}}>{msg.scores.Communication > 0 ? "+" : msg.scores.Communication < 0 ? "-" : ""}{msg.scores.Communication}</span>
+                                                                                </span>
+                                                                            </span>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                                                <span style={{ color: msg.scores.Compromise > 0 ? 'green' : 'red' }}>
+                                                                                    <ArrowUp style={{ height: '16px', width: '16px' }} />
+                                                                                    <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Compromise < 0 ? 'inline' : 'none' }} />
+                                                                                </span>
+                                                                                <span>Compromise: <span style={{}}>{msg.scores.Compromise > 0 ? "+" : msg.scores.Compromise < 0 ? "-" : ""}{msg.scores.Compromise}</span>
+                                                                                </span>
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+    
                                                                     <Button onClick={() => dismissFeedback(msg.id)} className="dismiss-button">
                                                                         Dismiss
                                                                     </Button>
@@ -2702,9 +3014,8 @@ const sendUserReply = async () => {
                                                                 key={index}
                                                                 onClick={() => generateUserResponse(option.description)}
                                                                 disabled={isResponseLoading || !buttonRevealComplete}
-                                                                className={`response-button ${
-                                                                    isResponseLoading ? 'loading' : ''
-                                                                }`}
+                                                                className={`response-button ${isResponseLoading ? 'loading' : ''
+                                                                    }`}
                                                             >
                                                                 <SlotMachineText
                                                                     text={option.name}
@@ -2716,7 +3027,7 @@ const sendUserReply = async () => {
                                                             </Button>
                                                         ))}
                                                     </div>
-
+    
                                                 </div>
                                                 <div className="feedback-toggle-container">
                                                     <label className="feedback-checkbox-label">
@@ -2736,7 +3047,7 @@ const sendUserReply = async () => {
                                                     <div className="spinner-container">
                                                     </div>
                                                 )}
-
+    
                                                 <div className="user-input-container">
                                                     <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
                                                         <textarea
@@ -2774,14 +3085,13 @@ const sendUserReply = async () => {
                                                             value={editableScenario.title}
                                                             onChange={(e) => handleScenarioChange('title', e.target.value)}
                                                             className="editable-scenario-title"
-                                                                style={{fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%'}}
+                                                            style={{ fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%' }}
                                                         />
                                                     ) : (
                                                         <CardTitle>{scenario.title}</CardTitle>
                                                     )}
                                                     <div className="spinner-container">
-                                                        {isFetching && (
-                                                            <BarLoader color="#0073e6" width="100%" />
+                                                        {isFetching && (<BarLoader color="#0073e6" width="100%" />
                                                         )}
                                                     </div>
 
@@ -2801,24 +3111,22 @@ const sendUserReply = async () => {
                                                         )}
 
                                                     </div>
-                                                   {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
-                                                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px'}}>
-                                                        <span  onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{marginLeft: '5px'}}/>
-                                                        </span>
-                                                    </div>
+                                                    {negotiationType === 'custom' && scenarioGenerated && !isScenarioEditable && (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
+                                                            <span onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
+                                                            </span>
+                                                        </div>
                                                     )}
-                                            {isScenarioEditable && (
-                                                    <div style={{display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap'}}>
-                                                    <span style={{whiteSpace: 'nowrap'}} onClick={handleSaveScenario} className='edit-control-label'>
-                                                    <Save style={{marginLeft: '5px'}}/>
-                                                   </span>
-                                                   <span style={{whiteSpace: 'nowrap'}} onClick={handleCancelScenarioEdit} className='edit-control-label'>
-                                                        <X style={{marginLeft: '5px'}}/>
-                                                   </span>
-                                                </div>
-                                            )}
-
-
+                                                    {isScenarioEditable && (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap' }}>
+                                                            <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
+                                                                <Save style={{ marginLeft: '5px' }} />
+                                                            </span>
+                                                            <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
+                                                                <X style={{ marginLeft: '5px' }} />
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                             </CardHeader>
@@ -2912,7 +3220,14 @@ const sendUserReply = async () => {
                                                 <div className="form-group">
                                                     <label>Select negotiation type</label>
                                                     <select
-                                                        onChange={(e) => setNegotiationType(e.target.value)}
+                                                        onChange={(e) => {
+                                                            setNegotiationType(e.target.value);
+                                                            if (e.target.value === 'custom') {
+                                                                setIsCustomInputMode(true);
+                                                            } else {
+                                                                setIsCustomInputMode(false);
+                                                            }
+                                                        }}
                                                         value={negotiationType}
                                                     >
                                                         <option value="">Choose negotiation type</option>
@@ -2950,6 +3265,12 @@ const sendUserReply = async () => {
                                                         <textarea
                                                             value={customScenarioInput}
                                                             onChange={(e) => setCustomScenarioInput(e.target.value)}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                                    e.preventDefault(); // Prevent newline
+                                                                    handleCustomScenarioSubmit();
+                                                                }
+                                                            }}
                                                             placeholder="Describe a custom negotiation scenario, including the people and situations you want to simulate."
                                                             className="custom-scenario-input"
                                                         />
@@ -2977,7 +3298,7 @@ const sendUserReply = async () => {
                             debriefing && (
                                 <div className="debriefing-section">
                                     <h4 className="debriefing-title">Simulation Debriefing</h4>
-                                     {radarData && (
+                                    {radarData && (
                                         <div style={{ width: '100%', height: 300 }}>
                                             <ResponsiveContainer>
                                                 <RadarChart data={radarData}>
@@ -2987,9 +3308,24 @@ const sendUserReply = async () => {
                                                     <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
                                                 </RadarChart>
                                             </ResponsiveContainer>
-                                             <p style={{textAlign: 'center', fontSize: '0.8em', marginTop: '5px'}}>
+                                            <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
                                                 This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
                                             </p>
+                                        </div>
+                                    )}
+                                    {performanceData.length > 0 && (
+                                        <div style={{ width: '100%', height: 300 }}>
+                                            <ResponsiveContainer>
+                                                <LineChart data={performanceData}>
+                                                    <CartesianGrid strokeDasharray="3 3" />
+                                                    <XAxis dataKey="turn" />
+                                                    <YAxis />
+                                                    <Tooltip />
+                                                    <Legend />
+                                                    <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                                </LineChart>
+                                            </ResponsiveContainer>
+                                            <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
                                         </div>
                                     )}
                                     <p>
@@ -3048,7 +3384,7 @@ const sendUserReply = async () => {
                                             </ul>
                                         ) : 'None'}
                                     </p>
-                                     <p>
+                                    <p>
                                         <strong>Overall Score:</strong> {debriefing.overallScore}
                                     </p>
                                     <p>
@@ -3088,23 +3424,23 @@ const sendUserReply = async () => {
             </main>
         </div>
     );
-};
+}
 
-// Metadata for the component
-export const metadata = {
+    // Metadata for the component
+    export const metadata = {
     title: 'Negotiation Simulator',
     description: 'Flex your negotiation skills against a skilled opponent.',
     imageUrl: '../images/NegotiationModule.png',
     instructions: `
-<h2>Gameplay Overview</h2>
-<p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
-<h3>Simulation Mechanism</h3>
-<p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>
-<p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>
-<h3>Outcome and Debriefing</h3>
-<p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
-`,
+    <h2>Gameplay Overview</h2>
+    <p>Welcome to the Negotiation Simulator, where you will engage in a strategic battle of wits against an intelligent opponent. Your objective is to navigate the negotiation process and achieve your desired outcome while considering the goals of the other party.</p>
+    <h3>Simulation Mechanism</h3>
+    <p>The simulation is driven by dynamic, AI-generated scenarios. Once you select a negotiation type and role, you'll enter a dialogue with the opponent. Each turn, you can choose from several strategic response options or draft a custom reply to guide the negotiation in your favor.</p>
+    <p>The AI opponent will respond based on the context and previous dialogue, adapting its strategy to challenge your decisions. Your task is to anticipate their moves, counter their tactics, and steer the negotiation towards your desired outcome.</p>
+    <h3>Outcome and Debriefing</h3>
+    <p>At the conclusion of the simulation, you will receive a detailed debriefing. This includes a summary of the negotiation, feedback on your strengths and areas for improvement, an overall score, and recommendations for future negotiations. Use this feedback to refine your skills and prepare for real-world scenarios.</p>
+    `,
     component: NegotiationModule
-};
+    };
 
-export default NegotiationModule;
+    export default NegotiationModule;

@@ -1,4 +1,4 @@
-# azure-deploy.yml
+# azure-deploy.yml (Optimized Version)
 name: Deploy Node.js App to Azure
 
 on:
@@ -40,8 +40,9 @@ jobs:
         echo "Creating deployment package..."
         mkdir deployment-package
         cp -r executrainserver/* deployment-package/
-        mkdir deployment-package/executrainsim-build  # ADD THIS LINE: Create the subdirectory
+        mkdir deployment-package/executrainsim-build  # Create the subdirectory for React build
         cp -r executrainsim/build/* deployment-package/executrainsim-build/
+        cp startup.sh deployment-package/             # Copy startup.sh script itself
         echo "Deployment package created."
 
     - name: Login to Azure

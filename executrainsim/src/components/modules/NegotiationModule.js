@@ -232,11 +232,17 @@ const NegotiationModule = ({ onReturn }) => {
     const [customSetupStage, setCustomSetupStage] = useState('selection');
     const [opponentPersonality, setOpponentPersonality] = useState('balanced');
     const [opponentPersonalitySetting, setOpponentPersonalitySetting] = useState({
-        aggressive: {
-            tone: 'highly assertive, sometimes combative',
-            complexity: 'advanced negotiation tactics, often uses challenging statements',
-            strategy: 'prioritizes own interests, will use direct challenges and put downs',
-            reactivity: 'attempts to dominate the conversation, actively undermines the user’s points, will not concede without a major benefit, and seeks to exploit any weakness. Can use sarcasm or put downs.',
+        collaborative: {
+            tone: 'friendly, casual, and lighthearted',
+            complexity: 'simple negotiation tactics, often making concessions',
+            strategy: 'accommodating and quick to compromise, focus on common ground',
+            reactivity: 'responds positively to user\'s points, often conceding or agreeing, seeks harmony and common ground. Uses casual, friendly language and humor to build rapport.',
+        },
+        slightlyCollaborative: {
+            tone: 'generally friendly and accommodating but occasionally firm',
+             complexity: 'simple negotiation tactics with some strategic thinking, and less often making concessions',
+            strategy: 'mostly accommodating but will attempt to get a slightly better deal, while focusing on common ground',
+            reactivity: 'responds generally positively to user\'s points, will occasionally concede or agree, seeks harmony and common ground. Uses relatable, and friendly language.',
         },
         balanced: {
             tone: 'professional, but still friendly and relatable',
@@ -244,18 +250,19 @@ const NegotiationModule = ({ onReturn }) => {
             strategy: 'firm but fair, seeking mutual benefit, will defend points well',
             reactivity: 'responds directly to the user’s points, maintains a strong position, uses balanced responses that take both positions into account. Uses relatable and friendly language.',
         },
-        collaborative: {
-            tone: 'friendly, casual, and lighthearted',
-            complexity: 'simple negotiation tactics, often making concessions',
-            strategy: 'accommodating and quick to compromise, focus on common ground',
-            reactivity: 'responds positively to user\'s points, often conceding or agreeing, seeks harmony and common ground. Uses casual, friendly language and humor to build rapport.',
+         slightlyAggressive: {
+           tone: 'assertive but generally respectful with occasional challenges',
+            complexity: 'standard negotiation strategies with some advanced tactics, sometimes challenges user directly',
+            strategy: 'prioritizes own interests but also seeks mutual benefit, often challenges user’s points but will sometimes concede without a major benefit',
+            reactivity: 'responds directly to the user’s points, but will sometimes aggressively undermine the user’s points, occasionally conceding without a major benefit, and sometimes seeks to exploit any weakness, using challenging but respectful language.',
         },
-        emotional: {
-            tone: 'highly intuitive and emotionally responsive',
-            complexity: 'uses emotional tactics to make a point',
-            strategy: 'will respond from the perspective of feelings more than needs',
-            reactivity: 'responds from their gut, and can be swayed through appeals to emotions and empathy. Can be easily distracted by strong emotions.',
+        aggressive: {
+            tone: 'highly assertive, sometimes combative',
+            complexity: 'advanced negotiation tactics, often uses challenging statements',
+            strategy: 'prioritizes own interests, will use direct challenges and put downs',
+            reactivity: 'attempts to dominate the conversation, actively undermines the user’s points, will not concede without a major benefit, and seeks to exploit any weakness. Can use sarcasm or put downs.',
         },
+
     });
 
     const [progress, setProgress] = useState(0);
@@ -1310,48 +1317,50 @@ const NegotiationModule = ({ onReturn }) => {
                                 </>
                             )}
                             {scenario && !negotiationStarted && (
-                                <div className="roles-customization">
-                                    <strong>Customize Roles:</strong>
-                                    {roles.map((role, index) => (
-                                        <input
-                                            key={index}
-                                            type="text"
-                                            className="editable-role"
-                                            value={role}
-                                            onChange={(e) => updateRoles(e.target.value, index)}
-                                        />
-                                    ))}
-                                    <div className="form-group">
-                                        <label style={{ marginBottom: '10px' }}>Set Opponent Personality:</label>
-                                        <div className="form-slider">
-                                            <div className="form-slider-labels">
-                                                <span>Collaborative</span>
-                                                <span>Balanced</span>
-                                                <span>Aggressive</span>
+                                <div className="left-column-setup-container">
+                                    <div className="roles-customization">
+                                        <strong style={{ display: 'block', marginBottom: '5px' }}>Customize Roles:</strong>
+                                        {roles.map((role, index) => (
+                                            <div key={index} className="form-group">
+                                                <input
+                                                    type="text"
+                                                    className="editable-role"
+                                                    value={role}
+                                                    onChange={(e) => updateRoles(e.target.value, index)}
+                                                />
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="0"
-                                                max={Object.keys(opponentPersonalitySetting).length - 1}
-                                                step="1"
-                                                value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
-                                                onChange={handleOpponentPersonalityChange}
-                                                style={{
-                                                    width: '100%',
-        
-                                                }}
-                                            />
-                                            <div className="form-slider-dots">
-                                                <span><Circle style={{ height: '10px', width: '10px' }} /></span>
-                                                <span><CircleDot style={{ height: '10px', width: '10px' }} /></span>
-                                                <span><Circle style={{ height: '10px', width: '10px' }} /></span>
-                                                <span><Circle style={{ height: '10px', width: '10px' }} /></span>
-                                            </div>
-                                            <div className="form-slider-description">
-                                                <span>Choose a personality for your opponent, which will affect their tone, communication style, and negotiation tactics. A collaborative opponent is more agreeable, while an aggressive opponent can be manipulative and unwilling to compromise.</span>
+
+                                            ))}
+                                        </div>
+                                        <div className="form-group">
+         <label style={{ marginBottom: '10px' }}>Set Opponent Personality:</label>
+         <div className="form-slider">
+            <div className="form-slider-labels">
+               <span>Collaborative</span>
+               
+               <span>Balanced</span>
+               
+               <span>Aggressive</span>
+             </div>
+              <input
+                    type="range"
+                    min="0"
+                    max={Object.keys(opponentPersonalitySetting).length - 1}
+                    step="2"
+                   value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality) > 4 ? 2 : Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
+                   onChange={handleOpponentPersonalityChange}
+                    style={{
+                      width: '100%',
+                     }}
+                />
+               
+            <div className="form-slider-description">
+                                                <span>Choose a personality for your opponent, which will affect their tone, communication style,
+                                                    and negotiation tactics. A collaborative opponent is more agreeable,
+                                                    while an aggressive opponent can be manipulative and unwilling to compromise.</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
                                 </div>
                             )}
                         </CardContent>

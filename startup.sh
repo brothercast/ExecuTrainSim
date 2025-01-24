@@ -1,4 +1,4 @@
-# startup.sh
+# startup.sh (Optimized Version)
 #!/bin/bash
 
 echo "Starting startup script..."
