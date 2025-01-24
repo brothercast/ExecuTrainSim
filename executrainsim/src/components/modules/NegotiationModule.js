@@ -783,7 +783,7 @@ const NegotiationModule = ({ onReturn }) => {
             setIsSpinning(false); // Added line to turn off the spinning state
         } else {
             console.error('Invalid response structure:', parsed);
-            set            setErrorMessage('Failed to generate response options. Please try again.');
+            setErrorMessage('Failed to generate response options. Please try again.');
         }
     };
 
@@ -798,7 +798,7 @@ const NegotiationModule = ({ onReturn }) => {
             Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between roommates.
             Focus on how the user could improve in the future by exploring common ground and advancing the negotiation goals, or by being more emotionally responsive.
             Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
-            Score the user's message on the following categories using a scale from -2 to +2:
+            Score the user's message on the following categories using a scale from -2 to +2, but **only award points if the message actually demonstrates the value of each category, and not simply by including it in their message**:
                 - Assertiveness: How effectively the user stated their position.
                 - Flexibility: How well the user changed strategy or incorporated new information.
                 - Empathy: How well the user understood the other party's feelings and needs.
@@ -1398,7 +1398,7 @@ const NegotiationModule = ({ onReturn }) => {
                     type="range"
                     min="0"
                     max={Object.keys(opponentPersonalitySetting).length - 1}
-                    step="2"
+                    step="1"
                    value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality) > 4 ? 2 : Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
                    onChange={handleOpponentPersonalityChange}
                     style={{
@@ -1443,47 +1443,47 @@ const NegotiationModule = ({ onReturn }) => {
                                                                     </h4>
                                                                     <div dangerouslySetInnerHTML={{ __html: msg.content }} />
                                                                     {msg.scores && (
-                                                                        <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px', alignItems: 'center', justifyContent: 'flex-start', gap: '10px' }}>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Assertiveness">
+                                                                        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: '10px', alignItems: 'center', padding: '0 15px' }}>
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Assertiveness">
                                                                                  <span style={{ color: msg.scores.Assertiveness > 0 ? 'green' : 'red' }}>
                                                                                     {msg.scores.Assertiveness > 0 ?  <Swords style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Assertiveness: <span style={{}}>{msg.scores.Assertiveness > 0 ? "+" : msg.scores.Assertiveness < 0 ? "-" : ""}{msg.scores.Assertiveness}</span>
+                                                                                <span style={{fontSize: '0.8em'}}><span style={{}}>{msg.scores.Assertiveness > 0 ? "+" : msg.scores.Assertiveness < 0 ? "-" : ""}{msg.scores.Assertiveness}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Flexibility">
+                                                                             <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Flexibility">
                                                                                  <span style={{ color: msg.scores.Flexibility > 0 ? 'green' : 'red' }}>
                                                                                      {msg.scores.Flexibility > 0 ? <HandCoins style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Flexibility < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Flexibility: <span style={{}}>{msg.scores.Flexibility > 0 ? "+" : msg.scores.Flexibility < 0 ? "-" : ""}{msg.scores.Flexibility}</span>
+                                                                                <span style={{fontSize: '0.8em'}}> <span style={{}}>{msg.scores.Flexibility > 0 ? "+" : msg.scores.Flexibility < 0 ? "-" : ""}{msg.scores.Flexibility}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Empathy">
+                                                                              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Empathy">
                                                                                 <span style={{ color: msg.scores.Empathy > 0 ? 'green' : 'red' }}>
                                                                                  {msg.scores.Empathy > 0 ? <HandHeart style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Empathy: <span style={{}}>{msg.scores.Empathy > 0 ? "+" : msg.scores.Empathy < 0 ? "-" : ""}{msg.scores.Empathy}</span>
+                                                                                <span style={{fontSize: '0.8em'}}><span style={{}}>{msg.scores.Empathy > 0 ? "+" : msg.scores.Empathy < 0 ? "-" : ""}{msg.scores.Empathy}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Strategic Planning">
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Strategic Planning">
                                                                                  <span style={{ color: msg.scores['Strategic Planning'] > 0 ? 'green' : 'red' }}>
                                                                                     {msg.scores['Strategic Planning'] > 0 ? <LandPlot style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Planning'] < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Strategic Planning: <span style={{}}>{msg.scores['Strategic Planning'] > 0 ? "+" : msg.scores['Strategic Planning'] < 0 ? "-" : ""}{msg.scores['Strategic Planning']}</span>
+                                                                                <span style={{fontSize: '0.8em'}}>Strategic Planning: <span style={{}}>{msg.scores['Strategic Planning'] > 0 ? "+" : msg.scores['Strategic Planning'] < 0 ? "-" : ""}{msg.scores['Strategic Planning']}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Clarity of Communication">
+                                                                             <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Clarity of Communication">
                                                                                  <span style={{ color: msg.scores['Clarity of Communication'] > 0 ? 'green' : 'red' }}>
                                                                                      {msg.scores['Clarity of Communication'] > 0 ?  <Speech style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Clarity of Communication'] < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Clarity of Communication: <span style={{}}>{msg.scores['Clarity of Communication'] > 0 ? "+" : msg.scores['Clarity of Communication'] < 0 ? "-" : ""}{msg.scores['Clarity of Communication']}</span>
+                                                                                <span style={{fontSize: '0.8em'}}> <span style={{}}>{msg.scores['Clarity of Communication'] > 0 ? "+" : msg.scores['Clarity of Communication'] < 0 ? "-" : ""}{msg.scores['Clarity of Communication']}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Collaborative Problem Solving">
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Collaborative Problem Solving">
                                                                                   <span style={{ color: msg.scores['Collaborative Problem Solving'] > 0 ? 'green' : 'red' }}>
                                                                                    {msg.scores['Collaborative Problem Solving'] > 0 ?   <Handshake style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Collaborative Problem Solving'] < 0 ? 'inline' : 'none' }} />}
                                                                                    </span>
-                                                                                <span>Collaborative Problem Solving: <span style={{}}>{msg.scores['Collaborative Problem Solving'] > 0 ? "+" : msg.scores['Collaborative Problem Solving'] < 0 ? "-" : ""}{msg.scores['Collaborative Problem Solving']}</span>
+                                                                                <span style={{fontSize: '0.8em'}}> <span style={{}}>{msg.scores['Collaborative Problem Solving'] > 0 ? "+" : msg.scores['Collaborative Problem Solving'] < 0 ? "-" : ""}{msg.scores['Collaborative Problem Solving']}</span>
                                                                                 </span>
                                                                             </span>
                                                                         </div>
@@ -1510,8 +1510,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                     <div />
                                                 </div>
                                                 {isFetchingOpponent && (
-                                                    <div className="spinner-container">
-                                                        <BeatLoader color="#0073e6" size={8} />
+                                                    <div className="spinner-container"></div>                                                        <BeatLoader color="#0073e6" size={8} />
                                                     </div>
                                                 )}
                                             </CardContent>
