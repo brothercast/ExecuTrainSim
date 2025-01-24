@@ -1,4 +1,4 @@
-# azure-deploy.yml (Final, Bullet-Proof, Optimized Version)
+# azure-deploy.yml (Alternative - Set WEBSITE_NODE_DEFAULT_VERSION via Azure CLI - Workaround)
 name: Deploy Node.js App to Azure
 
 on:
@@ -17,53 +17,30 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.x' # Explicitly set Node.js version
+        node-version: '20.x'
 
     - name: Install and Build
       run: |
         echo "Starting Install and Build process..."
-        # Install and build executrainsim (React app) - (Optional - if deploying React app)
-        echo "Navigating to executrainsim directory"
         cd executrainsim
-        echo "Running npm ci for executrainsim"
         npm ci
-        echo "NPM install complete for executrainsim"
-        echo "Running npm run build for executrainsim"
         npm run build
-        echo "NPM run build complete for executrainsim"
-        cd .. # Back to repository root
-
-        # Install server dependencies for executrainserver (Node.js server)
-        echo "Navigating to executrainserver directory"
+        cd ..
         cd executrainserver
-        echo "Running npm ci for executrainserver"
         npm ci
-        echo "NPM install complete for executrainserver"
         echo "Install and build process complete."
-        cd .. # Back to repository root
+        cd ..
 
     - name: Prepare Deployment Package
       run: |
         echo "Creating deployment package..."
-        rm -rf deployment-package  # Ensure clean package directory is clean
+        rm -rf deployment-package
         mkdir deployment-package
-
-        # Copy executrainserver content (server app) to deployment package root
-        echo "Copying executrainserver contents to deployment-package"
         cp -r executrainserver/* deployment-package/
-
-        # Copy built executrainsim (React app build) to deployment-package/executrainsim-build (optional - if serving React app from same Web App)
-        echo "Creating executrainsim-build directory in deployment-package"
         mkdir deployment-package/executrainsim-build
-        echo "Copying executrainsim build output to deployment-package/executrainsim-build"
         cp -r executrainsim/build/* deployment-package/executrainsim-build/
-
-        # Copy startup script to deployment package root
-        echo "Copying startup.sh to deployment-package root"
         cp startup.sh deployment-package/
-
         echo "Deployment package created."
-        echo "Listing contents of deployment-package:" # Debugging output
         ls -l deployment-package
 
     - name: Login to Azure
@@ -76,11 +53,10 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        package: deployment-package # Deploy the deployment package directory
+        package: deployment-package
 
-    - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting # Ensure correct Node.js version on Azure
-      uses: azure/appservice-settings@v1
-      with:
-        app-name: 'ExecuTrainSim'
-        slot-name: 'production'
-        app-settings-json: '{"WEBSITE_NODE_DEFAULT_VERSION": "~20"}' # Correct JSON string syntax
+    - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # Workaround using Azure CLI
+      run: |
+        echo "Setting WEBSITE_NODE_DEFAULT_VERSION App Setting using Azure CLI..."
+        az webapp config appsettings set --resource-group ExecuTrainSimGroup --name ExecuTrainSim --settings WEBSITE_NODE_DEFAULT_VERSION="~20"
+        echo "WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI."
