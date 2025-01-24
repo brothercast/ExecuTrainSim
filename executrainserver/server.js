@@ -6,7 +6,8 @@ const { AzureOpenAI } = require('openai');
 const readline = require('readline');   
   
 const app = express();  
-  
+
+const port = process.env.PORT || 3000;
 const GPT_PORT = process.env.GPT_PORT || 5000;  
 const DALLE_PORT = process.env.DALLE_PORT || 5001;  
   
@@ -189,19 +190,17 @@ app.post('/api/generate', async (req, res) => {
   }  
 });  
 
+app.get('/', (req, res) => {
+  res.send('<h1>ExecuTrainSim Server is running! (Minimal Test)</h1>');
+});
+
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
   
-console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);  
-console.log(`DALL-E Endpoint: ${dalleEndpoint}`);  
-  
-app.listen(GPT_PORT, () => {  
-  console.log(`GPT is running on port ${GPT_PORT}`);  
-});  
-  
-app.listen(DALLE_PORT, () => {  
-  console.log(`Dalle is running on port ${DALLE_PORT}`);  
-});  
-
-console.log(`Press "CTRL + L" to clear Log.`); 
+app.listen(port, () => {
+  console.log(`ExecuTrainSim Server listening on port ${port}`); // Main port log
+  console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);  // Keep API endpoint logs here
+  console.log(`DALL-E Endpoint: ${dalleEndpoint}`);    // Keep API endpoint logs here
+  console.log(`Press "CTRL + L" to clear Log.`); 
+});

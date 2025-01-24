@@ -937,9 +937,9 @@ const NegotiationModule = ({ onReturn }) => {
         setTimeout(async () => {
           // Directly pass the user's message to generateOpponentResponse
           const opponentMessageContent = await generateOpponentResponse(userMessage);
-           if (opponentMessageContent) {
-            const initialScore = 0;
-            addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
+          if (opponentMessageContent) {
+            const initialScore = 0
+           addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
           } else {
             console.error("Opponent message is null or undefined.");
             setErrorMessage('Failed to generate opponent message.');

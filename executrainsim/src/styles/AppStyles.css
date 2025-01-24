@@ -496,7 +496,8 @@ h3 {
 }
 
 /* -------------------- Custom Answer Styles -------------------- */
-.custom-answer-section {  margin-top: 15px;
+.custom-answer-section {
+  margin-top: 15px;
 }
 
 .custom-answer-label {
@@ -970,7 +971,7 @@ h3 {
   width: 100%;
   resize: vertical;
   min-height: calc(1.5em * 6);
-   word-wrap: break-word;
+  word-wrap: break-word;
     line-height: 1.4;
   padding: 8px;
   margin-bottom: 20px;
@@ -1064,8 +1065,7 @@ h3 {
   padding: 8px 12px;
   border-radius: 8px;
   background-color: #ffffff;
-  color: #007bff;
-  border: none;   outline: 1px solid #007bff;
+  color: #007bff;  border: none;   outline: 1px solid #007bff;
   text-align: center;
   display: flex;
   align-items: center;
@@ -1210,4 +1210,49 @@ display: none; /* Remove the dots by hiding this div */
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4;
+}
+/* In AppStyles.css */
+.chat-message .feedback-box > div {
+  display: flex;
+  justify-content: space-between; /* Distribute items */
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+}
+.chat-message .feedback-box > div > span {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: default; /* Remove the help cursor */
+    flex: 1; /* Make each span take up equal space */
+    min-width: 40px; /* Prevent elements from being too small */
+    padding: 5px; /* Add some padding */
+  box-sizing: border-box; /* Include padding in width */
+    margin: 2.5px;
+}
+.chat-message .feedback-box > div > span > span {
+        display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+.chat-message .feedback-box > div > span > span:last-child {
+    display: block;
+    margin-top: 5px;
+}
+
+.chat-message .feedback-box > div > span:nth-child(1) > span:first-child{
+    color: #e67e22; /* Assertiveness (Orange) */
+}
+.chat-message .feedback-box > div > span:nth-child(2) > span:first-child{
+     color: #2ecc71; /* Flexibility (Green) */
+}
+.chat-message .feedback-box > div > span:nth-child(3) > span:first-child{
+    color: #3498db; /* Empathy (Blue) */
+}
+.chat-message .feedback-box > div > span:nth-child(4) > span:first-child{
+     color: #9b59b6; /* Strategic Planning (Purple) */
+}
+.chat-message .feedback-box > div > span:nth-child(5) > span:first-child{
+   color: #f1c40f; /* Clarity of Communication (Yellow) */
+}
+.chat-message .feedback-box > div > span:nth-child(6) > span:first-child{
+   color: #e74c3c;  /* Collaborative Problem Solving (Red) */
 }
