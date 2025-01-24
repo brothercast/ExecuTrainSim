@@ -1,4 +1,4 @@
-# azure-deploy.yml (Updated - Explicitly Deploy node_modules - FOR TESTING ONLY)
+# azure-deploy.yml (Final, Bullet-Proof, Optimized Version)
 name: Deploy Node.js App to Azure
 
 on:
@@ -45,22 +45,18 @@ jobs:
     - name: Prepare Deployment Package
       run: |
         echo "Creating deployment package..."
-        rm -rf deployment-package  # Ensure clean package directory
+        rm -rf deployment-package  # Ensure clean package directory is clean
         mkdir deployment-package
 
-        # Copy executrainserver content (server app)
+        # Copy executrainserver content (server app) to deployment package root
         echo "Copying executrainserver contents to deployment-package"
         cp -r executrainserver/* deployment-package/
-        
-        # Explicitly copy node_modules directory for testing
-        echo "Copying executrainserver/node_modules to deployment-package"
-        cp -r executrainserver/node_modules deployment-package/
 
-        # Copy built executrainsim (React app build) to deployment-package/executrainsim-build (optional)
-        # echo "Creating executrainsim-build directory in deployment-package"
-        # mkdir deployment-package/executrainsim-build
-        # echo "Copying executrainsim build output to deployment-package/executrainsim-build"
-        # cp -r executrainsim/build/* deployment-package/executrainsim-build/
+        # Copy built executrainsim (React app build) to deployment-package/executrainsim-build (optional - if serving React app from same Web App)
+        echo "Creating executrainsim-build directory in deployment-package"
+        mkdir deployment-package/executrainsim-build
+        echo "Copying executrainsim build output to deployment-package/executrainsim-build"
+        cp -r executrainsim/build/* deployment-package/executrainsim-build/
 
         # Copy startup script to deployment package root
         echo "Copying startup.sh to deployment-package root"
@@ -81,3 +77,10 @@ jobs:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
         package: deployment-package # Deploy the deployment package directory
+
+    - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting # Ensure correct Node.js version on Azure
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: 'ExecuTrainSim'
+        slot-name: 'production'
+        app-settings-json: '{"WEBSITE_NODE_DEFAULT_VERSION": "~20"}' # Correct JSON string syntax

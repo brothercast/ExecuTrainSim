@@ -1,14 +1,10 @@
-# startup.sh (Optimized - Correct PM2 Startup Command from Azure Docs)
 #!/bin/bash
-# startup.sh (Optimized Version)
-#!/bin/bash
+# startup.sh (Final, Bullet-Proof, Optimized Version)
 
 echo "Starting startup script - Bullet-Proof Version..."
 
-# Set to debug mode for troubleshooting
-set -x
-
-# Function to log and exit with an error message
+# --- Debugging and Error Handling ---
+set -x  # Enable shell debugging - print every command
 error_exit() {
   echo "ERROR: $1"
   exit 1
@@ -35,7 +31,7 @@ ls -l /home/site/wwwroot/
 cd /home/site/wwwroot || error_exit "Failed to navigate to /home/site/wwwroot"
 echo "$(date) - Successfully navigated to /home/site/wwwroot"
 
-# --- Install Server Dependencies (Redundant if done in CI, but safer to keep for now) ---
+# --- Install Server Dependencies ---
 echo "$(date) - Checking and installing server dependencies with npm ci..."
 if [ -f package.json ]; then
   npm ci || error_exit "Server dependencies installation failed!"
