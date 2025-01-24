@@ -40,7 +40,8 @@ jobs:
         echo "Creating deployment package..."
         mkdir deployment-package
         cp -r executrainserver/* deployment-package/
-        cp -r executrainsim/build/* deployment-package/executrainsim-build/ # Copy built React app to a subfolder
+        mkdir deployment-package/executrainsim-build  # ADD THIS LINE: Create the subdirectory
+        cp -r executrainsim/build/* deployment-package/executrainsim-build/
         echo "Deployment package created."
 
     - name: Login to Azure
