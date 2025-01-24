@@ -1,4 +1,4 @@
-# azure-deploy.yml (Bullet-Proof, Optimized Version)
+# azure-deploy.yml (Complete, Refactored, Bullet-Proof Version)
 name: Deploy Node.js App to Azure
 
 on:
@@ -52,7 +52,7 @@ jobs:
         echo "Copying executrainserver contents to deployment-package"
         cp -r executrainserver/* deployment-package/
 
-        # Copy built executrainsim (React app build) to deployment-package/executrainsim-build (optional)
+        # Copy built executrainsim (React app build) to deployment-package/executrainsim-build (optional - if serving React app from same Web App)
         echo "Creating executrainsim-build directory in deployment-package"
         mkdir deployment-package/executrainsim-build
         echo "Copying executrainsim build output to deployment-package/executrainsim-build"
@@ -83,7 +83,4 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        app-settings-json: |
-          {
-            "WEBSITE_NODE_DEFAULT_VERSION": "~20" # Match your Node.js version
-          }
+        app-settings-json: '{"WEBSITE_NODE_DEFAULT_VERSION": "~20"}' # Correct JSON string syntax
