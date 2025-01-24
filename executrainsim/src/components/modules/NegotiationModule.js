@@ -230,7 +230,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
     const [customSetupStage, setCustomSetupStage] = useState('selection');
-     const [opponentPersonality, setOpponentPersonality] = useState('balanced');
+    const [opponentPersonality, setOpponentPersonality] = useState('balanced');
     const [opponentPersonalitySetting, setOpponentPersonalitySetting] = useState({
         collaborative: {
             tone: 'friendly, casual, and lighthearted',
@@ -763,7 +763,7 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
     // Handle error
-    const handleError = (message, error) => {
+    const handleError =(message, error) => {
         console.error(message, error);
         setErrorMessage(message);
     };
@@ -889,7 +889,7 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
 
-    // Send user reply and process AI response
+  // Send user reply and process AI response
     const sendUserReply = async () => {
         if (!userDraft.trim()) {
           setErrorMessage('Please type a reply before sending.');
@@ -905,7 +905,6 @@ const NegotiationModule = ({ onReturn }) => {
         const feedbackDelay = delay * 0.5;
         const animationDelay = delay * 0.25;
 
-        // Start loader animation
           setTimeout(() => {
           setIsFetchingOpponent(true);
           }, animationDelay);
@@ -927,18 +926,17 @@ const NegotiationModule = ({ onReturn }) => {
 
         // Add user message to chat history after delay
         addMessageToHistory(userMessage, 'user');
-        const outcome = await assessNegotiationOutcome();
-        if (outcome && outcome.outcome !== 'Draw') {
+          const outcome = await assessNegotiationOutcome();
+            if (outcome && outcome.outcome !== 'Draw') {
           finalizeSimulation();
           return;
         }
-
         // Send Response
         setTimeout(async () => {
           // Directly pass the user's message to generateOpponentResponse
           const opponentMessageContent = await generateOpponentResponse(userMessage);
           if (opponentMessageContent) {
-            const initialScore = 0
+           const initialScore = 0
            addMessageToHistory(opponentMessageContent, 'opponent', initialScore);
           } else {
             console.error("Opponent message is null or undefined.");
@@ -957,6 +955,7 @@ const NegotiationModule = ({ onReturn }) => {
         }, delay);
       };
 
+
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
         setChatHistory((prevHistory) =>
@@ -968,17 +967,17 @@ const NegotiationModule = ({ onReturn }) => {
         );
         setFeedbackVisible(false);
     };
-     
+
     // Handles the complete button animation
     const handleButtonAnimationComplete = () => {
         setButtonRevealComplete(true);
     };
-     
+
     // Toggle showing feedback
     const toggleFeedback = () => {
         setShowFeedback(!showFeedback);
     };
-     
+
     // Click event for feedback box
     const handleFeedbackClick = (messageId) => {
         setChatHistory(prevHistory =>
@@ -998,7 +997,7 @@ const NegotiationModule = ({ onReturn }) => {
             }
             finalOutcome = customOutcomeInput
         }
-     
+
         const userMessages = chatHistory.filter(msg => msg.role === 'user').map(msg => msg.content).join(' ');
         const outcomeCheckPrompt = `
                      Based on the user's negotiation messages: "${userMessages}", and the context of the negotiation, including the desired outcome of "${finalOutcome}", determine if the user has likely achieved their goal or if the negotiation has ended without a clear win. In the case of a win, check if the opponent has explicitly agreed with a contract or proposal by name. Return the result in JSON format:
@@ -1007,7 +1006,7 @@ const NegotiationModule = ({ onReturn }) => {
                          "reason": "Your objective justification."
                      }
                  `;
-     
+
         try {
             const rawResponse = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: outcomeCheckPrompt }] },
@@ -1018,7 +1017,7 @@ const NegotiationModule = ({ onReturn }) => {
             }
             const parsedResponse = parseAiJson(rawResponse);
             return parsedResponse;
-     
+
         } catch (error) {
             console.error('Failed to assess negotiation outcome', error);
             return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
@@ -1045,7 +1044,7 @@ const NegotiationModule = ({ onReturn }) => {
                                "Collaborative Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] }
                           }
                       }
-     
+
                      The negotiation transcript:
                      ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
                  `;
@@ -1054,7 +1053,7 @@ const NegotiationModule = ({ onReturn }) => {
                 messages: [{ role: 'system', content: analysisPrompt }],
             }, '/api/generate');
             const parsedAnalysis = parseAiJson(rawAnalysisResponse);
-     
+
             if (parsedAnalysis) {
                 console.log('Parsed Analysis:', parsedAnalysis)
                 const sentenceCaseKeys = (obj) => {
@@ -1073,9 +1072,9 @@ const NegotiationModule = ({ onReturn }) => {
                     }
                     return newObj
                 };
-     
+
                 const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
-     
+
                 setDebriefing((prev) => ({
                     ...prev,
                     summary: formattedAnalysis.Summary,
@@ -1085,14 +1084,14 @@ const NegotiationModule = ({ onReturn }) => {
                     skill: name,
                     score: value.score,
                 }));
-     
+
                 setRadarData(radarData)
                 return formattedAnalysis;
             } else {
                 setErrorMessage('Failed to analyze negotiation. Please try again.');
                 return null;
             }
-     
+
         } catch (error) {
             setErrorMessage('Failed to analyze negotiation. Please try again.');
             console.error('Error analyzing negotiation:', error);
@@ -1104,7 +1103,7 @@ const NegotiationModule = ({ onReturn }) => {
         const outcomeData = await assessNegotiationOutcome();
         const analysisData = await analyzeNegotiation()
         const recommendationData = await generateRecommendation();
-     
+
         const userStrategyEffectiveness = chatHistory.reduce((acc, msg) => {
             if (msg.role === 'user') {
                 return acc + 1
@@ -1119,11 +1118,11 @@ const NegotiationModule = ({ onReturn }) => {
         }, 0);
         const totalMessages = chatHistory.length;
         const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
-     
+
         if (analysisData && outcomeData && recommendationData) {
             const outcome = outcomeData.outcome;
             const outcomeReason = outcomeData.reason;
-     
+
             setDebriefing((prev) => ({
                 ...prev,
                 strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
@@ -1147,7 +1146,7 @@ const NegotiationModule = ({ onReturn }) => {
         }
         setSimulationComplete(true);
     };
-     
+
     const generateRecommendation = async () => {
         const userRole = scenario.roles.find((r) => r.name === selectedRole);
         const transcript = chatHistory.filter(msg => msg.role !== 'feedback');
@@ -1191,7 +1190,7 @@ const NegotiationModule = ({ onReturn }) => {
         setEditableScenario(null)
         setCustomOutcomeInput('');
         setCustomSetupStage('selection');
-        setPerformanceData([]);
+         setPerformanceData([]);
     };
     // Function to go to previous turn
     const goToPreviousTurn = () => {
@@ -1216,7 +1215,7 @@ const NegotiationModule = ({ onReturn }) => {
             return updatedValue;
           });
         }
-        setPerformanceData((prevData) => [...prevData, { turn: currentTurnIndex, score: performanceScore }])
+          setPerformanceData((prevData) => [...prevData, { turn: currentTurnIndex, score: performanceScore }])
         let scaledProgress = (performanceScore / scenario.goal) * 100
         if (scaledProgress > 100) {
             scaledProgress = 100
@@ -1231,7 +1230,7 @@ const NegotiationModule = ({ onReturn }) => {
                     <span className="header-title">Negotiation Challenge</span>
                 </div>
             </header>
-    
+
             <main className="content-grid">
                 <aside className="left-column">
                     {/* CONDITIONAL RENDERING OF STEP BOX HERE */}
@@ -1340,7 +1339,7 @@ const NegotiationModule = ({ onReturn }) => {
                             )}
                             {negotiationStarted && scenario ? (
                                 <div>
-        
+
                                 </div>
                             ) : (
                                 <>
@@ -1389,9 +1388,9 @@ const NegotiationModule = ({ onReturn }) => {
                                         <div className="form-slider">
                                             <div className="form-slider-labels">
                                             <span>Collaborative</span>
-                                            
+
                                             <span>Balanced</span>
-                                            
+
                                             <span>Aggressive</span>
                                             </div>
                                             <input
@@ -1405,7 +1404,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                     width: '100%',
                                                     }}
                                                 />
-                                            
+
                                             <div className="form-slider-description">
                                                 <span>Choose a personality for your opponent, which will affect their tone, communication style,
                                                     and negotiation tactics. A collaborative opponent is more agreeable,
@@ -1418,7 +1417,7 @@ const NegotiationModule = ({ onReturn }) => {
                         </CardContent>
                     </Card>
                 </aside>
-    
+
                 <section className="main-content">
                     <div className="main-content-flex">
                         {errorMessage && (
@@ -1488,7 +1487,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                                             </span>
                                                                         </div>
                                                                     )}
-    
+
                                                                     <Button onClick={() => dismissFeedback(msg.id)} className="dismiss-button">
                                                                         Dismiss
                                                                     </Button>
@@ -1535,7 +1534,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                             </Button>
                                                         ))}
                                                     </div>
-    
+
                                                 </div>
                                                 <div className="feedback-toggle-container">
                                                     <label className="feedback-checkbox-label">
@@ -1555,7 +1554,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                     <div className="spinner-container">
                                                     </div>
                                                 )}
-    
+
                                                 <div className="user-input-container">
                                                     <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
                                                     <textarea
