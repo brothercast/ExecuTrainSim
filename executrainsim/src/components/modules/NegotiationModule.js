@@ -1,4 +1,3 @@
-// NegotiationModule.js
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
@@ -272,6 +271,43 @@ const NegotiationModule = ({ onReturn }) => {
 
     // Ref for scrolling chat history
     const chatHistoryContainerRef = useRef(null);
+
+      // Function to convert HTML-like <p> tags to line breaks
+    const convertParagraphsToLineBreaks = (htmlString) => {
+        if (!htmlString) return '';
+        try {
+            // Use a DOMParser to handle proper HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlString, 'text/html');
+            const paragraphs = doc.querySelectorAll('p');
+            let text = '';
+            paragraphs.forEach((p, index) => {
+                text += p.textContent;
+                if (index < paragraphs.length - 1) {
+                    text += '\n';
+                }
+            });
+            return text;
+        } catch (e) {
+            // Fallback if DOMParser fails or if input is already plain text
+            console.warn('Error parsing HTML-like string:', e);
+             return htmlString.replace(/<p>|<\/p>/g, '').replace(/<br\s*\/?>/gi, '\n');
+         }
+    };
+
+
+    // Function to convert line breaks back to <p> tags
+     const convertLineBreaksToParagraphs = (text) => {
+         if (!text) return '';
+        const paragraphs = text
+          .split('\n')
+            .map(paragraph => paragraph.trim())
+          .filter(paragraph => paragraph !== '')
+          .map(paragraph => `<p>${paragraph}</p>`)
+          .join('');
+      return paragraphs;
+    };
+
 
     // addMessageToHistory function (Modified)
     const addMessageToHistory = (content, role, scores) => {
@@ -712,7 +748,8 @@ const NegotiationModule = ({ onReturn }) => {
     const handleUserResponse = (rawResponse) => {
         const parsed = parseAiJson(rawResponse);
         if (parsed?.message) {
-            setUserDraft(parsed.message);
+            const messageWithLineBreaks = convertParagraphsToLineBreaks(parsed.message);
+            setUserDraft(messageWithLineBreaks);
         } else {
             setErrorMessage('Failed to generate user draft. Please try again.');
         }
@@ -757,9 +794,7 @@ const NegotiationModule = ({ onReturn }) => {
                 - Assertiveness: How effectively the user stated their position.
                 - Adaptability: How well the user changed strategy or incorporated new information.
                 - Empathy: How well the user understood the other party's feelings and needs.
-                - Strategic Thinking: How effectively// NegotiationModule.js - continued from previous code block
-
-                the user advanced their goals in a strategic manner.
+                - Strategic Thinking: How effectively the user advanced their goals in a strategic manner.
                 - Communication: How clearly and concisely the user delivered their message.
                 - Compromise: How open and willing the user was to find a middle ground.
             Return the feedback and scores in JSON format:
@@ -853,7 +888,7 @@ const NegotiationModule = ({ onReturn }) => {
           return;
         }
         setErrorMessage('');
-        const userMessage = userDraft;
+        const userMessage = convertLineBreaksToParagraphs(userDraft);
         setUserDraft('');
         setIsUserTurn(false);
     
