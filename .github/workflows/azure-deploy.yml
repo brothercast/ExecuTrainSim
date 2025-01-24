@@ -1,4 +1,4 @@
-# azure-deploy.yml (Corrected app-settings-json - Explicit JSON String - Take 3 - Version 1)
+# azure-deploy.yml (Corrected app-settings-json - YAML Block Scalar with Double Quotes - Alternative - Version 2)
 name: Deploy Node.js App to Azure
 
 on:
@@ -83,4 +83,7 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        app-settings-json: '{"WEBSITE_NODE_DEFAULT_VERSION": "~20"}' # Explicit JSON string - VERSION 1
+        app-settings-json: >- # YAML Block Scalar with Double Quotes - VERSION 2
+          {
+            "WEBSITE_NODE_DEFAULT_VERSION": "~20"
+          }
