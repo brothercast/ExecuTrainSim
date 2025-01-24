@@ -1,4 +1,4 @@
-# azure-deploy.yml (Basic, Successfully Completing Version)
+# azure-deploy.yml (Corrected - Package executrainserver Contents)
 name: Deploy Node.js App to Azure
 
 on:
@@ -11,37 +11,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
 
-      - name: Install and Build
-        run: |
-          echo "Starting Install and Build process..."
-          echo "Navigating to executrainsim directory and running npm ci"
-          cd executrainsim
-          npm ci
-          echo "NPM install complete for executrainsim"
-          echo "Running npm run build for executrainsim"
-          npm run build
-          echo "NPM run build complete for executrainsim"
-          echo "Navigating to executrainserver directory and running npm ci"
-          cd ../executrainserver
-          npm ci
-          echo "NPM install complete for executrainserver"
-          echo "Install and build process complete."
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Install and Build
+      run: |
+        echo "Starting Install and Build process..."
+        echo "Navigating to executrainsim directory and running npm ci"
+        cd executrainsim
+        npm ci
+        echo "NPM install complete for executrainsim"
+        echo "Running npm run build for executrainsim"
+        npm run build
+        echo "NPM run build complete for executrainsim"
+        echo "Navigating to executrainserver directory and running npm ci"
+        cd ../executrainserver
+        npm ci
+        echo "NPM install complete for executrainserver"
+        echo "Install and build process complete."
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'ExecuTrainSim'
-          slot-name: 'production'
-          package: . # Deploy entire repository root
+    - name: Prepare Deployment Package
+      run: |
+        echo "Creating deployment package..."
+        rm -rf deployment-package  # Ensure clean package directory
+        mkdir deployment-package
+        cp -r executrainserver/* deployment-package/  # Copy server contents
+        # mkdir deployment-package/executrainsim-build # (Optional: If you want to deploy React build too)
+        # cp -r executrainsim/build/* deployment-package/executrainsim-build/ # (Optional)
+        cp startup.sh deployment-package/             # Copy startup.sh
+        echo "Deployment package created."
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'ExecuTrainSim'
+        slot-name: 'production'
+        package: deployment-package # Deploy the created package directory!

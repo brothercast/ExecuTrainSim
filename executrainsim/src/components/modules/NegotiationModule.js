@@ -1469,7 +1469,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                                                  <span style={{ color: msg.scores['Strategic Planning'] > 0 ? 'green' : 'red' }}>
                                                                                     {msg.scores['Strategic Planning'] > 0 ? <LandPlot style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Planning'] < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span style={{fontSize: '0.8em'}}>Strategic Planning: <span style={{}}>{msg.scores['Strategic Planning'] > 0 ? "+" : msg.scores['Strategic Planning'] < 0 ? "-" : ""}{msg.scores['Strategic Planning']}</span>
+                                                                                <span style={{fontSize: '0.8em'}}> <span style={{}}>{msg.scores['Strategic Planning'] > 0 ? "+" : msg.scores['Strategic Planning'] < 0 ? "-" : ""}{msg.scores['Strategic Planning']}</span>
                                                                                 </span>
                                                                             </span>
                                                                              <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',  cursor: 'help' }} title="Clarity of Communication">
