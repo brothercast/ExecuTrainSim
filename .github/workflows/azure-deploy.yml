@@ -1,4 +1,4 @@
-# azure-deploy.yml (Corrected - Package executrainserver Contents)
+# azure-deploy.yml (Bullet-Proof, Optimized Version)
 name: Deploy Node.js App to Azure
 
 on:
@@ -17,34 +17,54 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '20.x'
+        node-version: '20.x' # Explicitly set Node.js version
 
     - name: Install and Build
       run: |
         echo "Starting Install and Build process..."
-        echo "Navigating to executrainsim directory and running npm ci"
+        # Install and build executrainsim (React app)
+        echo "Navigating to executrainsim directory"
         cd executrainsim
+        echo "Running npm ci for executrainsim"
         npm ci
         echo "NPM install complete for executrainsim"
         echo "Running npm run build for executrainsim"
         npm run build
         echo "NPM run build complete for executrainsim"
-        echo "Navigating to executrainserver directory and running npm ci"
-        cd ../executrainserver
+        cd .. # Back to repository root
+
+        # Install server dependencies for executrainserver (Node.js server)
+        echo "Navigating to executrainserver directory"
+        cd executrainserver
+        echo "Running npm ci for executrainserver"
         npm ci
         echo "NPM install complete for executrainserver"
         echo "Install and build process complete."
+        cd .. # Back to repository root
 
     - name: Prepare Deployment Package
       run: |
         echo "Creating deployment package..."
-        rm -rf deployment-package  # Ensure clean package directory
+        rm -rf deployment-package  # Ensure clean package directory is clean
         mkdir deployment-package
-        cp -r executrainserver/* deployment-package/  # Copy server contents
-        # mkdir deployment-package/executrainsim-build # (Optional: If you want to deploy React build too)
-        # cp -r executrainsim/build/* deployment-package/executrainsim-build/ # (Optional)
-        cp startup.sh deployment-package/             # Copy startup.sh
+
+        # Copy executrainserver content (server app) to deployment package root
+        echo "Copying executrainserver contents to deployment-package"
+        cp -r executrainserver/* deployment-package/
+
+        # Copy built executrainsim (React app build) to deployment-package/executrainsim-build (optional)
+        echo "Creating executrainsim-build directory in deployment-package"
+        mkdir deployment-package/executrainsim-build
+        echo "Copying executrainsim build output to deployment-package/executrainsim-build"
+        cp -r executrainsim/build/* deployment-package/executrainsim-build/
+
+        # Copy startup script to deployment package root
+        echo "Copying startup.sh to deployment-package root"
+        cp startup.sh deployment-package/
+
         echo "Deployment package created."
+        echo "Listing contents of deployment-package:" # Debugging output
+        ls -l deployment-package
 
     - name: Login to Azure
       uses: azure/login@v1
@@ -56,4 +76,14 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        package: deployment-package # Deploy the created package directory!
+        package: deployment-package # Deploy the deployment package directory
+
+    - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting # Ensure correct Node.js version on Azure
+      uses: azure/appservice-settings@v1
+      with:
+        app-name: 'ExecuTrainSim'
+        slot-name: 'production'
+        app-settings-json: |
+          {
+            "WEBSITE_NODE_DEFAULT_VERSION": "~20" # Match your Node.js version
+          }

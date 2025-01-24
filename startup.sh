@@ -1,9 +1,57 @@
- #!/bin/bash
- echo "Starting VERY basic startup script..."
- set -x
- cd /home/site/wwwroot/executrainserver  # Corrected lowercase path
- npm ci # Keep dependency install for now
- pm2 start server.js --name executrainserver --update-env --log "/home/LogFiles/pm2.log"
- echo "Basic startup script complete."
- tail -f /dev/null
- 
+#!/bin/bash
+# startup.sh (Bullet-Proof, Optimized Version)
+
+echo "Starting startup script - Bullet-Proof Version..."
+
+# --- Debugging and Error Handling ---
+set -x  # Enable shell debugging - print every command
+error_exit() {
+  echo "ERROR: $1"
+  exit 1
+}
+LOG_FILE="/home/LogFiles/startup.log"
+exec &> >(tee -a "$LOG_FILE") # Redirect all output to log file and stdout
+
+echo "$(date) - Startup script started."
+
+# --- Set Node.js Version (Redundant if WEBSITE_NODE_DEFAULT_VERSION is set, but safer) ---
+if [ -z "$WEBSITE_NODE_DEFAULT_VERSION" ]; then
+  echo "$(date) - WEBSITE_NODE_DEFAULT_VERSION is not set, setting to ~20"
+  export WEBSITE_NODE_DEFAULT_VERSION="~20" # Or your desired version
+fi
+echo "$(date) - Using Node.js version: $WEBSITE_NODE_DEFAULT_VERSION"
+nvm use "$WEBSITE_NODE_DEFAULT_VERSION" || error_exit "Failed to set Node.js version using NVM"
+node -v
+npm -v
+
+# --- Navigate to Server Directory ---
+echo "$(date) - Current directory: $(pwd)"
+echo "$(date) - Listing contents of /home/site/wwwroot:"
+ls -l /home/site/wwwroot/
+cd /home/site/wwwroot || error_exit "Failed to navigate to /home/site/wwwroot"
+echo "$(date) - Successfully navigated to /home/site/wwwroot"
+
+# --- Install Server Dependencies ---
+echo "$(date) - Checking and installing server dependencies with npm ci..."
+if [ -f package.json ]; then
+  npm ci || error_exit "Server dependencies installation failed!"
+  echo "$(date) - Server dependencies check complete"
+else
+  echo "$(date) - WARNING: package.json not found in /home/site/wwwroot. Skipping npm ci (assuming dependencies are deployed)."
+fi
+
+# --- Start the Node.js Server using PM2 ---
+echo "$(date) - Starting the server with pm2..."
+PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
+pm2 start server.js --name executrainserver --update-env --log "$PM2_LOG_FILE" || {
+  echo "ERROR: pm2 failed to start server! Check pm2 logs: $PM2_LOG_FILE"
+  pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
+  error_exit "pm2 failed to start."
+}
+
+echo "$(date) - Successfully started server with pm2, listening on port $PORT"
+echo "$(date) - Application is running and listening on port $PORT"
+
+# --- Keep Container Running ---
+echo "$(date) - Startup script execution finished. Keeping container running with tail -f /dev/null"
+tail -f /dev/null
