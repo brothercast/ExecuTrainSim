@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import SlotMachineText from '../effects/SlotMachineText';
 import Select, { SelectItem } from '../ui/Select';
-import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X, ArrowUp, ArrowDown, Circle, CircleDot, ArrowLeft, ArrowRight, Activity, Layout, MessageSquare, UserCheck, Users, Flag, MessageCircle, Hand, Lightbulb } from 'lucide-react';
+import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X, ArrowUp, ArrowDown, Circle, CircleDot, ArrowLeft, ArrowRight, Activity, Layout, MessageSquare, UserCheck, Users, Flag, MessageCircle, Hand, Lightbulb, Swords, HandCoins, HandHeart, LandPlot, Speech, Handshake } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
@@ -230,7 +230,7 @@ const NegotiationModule = ({ onReturn }) => {
     const [isScenarioEditable, setIsScenarioEditable] = useState(false);
     const [editableScenario, setEditableScenario] = useState(null);
     const [customSetupStage, setCustomSetupStage] = useState('selection');
-    const [opponentPersonality, setOpponentPersonality] = useState('balanced');
+     const [opponentPersonality, setOpponentPersonality] = useState('balanced');
     const [opponentPersonalitySetting, setOpponentPersonalitySetting] = useState({
         collaborative: {
             tone: 'friendly, casual, and lighthearted',
@@ -264,7 +264,7 @@ const NegotiationModule = ({ onReturn }) => {
         },
 
     });
-    const [progress, setProgress] = useState(0);
+     const [progress, setProgress] = useState(0);
 
     // Get the selected role object for easy access
     const selectedRoleObject = scenario?.roles?.find((role) => role.name === selectedRole);
@@ -273,7 +273,7 @@ const NegotiationModule = ({ onReturn }) => {
     const chatHistoryContainerRef = useRef(null);
 
       // Function to convert HTML-like <p> tags to line breaks
-    const convertParagraphsToLineBreaks = (htmlString) => {
+      const convertParagraphsToLineBreaks = (htmlString) => {
         if (!htmlString) return '';
         try {
             // Use a DOMParser to handle proper HTML
@@ -295,18 +295,26 @@ const NegotiationModule = ({ onReturn }) => {
          }
     };
 
-
-    // Function to convert line breaks back to <p> tags
-     const convertLineBreaksToParagraphs = (text) => {
-         if (!text) return '';
-        const paragraphs = text
-          .split('\n')
-            .map(paragraph => paragraph.trim())
-          .filter(paragraph => paragraph !== '')
-          .map(paragraph => `<p>${paragraph}</p>`)
-          .join('');
-      return paragraphs;
+     // Function to convert line breaks back to <p> tags
+    const convertLineBreaksToParagraphs = (text) => {
+        if (!text) return '';
+       const paragraphs = text
+         .split('\n')
+           .map(paragraph => paragraph.trim())
+         .filter(paragraph => paragraph !== '')
+         .map(paragraph => `<p>${paragraph}</p>`)
+         .join('');
+     return paragraphs;
     };
+
+       const handleKeyDown = (event) => {
+        if (event.key === 'Enter' && event.shiftKey) {
+          // Allow line breaks with Shift + Enter
+        } else if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault(); // Prevent new line
+           sendUserReply();
+        }
+      };
 
 
     // addMessageToHistory function (Modified)
@@ -775,7 +783,7 @@ const NegotiationModule = ({ onReturn }) => {
             setIsSpinning(false); // Added line to turn off the spinning state
         } else {
             console.error('Invalid response structure:', parsed);
-            setErrorMessage('Failed to generate response options. Please try again.');
+            set            setErrorMessage('Failed to generate response options. Please try again.');
         }
     };
 
@@ -792,21 +800,21 @@ const NegotiationModule = ({ onReturn }) => {
             Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
             Score the user's message on the following categories using a scale from -2 to +2:
                 - Assertiveness: How effectively the user stated their position.
-                - Adaptability: How well the user changed strategy or incorporated new information.
+                - Flexibility: How well the user changed strategy or incorporated new information.
                 - Empathy: How well the user understood the other party's feelings and needs.
-                - Strategic Thinking: How effectively the user advanced their goals in a strategic manner.
-                - Communication: How clearly and concisely the user delivered their message.
-                - Compromise: How open and willing the user was to find a middle ground.
+                - Strategic Planning: How effectively the user approached the negotiation with a structure and long term plan.
+                - Clarity of Communication: How clearly and concisely the user delivered their message.
+                - Collaborative Problem Solving: How open and willing the user was to find a middle ground.
             Return the feedback and scores in JSON format:
             {
             "feedback": "<p>Your concise feedback here</p><p>Another paragraph of feedback here</p>",
                 "scores": {
                     "Assertiveness": number,
-                    "Adaptability": number,
+                    "Flexibility": number,
                     "Empathy": number,
-                    "Strategic Thinking": number,
-                    "Communication": number,
-                    "Compromise": number
+                    "Strategic Planning": number,
+                    "Clarity of Communication": number,
+                    "Collaborative Problem Solving": number
                 }
             }
         `;
@@ -882,7 +890,7 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
     // Send user reply and process AI response
-     const sendUserReply = async () => {
+    const sendUserReply = async () => {
         if (!userDraft.trim()) {
           setErrorMessage('Please type a reply before sending.');
           return;
@@ -891,12 +899,12 @@ const NegotiationModule = ({ onReturn }) => {
         const userMessage = convertLineBreaksToParagraphs(userDraft);
         setUserDraft('');
         setIsUserTurn(false);
-    
+
         // Get the delay time
         const delay = getRandomDelay();
         const feedbackDelay = delay * 0.5;
         const animationDelay = delay * 0.25;
-    
+
         // Start loader animation
           setTimeout(() => {
           setIsFetchingOpponent(true);
@@ -904,7 +912,7 @@ const NegotiationModule = ({ onReturn }) => {
         // Generate feedback if the toggle is on and add it separately
         let feedbackContent = null;
          let scores;
-    
+
         if (showFeedback) {
           const rawFeedback = await generateFeedback(userMessage);
           if (rawFeedback) {
@@ -916,7 +924,7 @@ const NegotiationModule = ({ onReturn }) => {
             }, feedbackDelay);
           }
         }
-    
+
         // Add user message to chat history after delay
         addMessageToHistory(userMessage, 'user');
         const outcome = await assessNegotiationOutcome();
@@ -924,7 +932,7 @@ const NegotiationModule = ({ onReturn }) => {
           finalizeSimulation();
           return;
         }
-    
+
         // Send Response
         setTimeout(async () => {
           // Directly pass the user's message to generateOpponentResponse
@@ -945,7 +953,7 @@ const NegotiationModule = ({ onReturn }) => {
             }
             updateProgress(scaledProgress, scores);
           setCurrentTurnIndex((prev) => prev + 1);
-    
+
         }, delay);
       };
 
@@ -1030,11 +1038,11 @@ const NegotiationModule = ({ onReturn }) => {
                           "Summary": "string",
                           "Tactics": {
                                "Assertiveness": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                               "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                               "Flexibility": { "score": number, "examples": ["string"], "recommendations": ["string"] },
                                "Empathy": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                              "Strategic Thinking": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                              "Communication": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                               "Compromise": { "score": number, "examples": ["string"], "recommendations": ["string"] }
+                              "Strategic Planning": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                              "Clarity of Communication": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                               "Collaborative Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] }
                           }
                       }
      
@@ -1438,44 +1446,44 @@ const NegotiationModule = ({ onReturn }) => {
                                                                         <div style={{ display: 'flex', flexDirection: 'row', marginTop: '10px', alignItems: 'center', justifyContent: 'flex-start', gap: '10px' }}>
                                                                             <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Assertiveness">
                                                                                  <span style={{ color: msg.scores.Assertiveness > 0 ? 'green' : 'red' }}>
-                                                                                    {msg.scores.Assertiveness > 0 ?  <ArrowUp style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none' }} />}
+                                                                                    {msg.scores.Assertiveness > 0 ?  <Swords style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Assertiveness < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
                                                                                 <span>Assertiveness: <span style={{}}>{msg.scores.Assertiveness > 0 ? "+" : msg.scores.Assertiveness < 0 ? "-" : ""}{msg.scores.Assertiveness}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Adaptability">
-                                                                                 <span style={{ color: msg.scores.Adaptability > 0 ? 'green' : 'red' }}>
-                                                                                     {msg.scores.Adaptability > 0 ? <ArrowUp style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Adaptability < 0 ? 'inline' : 'none' }} />}
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Flexibility">
+                                                                                 <span style={{ color: msg.scores.Flexibility > 0 ? 'green' : 'red' }}>
+                                                                                     {msg.scores.Flexibility > 0 ? <HandCoins style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Flexibility < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Adaptability: <span style={{}}>{msg.scores.Adaptability > 0 ? "+" : msg.scores.Adaptability < 0 ? "-" : ""}{msg.scores.Adaptability}</span>
+                                                                                <span>Flexibility: <span style={{}}>{msg.scores.Flexibility > 0 ? "+" : msg.scores.Flexibility < 0 ? "-" : ""}{msg.scores.Flexibility}</span>
                                                                                 </span>
                                                                             </span>
                                                                             <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Empathy">
                                                                                 <span style={{ color: msg.scores.Empathy > 0 ? 'green' : 'red' }}>
-                                                                                 {msg.scores.Empathy > 0 ? <ArrowUp style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none' }} />}
+                                                                                 {msg.scores.Empathy > 0 ? <HandHeart style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Empathy < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
                                                                                 <span>Empathy: <span style={{}}>{msg.scores.Empathy > 0 ? "+" : msg.scores.Empathy < 0 ? "-" : ""}{msg.scores.Empathy}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Strategic Thinking">
-                                                                                 <span style={{ color: msg.scores['Strategic Thinking'] > 0 ? 'green' : 'red' }}>
-                                                                                    {msg.scores['Strategic Thinking'] > 0 ? <Lightbulb style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Thinking'] < 0 ? 'inline' : 'none' }} />}
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Strategic Planning">
+                                                                                 <span style={{ color: msg.scores['Strategic Planning'] > 0 ? 'green' : 'red' }}>
+                                                                                    {msg.scores['Strategic Planning'] > 0 ? <LandPlot style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Strategic Planning'] < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Strategic Thinking: <span style={{}}>{msg.scores['Strategic Thinking'] > 0 ? "+" : msg.scores['Strategic Thinking'] < 0 ? "-" : ""}{msg.scores['Strategic Thinking']}</span>
+                                                                                <span>Strategic Planning: <span style={{}}>{msg.scores['Strategic Planning'] > 0 ? "+" : msg.scores['Strategic Planning'] < 0 ? "-" : ""}{msg.scores['Strategic Planning']}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Communication">
-                                                                                 <span style={{ color: msg.scores.Communication > 0 ? 'green' : 'red' }}>
-                                                                                     {msg.scores.Communication > 0 ?  <MessageCircle style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Communication < 0 ? 'inline' : 'none' }} />}
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Clarity of Communication">
+                                                                                 <span style={{ color: msg.scores['Clarity of Communication'] > 0 ? 'green' : 'red' }}>
+                                                                                     {msg.scores['Clarity of Communication'] > 0 ?  <Speech style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Clarity of Communication'] < 0 ? 'inline' : 'none' }} />}
                                                                                  </span>
-                                                                                <span>Communication: <span style={{}}>{msg.scores.Communication > 0 ? "+" : msg.scores.Communication < 0 ? "-" : ""}{msg.scores.Communication}</span>
+                                                                                <span>Clarity of Communication: <span style={{}}>{msg.scores['Clarity of Communication'] > 0 ? "+" : msg.scores['Clarity of Communication'] < 0 ? "-" : ""}{msg.scores['Clarity of Communication']}</span>
                                                                                 </span>
                                                                             </span>
-                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Compromise">
-                                                                                  <span style={{ color: msg.scores.Compromise > 0 ? 'green' : 'red' }}>
-                                                                                   {msg.scores.Compromise > 0 ?   <Hand style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores.Compromise < 0 ? 'inline' : 'none' }} />}
+                                                                            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'help' }} title="Collaborative Problem Solving">
+                                                                                  <span style={{ color: msg.scores['Collaborative Problem Solving'] > 0 ? 'green' : 'red' }}>
+                                                                                   {msg.scores['Collaborative Problem Solving'] > 0 ?   <Handshake style={{ height: '16px', width: '16px' }} /> : <ArrowDown style={{ height: '16px', width: '16px', display: msg.scores['Collaborative Problem Solving'] < 0 ? 'inline' : 'none' }} />}
                                                                                    </span>
-                                                                                <span>Compromise: <span style={{}}>{msg.scores.Compromise > 0 ? "+" : msg.scores.Compromise < 0 ? "-" : ""}{msg.scores.Compromise}</span>
+                                                                                <span>Collaborative Problem Solving: <span style={{}}>{msg.scores['Collaborative Problem Solving'] > 0 ? "+" : msg.scores['Collaborative Problem Solving'] < 0 ? "-" : ""}{msg.scores['Collaborative Problem Solving']}</span>
                                                                                 </span>
                                                                             </span>
                                                                         </div>
@@ -1518,7 +1526,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                                 className={`response-button ${isResponseLoading ? 'loading' : ''
                                                                     }`}
                                                             >
-                                                                <SlotMachineText
+                                                                                               <SlotMachineText
                                                                     text={option.name}
                                                                     isSpinning={isResponseLoading}
                                                                     revealSpeed={100}
@@ -1551,18 +1559,13 @@ const NegotiationModule = ({ onReturn }) => {
     
                                                 <div className="user-input-container">
                                                     <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
-                                                        <textarea
+                                                    <textarea
                                                             value={userDraft}
                                                             onChange={(e) => setUserDraft(e.target.value)}
                                                             className="user-draft-textarea"
                                                             placeholder="Type your reply here or select an option above..."
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter' && !e.shiftKey) {
-                                                                    e.preventDefault();
-                                                                    sendUserReply();
-                                                                }
-                                                            }}
-                                                        />
+                                                            onKeyDown={handleKeyDown}
+                                                            />
                                                         <Button onClick={sendUserReply} className="send-button">
                                                             Send <SendHorizontal style={{ marginLeft: '8px' }} />
                                                         </Button>

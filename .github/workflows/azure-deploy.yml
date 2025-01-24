@@ -1,4 +1,4 @@
-# azure-deploy.yml (Optimized - Corrected Verbose Logging via app-settings)
+# azure-deploy.yml (Basic, Successfully Completing Version)
 name: Deploy Node.js App to Azure
 
 on:
@@ -11,57 +11,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20.x'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
 
-    - name: Install and Build
-      run: |
-        echo "Starting Install and Build process..."
-        echo "Navigating to executrainsim directory and running npm ci"
-        cd executrainsim
-        npm ci
-        echo "NPM install complete for executrainsim"
-        echo "Running npm run build for executrainsim"
-        npm run build
-        echo "NPM run build complete for executrainsim"
-        echo "Navigating to executrainserver directory and running npm ci"
-        cd ../executrainserver
-        npm ci
-        echo "NPM install complete for executrainserver"
-        echo "Install and build process complete."
+      - name: Install and Build
+        run: |
+          echo "Starting Install and Build process..."
+          echo "Navigating to executrainsim directory and running npm ci"
+          cd executrainsim
+          npm ci
+          echo "NPM install complete for executrainsim"
+          echo "Running npm run build for executrainsim"
+          npm run build
+          echo "NPM run build complete for executrainsim"
+          echo "Navigating to executrainserver directory and running npm ci"
+          cd ../executrainserver
+          npm ci
+          echo "NPM install complete for executrainserver"
+          echo "Install and build process complete."
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Prepare Deployment Package
-      run: |
-        echo "Creating deployment package..."
-        rm -rf deployment-package  # Ensure clean package directory - DELETE if exists
-        mkdir deployment-package
-        cp -r executrainserver/* deployment-package/  # Copy server - ensure lowercase source
-        mkdir deployment-package/executrainsim-build
-        cp -r executrainsim/build/* deployment-package/executrainsim-build/
-        cp startup.sh deployment-package/
-        echo "Deployment package created."
-        echo "Listing contents of deployment-package BEFORE deployment:" # Debugging
-        ls -l deployment-package # Debugging: List package contents
-
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Deploy to Azure Web App (Enhanced Logging - Corrected)
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'ExecuTrainSim'
-        slot-name: 'production'
-        package: deployment-package
-        app-settings: | # Correct way to set app settings for logging
-          WEBSITE_LOGGING_ENABLED: 1
-          WEBSITE_VERBOSE_LOGGING: 1
-          APPSETTING_WEBSITE_LOGGING_ENABLED: true
-          # ENABLE_ORYX_BUILD: true # (Oryx build might not be configurable this way) # Removed - likely not a valid app setting
-          # DEPLOYMENT_TYPE: zip      # (Deployment type is usually inferred)       # Removed - likely not a valid app setting
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'ExecuTrainSim'
+          slot-name: 'production'
+          package: . # Deploy entire repository root
