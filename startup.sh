@@ -1,57 +1,49 @@
+# startup.sh
 #!/bin/bash
-# startup.sh - Refactored for Robustness and Clear Logging (Improved)
 
 echo "Starting startup script..."
 
-# --- Setup & Debugging ---
-set -x # Enable debug mode - VERY HELPFUL FOR LOGS
-set -e # Exit immediately on error
+# Set to debug mode for troubleshooting
+set -x
 
-# --- Helper Functions ---
+# Function to log and exit with an error message
 error_exit() {
   echo "ERROR: $1"
-  echo "Detailed Error Log:"
-  cat /home/LogFiles/startup_error.log # Capture full error context
   exit 1
 }
 
-log_step() {
-  echo "--- STEP: $1 ---"
+# Get the application's port from the PORT environment variable, fallback to 3000
+PORT="${PORT:=3000}"
+
+# Navigate to the server directory (already in wwwroot due to deployment package)
+echo "Current directory: $(pwd)" # Debugging: Print current directory
+echo "Listing contents of /home/site/wwwroot:"
+ls -l /home/site/wwwroot/ # Debugging: List wwwroot contents
+
+echo "Navigating to /home/site/wwwroot..."
+cd /home/site/wwwroot || error_exit "Failed to navigate to /home/site/wwwroot"
+echo "Successfully navigated to /home/site/wwwroot"
+
+# Install server dependencies (redundant if done in CI, but safer to keep for now)
+echo "Checking and installing server dependencies with npm ci..."
+if [ -f package.json ]; then # Check if package.json exists to avoid errors
+  npm ci || error_exit "Server dependencies installation failed!"
+  echo "Server dependencies check complete"
+else
+  echo "package.json not found in /home/site/wwwroot. Skipping npm ci (assuming dependencies are deployed)."
+fi
+
+# Start the Node.js server using pm2 (with absolute path, corrected path)
+echo "Starting the server with pm2..."
+pm2 start server.js --name executrainserver --update-env --log "/home/LogFiles/pm2.log"  || {
+  echo "ERROR: pm2 failed to start server! Check pm2 logs:"
+  pm2 logs executrainserver --lines 20 # Show last 20 lines of pm2 logs
+  error_exit "pm2 failed to start."
 }
 
-# --- Get Port ---
-PORT="${PORT:=3000}" # Default to 3000 if PORT env var is not set
-export PORT # Ensure PORT is exported for Node.js app to see
+echo "Successfully started server with pm2, listening on port $PORT"
+# Output port information in the logs
+echo "Application is running and listening on port $PORT"
 
-# --- Server Directory Setup ---
-SERVER_DIR="/home/site/wwwroot/executrainserver" # Explicitly define server directory
-APP_DIR="/home/site/wwwroot/executrainsim"      # Explicitly define app directory
-
-log_step "Navigating to server directory: $SERVER_DIR"
-cd "$SERVER_DIR" || error_exit "Navigation to server directory failed!"
-
-log_step "Installing server dependencies using npm ci"
-npm ci --logs-dir=/home/LogFiles || error_exit "npm ci for server dependencies failed!" # Log npm ci output
-
-# --- App Directory Setup (Serving Static Files - Important!) ---
-log_step "Navigating to app directory: $APP_DIR"
-cd "$APP_DIR" || error_exit "Navigation to app directory failed!"
-
-# No npm ci here for the app directory in startup.sh - dependencies are built in GitHub Actions
-
-# --- Serve Static Files (If needed - depends on your server setup) ---
-# If your server.js is designed to serve the React app's static files,
-# you might not need a separate static file server like Nginx here.
-# If your server.js *does not* serve static files, you might need to configure
-# Azure Web App to serve the files from /home/site/wwwroot/executrainsim/build
-# In many cases, Node.js servers *do* serve static assets.
-
-# --- Start Server with pm2 ---
-log_step "Starting server with pm2: $SERVER_DIR/server.js"
-pm2 start "$SERVER_DIR/server.js" --name executrainserver --update-env --log "/home/LogFiles/pm2.log" || error_exit "pm2 server start failed!"
-
-echo "Server started successfully on port $PORT"
-echo "Startup script completed successfully."
-
-# --- Keep Container Running ---
-tail -f /dev/null # Keep the container alive
+# Keep the container running if necessary
+tail -f /dev/null

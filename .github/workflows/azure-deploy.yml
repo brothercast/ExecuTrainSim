@@ -1,4 +1,5 @@
-name: Robust Deploy Node.js App to Azure Web App
+# azure-deploy.yml
+name: Deploy Node.js App to Azure
 
 on:
   push:
@@ -8,107 +9,48 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: Production # Optional: Define a production environment for clarity
 
     steps:
-    - name: 🚀 Checkout Code Repository
+    - name: Checkout code
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0 # Fetch full history for accurate versioning
 
-    - name: 🛠️ Setup Node.js Environment
+    - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x' # Or your preferred Node.js version
-        cache: 'npm' # Enable npm caching for faster builds
+        node-version: '20.x'
 
-    - name: 🧹 Clean Build Directories
-      id: clean_build_dir
+    - name: Install and Build
       run: |
-        echo "🧹 Cleaning build directories..."
-        rm -rf executrainsim/build  # Ensure clean React build
-        rm -rf deploy              # Clean previous deploy dir
-        mkdir -p deploy             # Recreate deploy directory
-        echo "✅ Cleaned: Build and deploy directories"
-
-    - name: 📦 Install and Build - ExecuTrainSim (React App)
-      id: build_react_app
-      run: |
-        echo "📦 Starting: Install and Build - ExecuTrainSim (React App)"
+        echo "Starting Install and Build process..."
+        echo "Navigating to executrainsim directory and running npm ci"
         cd executrainsim
-        npm ci -- Audit=false # Use npm ci for clean installs, disable audit for speed in CI
+        npm ci
+        echo "NPM install complete for executrainsim"
+        echo "Running npm run build for executrainsim"
         npm run build
-        echo "✅ Completed: React App build"
-      continue-on-error: false # Fail the workflow if build fails
+        echo "NPM run build complete for executrainsim"
+        echo "Navigating to executrainserver directory and running npm ci"
+        cd ../executrainserver
+        npm ci
+        echo "NPM install complete for executrainserver"
+        echo "Install and build process complete."
 
-    - name: ⚙️ Install - ExecuTrainServer (Node.js Server)
-      id: install_server_deps
+    - name: Prepare Deployment Package
       run: |
-        echo "⚙️ Starting: Install - ExecuTrainServer (Node.js Server)"
-        cd executrainserver
-        npm ci -- Audit=false # Use npm ci for consistent server dependencies, disable audit for speed in CI
-        echo "✅ Completed: Server dependencies install"
-      continue-on-error: false # Fail the workflow if install fails
+        echo "Creating deployment package..."
+        mkdir deployment-package
+        cp -r executrainserver/* deployment-package/
+        cp -r executrainsim/build/* deployment-package/executrainsim-build/ # Copy built React app to a subfolder
+        echo "Deployment package created."
 
-    - name: 📂 Archive Production Artifacts
-      id: archive_artifacts
-      run: |
-        echo "📂 Starting: Archive production artifacts"
-        mkdir -p ./deploy
-        cp -r ./executrainsim/build ./deploy/executrainsim # Copy built React app
-        cp -r ./executrainserver ./deploy/executrainserver  # Copy Node.js server
-        echo "✅ Completed: Production artifacts archived to ./deploy"
-
-    - name: 🛑 Stop Azure Web App (Minimize Deployment Conflicts)
-      id: stop_webapp
-      uses: azure/webapps-task@v1
+    - name: Login to Azure
+      uses: azure/login@v1
       with:
-        app-name: 'ExecuTrainSim'
-        action: 'stop'
-        slot-name: 'production'
-        resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-      continue-on-error: true # Allow workflow to continue even if stop fails (e.g., app already stopped)
 
-    - name: 🚀 Deploy to Azure Web App
-      id: deploy_webapp
+    - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        package: ./deploy
-      continue-on-error: false # Fail workflow if deployment fails
-
-    - name: ✅ Start Azure Web App
-      id: start_webapp
-      uses: azure/webapps-task@v1
-      if: always() # Ensure start happens even if deployment fails (cleanup)
-      with:
-        app-name: 'ExecuTrainSim'
-        action: 'start'
-        slot-name: 'production'
-        resource-group: ${{ secrets.AZURE_RESOURCE_GROUP }}
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: 🚦 Workflow Status Summary
-      id: workflow_summary
-      if: always() # Always run this step to summarize workflow status
-      run: |
-        echo "Workflow Status Summary:"
-        echo "-------------------------"
-        echo "Checkout Code: ✅"
-        echo "Node.js Setup: ✅"
-        echo "Clean Build Dir: ✅ (Step ID: ${{ steps.clean_build_dir.outcome }})"
-        echo "React App Build: ${{ steps.build_react_app.outcome }} (Step ID: ${{ steps.build_react_app.outcome }})"
-        echo "Server Deps Install: ${{ steps.install_server_deps.outcome }} (Step ID: ${{ steps.install_server_deps.outcome }})"
-        echo "Archive Artifacts: ✅ (Step ID: ${{ steps.archive_artifacts.outcome }})"
-        echo "Stop Web App: ${{ steps.stop_webapp.outcome }} (Step ID: ${{ steps.stop_webapp.outcome }})"
-        echo "Deploy Web App: ${{ steps.deploy_webapp.outcome }} (Step ID: ${{ steps.deploy_webapp.outcome }})"
-        echo "Start Web App: ${{ steps.start_webapp.outcome }} (Step ID: ${{ steps.start_webapp.outcome }})"
-        echo "-------------------------"
-        if ${{ steps.deploy_webapp.outcome == 'success' }}; then
-          echo "🎉🎉🎉 Application Deployed Successfully! 🎉🎉🎉"
-          echo "✅✅✅ Check your application at: https://executrainsim.azurewebsites.net ✅✅✅"
-        else
-          echo "❌❌❌ Deployment Failed. Check workflow logs for errors. ❌❌❌"
-        fi
+        package: deployment-package # Deploy the created package directory
