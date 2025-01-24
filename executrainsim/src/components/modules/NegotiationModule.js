@@ -1385,28 +1385,28 @@ const NegotiationModule = ({ onReturn }) => {
                                             ))}
                                         </div>
                                         <div className="form-group">
-         <label style={{ marginBottom: '10px' }}>Set Opponent Personality:</label>
-         <div className="form-slider">
-            <div className="form-slider-labels">
-               <span>Collaborative</span>
-               
-               <span>Balanced</span>
-               
-               <span>Aggressive</span>
-             </div>
-              <input
-                    type="range"
-                    min="0"
-                    max={Object.keys(opponentPersonalitySetting).length - 1}
-                    step="1"
-                   value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality) > 4 ? 2 : Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
-                   onChange={handleOpponentPersonalityChange}
-                    style={{
-                      width: '100%',
-                     }}
-                />
-               
-            <div className="form-slider-description">
+                                        <label style={{ marginBottom: '10px' }}>Set Opponent Personality:</label>
+                                        <div className="form-slider">
+                                            <div className="form-slider-labels">
+                                            <span>Collaborative</span>
+                                            
+                                            <span>Balanced</span>
+                                            
+                                            <span>Aggressive</span>
+                                            </div>
+                                            <input
+                                                    type="range"
+                                                    min="0"
+                                                    max={Object.keys(opponentPersonalitySetting).length - 1}
+                                                    step="1"
+                                                value={Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality) > 4 ? 2 : Object.keys(opponentPersonalitySetting).indexOf(opponentPersonality)}
+                                                onChange={handleOpponentPersonalityChange}
+                                                    style={{
+                                                    width: '100%',
+                                                    }}
+                                                />
+                                            
+                                            <div className="form-slider-description">
                                                 <span>Choose a personality for your opponent, which will affect their tone, communication style,
                                                     and negotiation tactics. A collaborative opponent is more agreeable,
                                                     while an aggressive opponent can be manipulative and unwilling to compromise.</span>
@@ -1510,7 +1510,7 @@ const NegotiationModule = ({ onReturn }) => {
                                                     <div />
                                                 </div>
                                                 {isFetchingOpponent && (
-                                                    <div className="spinner-container"></div>                                                        <BeatLoader color="#0073e6" size={8} />
+                                                    <div className="spinner-container"> <BeatLoader color="#0073e6" size={8} />
                                                     </div>
                                                 )}
                                             </CardContent>

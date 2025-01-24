@@ -496,8 +496,7 @@ h3 {
 }
 
 /* -------------------- Custom Answer Styles -------------------- */
-.custom-answer-section {
-  margin-top: 15px;
+.custom-answer-section {  margin-top: 15px;
 }
 
 .custom-answer-label {
@@ -546,7 +545,7 @@ h3 {
     font-size: 32px;
 }
 .debriefing-section p {
-    margin-bottom: 1px;
+    margin-bottom: 12px;
     line-height: 1.5;
 }
 
@@ -971,7 +970,7 @@ h3 {
   width: 100%;
   resize: vertical;
   min-height: calc(1.5em * 6);
-  word-wrap: break-word;
+   word-wrap: break-word;
     line-height: 1.4;
   padding: 8px;
   margin-bottom: 20px;
