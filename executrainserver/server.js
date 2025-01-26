@@ -1,12 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
 const { AzureOpenAI } = require('openai');
 const readline = require('readline');
 const path = require('path');
-const corsOptions = {
-    origin: 'https://executrainsim.azurewebsites.net'
-}
 
 
 const app = express();
@@ -43,7 +41,7 @@ const getClient = () => {
 
 const assistantsClient = getClient();
 
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'executrainsim-build')));
 app.get('*', (req, res) => {
