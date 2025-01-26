@@ -1,5 +1,5 @@
-# azure-deploy.yml (Alternative - Set WEBSITE_NODE_DEFAULT_VERSION via Azure CLI - Workaround)
-name: Deploy Node.js App to Azure
+# azure-deploy.yml (Refactored for Full App Deployment)
+name: Deploy Full Node.js App to Azure
 
 on:
   push:
@@ -19,28 +19,37 @@ jobs:
       with:
         node-version: '20.x'
 
-    - name: Install and Build
+    - name: Install and Build - Full App
       run: |
-        echo "Starting Install and Build process..."
+        echo "Starting Install and Build process for full application..."
+        echo "➡️ Building executrainsim (React Client)..."
         cd executrainsim
         npm ci
         npm run build
+        echo "✅ executrainsim build complete."
         cd ..
+        echo "➡️ Installing executrainserver (Node.js Server) dependencies..."
         cd executrainserver
         npm ci
-        echo "Install and build process complete."
+        echo "✅ executrainserver dependencies installed."
+        echo "✅ Install and build process for full application complete."
         cd ..
 
-    - name: Prepare Deployment Package
+    - name: Prepare Deployment Package - Full App
       run: |
-        echo "Creating deployment package..."
+        echo "📦 Creating deployment package for full application..."
         rm -rf deployment-package
         mkdir deployment-package
+        echo "   📂 Copying executrainserver files..."
         cp -r executrainserver/* deployment-package/
+        echo "   📂 Creating executrainsim-build directory..."
         mkdir deployment-package/executrainsim-build
+        echo "   📂 Copying executrainsim build output..."
         cp -r executrainsim/build/* deployment-package/executrainsim-build/
+        echo "   📂 Copying startup.sh..."
         cp startup.sh deployment-package/
-        echo "Deployment package created."
+        echo "✅ Deployment package for full application created."
+        echo "   🔍 Listing contents of deployment-package:"
         ls -l deployment-package
 
     - name: Login to Azure
@@ -48,7 +57,7 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Deploy to Azure Web App
+    - name: Deploy to Azure Web App - Full App
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'ExecuTrainSim'
@@ -57,6 +66,6 @@ jobs:
 
     - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # Workaround using Azure CLI
       run: |
-        echo "Setting WEBSITE_NODE_DEFAULT_VERSION App Setting using Azure CLI..."
+        echo "🛠️ Setting WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI..."
         az webapp config appsettings set --resource-group ExecuTrainSimGroup --name ExecuTrainSim --settings WEBSITE_NODE_DEFAULT_VERSION="~20"
-        echo "WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI."
+        echo "✅ WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI."

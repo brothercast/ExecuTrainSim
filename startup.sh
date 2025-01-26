@@ -1,7 +1,8 @@
 #!/bin/bash
-# startup.sh (Final, Bullet-Proof, Optimized Version)
+# startup.sh (Refactored for Full App - Serving Client Build)
+# Optimized for serving React client from executrainsim-build
 
-echo "Starting startup script - Bullet-Proof Version..."
+echo "Starting startup script - Full App Version..."
 
 # --- Debugging and Error Handling ---
 set -x  # Enable shell debugging - print every command
@@ -24,33 +25,35 @@ nvm use "$WEBSITE_NODE_DEFAULT_VERSION" || error_exit "Failed to set Node.js ver
 node -v
 npm -v
 
-# --- Navigate to Server Directory ---
+# --- Navigate to Deployment Package Root ---
 echo "$(date) - Current directory: $(pwd)"
-echo "$(date) - Listing contents of /home/site/wwwroot:"
-ls -l /home/site/wwwroot/
-cd /home/site/wwwroot || error_exit "Failed to navigate to /home/site/wwwroot"
-echo "$(date) - Successfully navigated to /home/site/wwwroot"
+echo "$(date) - Listing contents of /home/site/wwwroot/deployment-package:"
+ls -l /home/site/wwwroot/deployment-package/
+cd /home/site/wwwroot/deployment-package || error_exit "Failed to navigate to /home/site/wwwroot/deployment-package"
+echo "$(date) - Successfully navigated to /home/site/wwwroot/deployment-package"
 
 # --- Install Server Dependencies ---
 echo "$(date) - Checking and installing server dependencies with npm ci..."
-if [ -f package.json ]; then
+if [ -f package.json ]; then # Check for package.json in deployment-package (where server.js is)
   npm ci || error_exit "Server dependencies installation failed!"
   echo "$(date) - Server dependencies check complete"
 else
-  echo "$(date) - WARNING: package.json not found in /home/site/wwwroot. Skipping npm ci (assuming dependencies are deployed)."
+  echo "$(date) - WARNING: package.json not found in /home/site/wwwroot/deployment-package. Skipping npm ci (assuming dependencies are deployed)."
 fi
 
-# --- Start the Node.js Server using PM2 (Correct Command from Azure Docs) ---
-echo "$(date) - Starting the server with pm2-runtime..."
+# --- Serve Static Files (React App) and Start Server using PM2 ---
+echo "$(date) - Starting server with pm2-runtime, serving React client from ./executrainsim-build..."
 PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
-pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" || { # Correct PM2 command with --no-daemon
+
+# Correct pm2-runtime command to serve static files and start server.js
+pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --serve ./executrainsim-build --no-autorestart || {
   echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
   pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
   error_exit "pm2-runtime failed to start."
 }
 
-echo "$(date) - Successfully started server with pm2-runtime, listening on port $PORT"
-echo "$(date) - Application is running and listening on port $PORT"
+echo "$(date) - Successfully started server with pm2-runtime, serving React client and listening on port $PORT"
+echo "$(date) - Application is running and serving React client on port $PORT"
 
 # --- Keep Container Running ---
 echo "$(date) - Startup script execution finished. Keeping container running with tail -f /dev/null"

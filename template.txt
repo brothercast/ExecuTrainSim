@@ -1593,17 +1593,17 @@ app.listen(port, () => {
 ⭐✨ ✨⭐ \ NegotationModule.js ⭐✨
 🌟 ✨ 🌟                                                  🌟
 ⭐ ⭐
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import SlotMachineText from '../effects/SlotMachineText';
+import axios from 'axios';
 import Select, { SelectItem } from '../ui/Select';
 import { Info, Star, ChevronLeft, ChevronRight, Menu, RefreshCw, SendHorizontal, Bell, CheckSquare, Square, Edit, Save, X, ArrowUp, ArrowDown, Circle, CircleDot, ArrowLeft, ArrowRight, Activity, Layout, MessageSquare, UserCheck, Users, Flag, MessageCircle, Hand, Lightbulb, Swords, HandCoins, HandHeart, LandPlot, Speech, Handshake } from 'lucide-react';
 import { BarLoader, GridLoader, BeatLoader } from 'react-spinners';
 import '../../styles/AppStyles.css';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import DOMPurify from 'dompurify';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 // Define API Base URLs
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
