@@ -1,7 +1,7 @@
 #!/bin/bash
-# startup.sh - Robust Version with Explicit Port Handling & Logging
+# startup.sh - Refactored and Compliant Version for Azure App Service
 
-echo "Starting startup script - Robust Version..."
+echo "Starting startup script - Refactored and Compliant Version..."
 
 # --- Debugging and Error Handling ---
 set -x  # Enable shell debugging - print every command
@@ -14,9 +14,9 @@ exec &> >(tee -a "$LOG_FILE") # Redirect all output to log file and stdout
 
 echo "$(date) - Startup script started."
 
-# --- Determine Port - Prioritize WEBSITE_PORT, then PORT, then default ---
-PORT=${WEBSITE_PORT:-$PORT}  # Prioritize WEBSITE_PORT if set
-PORT=${PORT:-3000}          # Default to 3000 if neither is set
+# --- Determine Port - Prioritize WEBSITE_PORT, then PORT, then default to 8080 (Azure Convention) ---
+PORT=${WEBSITE_PORT:-$PORT}  # Prioritize WEBSITE_PORT if set by Azure
+PORT=${PORT:-8080}          # Default to 8080 if neither is set (Azure expects 8080)
 export PORT                  # Ensure PORT is exported for Node.js
 
 echo "$(date) - Determined PORT to be: $PORT" # Explicitly log the determined port
@@ -47,19 +47,19 @@ else
   echo "$(date) - WARNING: package.json not found in /home/site/wwwroot/deployment-package. Skipping npm ci (assuming dependencies are deployed)."
 fi
 
-# --- Start the Node.js Server using PM2 (Correct Command from Azure Docs) ---
-echo "$(date) - Starting server with pm2-runtime on port $PORT, serving React client from ./executrainsim-build..."
+# --- Start the Node.js Server using PM2 (Corrected Command with Error Handling) ---
+echo "$(date) - Starting server with pm2-runtime on port $PORT, serving React client (if configured in server.js)..."
 PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
 
-# Correct pm2-runtime command to serve static files and start server.js
-pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --no-autorestart {
+# Correct pm2-runtime command with standard if-then error checking
+if ! pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --no-autorestart; then
   echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
   pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
   error_exit "pm2-runtime failed to start."
-}
+fi
 
-echo "$(date) - Successfully started server with pm2-runtime, serving React client and listening on port $PORT"
-echo "$(date) - Application is running and serving React client on port $PORT"
+echo "$(date) - Successfully started server with pm2-runtime, listening on port $PORT"
+echo "$(date) - Application (server component) is running on port $PORT"
 
 # --- Keep Container Running ---
 echo "$(date) - Startup script execution finished. Keeping container running with tail -f /dev/null"
