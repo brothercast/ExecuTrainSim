@@ -1,8 +1,7 @@
 #!/bin/bash
-# startup.sh (Refactored for Full App - Serving Client Build)
-# Optimized for serving React client from executrainsim-build
+# startup.sh - Robust Version with Explicit Port Handling & Logging
 
-echo "Starting startup script - Full App Version..."
+echo "Starting startup script - Robust Version..."
 
 # --- Debugging and Error Handling ---
 set -x  # Enable shell debugging - print every command
@@ -14,6 +13,13 @@ LOG_FILE="/home/LogFiles/startup.log"
 exec &> >(tee -a "$LOG_FILE") # Redirect all output to log file and stdout
 
 echo "$(date) - Startup script started."
+
+# --- Determine Port - Prioritize WEBSITE_PORT, then PORT, then default ---
+PORT=${WEBSITE_PORT:-$PORT}  # Prioritize WEBSITE_PORT if set
+PORT=${PORT:-3000}          # Default to 3000 if neither is set
+export PORT                  # Ensure PORT is exported for Node.js
+
+echo "$(date) - Determined PORT to be: $PORT" # Explicitly log the determined port
 
 # --- Set Node.js Version (Redundant if WEBSITE_NODE_DEFAULT_VERSION is set, but safer) ---
 if [ -z "$WEBSITE_NODE_DEFAULT_VERSION" ]; then
@@ -41,12 +47,12 @@ else
   echo "$(date) - WARNING: package.json not found in /home/site/wwwroot/deployment-package. Skipping npm ci (assuming dependencies are deployed)."
 fi
 
-# --- Serve Static Files (React App) and Start Server using PM2 ---
-echo "$(date) - Starting server with pm2-runtime, serving React client from ./executrainsim-build..."
+# --- Start the Node.js Server using PM2 (Correct Command from Azure Docs) ---
+echo "$(date) - Starting server with pm2-runtime on port $PORT, serving React client from ./executrainsim-build..."
 PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
 
 # Correct pm2-runtime command to serve static files and start server.js
-pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --serve ./executrainsim-build --no-autorestart || {
+pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --serve ./executrainsim-build --no-autorestart || {
   echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
   pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
   error_exit "pm2-runtime failed to start."
