@@ -4,7 +4,7 @@ import {
     Card, CardContent, CardHeader, CardTitle,
 } from '../ui/Card';
 import Button from '../ui/Button';
-import Select from '../ui/Select';
+import Select, { SelectItem } from '../ui/Select';
 import Progress from '../ui/Progress';
 import SevenSegmentDisplay from '../effects/SevenSegmentDisplay';
 import { BarLoader, BeatLoader } from 'react-spinners';
@@ -41,6 +41,7 @@ import {
 } from 'recharts';
 import DOMPurify from 'dompurify';
 
+// Define API Base URL - Unified to API_BASE_URL - CORRECTED
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const parseAiJson = (apiResponse) => {
@@ -64,13 +65,12 @@ const parseAiJson = (apiResponse) => {
     }
 };
 
-const CybersecurityModule = ({ onReturn }) => {
-    // Core State Variables
+const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     const [role, setRole] = useState('');
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [difficulty, setDifficulty] = useState('');
     const [scenario, setScenario] = useState(null);
-     const [editableScenario, setEditableScenario] = useState(null);
+    const [editableScenario, setEditableScenario] = useState(null);
     const [alerts, setAlerts] = useState([]);
     const [selectedAlert, setSelectedAlert] = useState(null);
     const [progress, setProgress] = useState(0);
@@ -83,14 +83,14 @@ const CybersecurityModule = ({ onReturn }) => {
     const [notifications, setNotifications] = useState([]);
     const [responseOptions, setResponseOptions] = useState([]);
     const [simulationStarted, setSimulationStarted] = useState(false);
-     const [showInstructions, setShowInstructions] = useState(false);
+    const [showInstructions, setShowInstructions] = useState(false); // State for instructions toggle
     const [systemStatus, setSystemStatus] = useState({
         networkHealth: 100,
         serverLoad: 0,
         intrusionAttempts: 0,
     });
     const [performanceScore, setPerformanceScore] = useState(0);
-     const [performanceData, setPerformanceData] = useState([]);
+    const [performanceData, setPerformanceData] = useState([]);
     const [scenarioGenerated, setScenarioGenerated] = useState(false);
     const [logs, setLogs] = useState([]);
     const logsEndRef = useRef(null);
@@ -677,499 +677,527 @@ const CybersecurityModule = ({ onReturn }) => {
     };
 
      // Return JSX for the UI
-    return (
+     return (
         <div className="app-container">
             <header className="app-header">
                 <div className="header-box">
-                    <span className="header-title">Cybersecurity Challenge</span>
+                    <span className="header-title">{metadata.title}</span>
                     <Menu className="hamburger-icon" onClick={() => setDropdownVisible(!dropdownVisible)} />
                     {dropdownVisible && (
-                       <div className="dropdown-menu">
+                        <div className="dropdown-menu">
                             <div onClick={onReturn}>Return to Module Library</div>
+                            {modules.map((module, index) => (
+                                <div key={index} onClick={() => onSelectModule(module.title)}>
+                                    {module.title}
+                                </div>
+                            ))}
                         </div>
                     )}
-               </div>
+                </div>
             </header>
+
             <main className="content-grid">
                 <aside className="left-column">
+                    {/* Left Column - Details Card - Modularized Rendering */}
                     <Card className="details-card">
-                       <CardContent>
-                            {simulationStarted && scenario ? (
-                                 <div>
-                                    <div className="scenario-info">
-                                       <h3 style={{ position: 'relative' }} className="left-column-scenario-title">
-                                            {scenario.title}
-                                       </h3>
-                                       <div className="scenario-description left-column-scenario-description"
-                                             style={{ position: 'relative' }}>
-                                            {scenario.context.split('\n').map((line, i) => (
-                                                 <p key={i}>{line}</p>
-                                           ))}
-                                        </div>
-                                         <div className="role-info">
-                                            <strong>Role:</strong>
-                                           {role === 'custom' ? 'Custom Role' : roles.find((r) => r.value === role).title}
-                                            <br />
-                                            <strong>Difficulty:</strong> {difficultyLevels.find((level) => level.value === difficulty).title}
-                                       </div>
-                                   </div>
-                               </div>
-                            ) : (
-                                <>
-                                   <img
-                                        src="../images/CybersecurityModule.png"
-                                        alt="Scenario Illustration"
-                                        className="scenario-image"
-                                    />
-                                    {!scenario && (
-                                       <div className="module-description">
-                                           <h2>Cybersecurity Simulator</h2>
-                                            <p>
-                                                Welcome to the Cybersecurity Simulator, where you will
-                                               engage in a strategic battle of wits against a dynamic
-                                               simulation. Your objective is to make critical decisions to
-                                                defend against threats and protect your organization.
-                                           </p>
-                                           <Button
-                                                onClick={() => setShowInstructions(!showInstructions)}
-                                            >
-                                               {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
-                                           </Button>
-                                           {showInstructions && (
-                                               <div>
-                                                    {metadata.instructions.split('\n').map((line, i) => (
-                                                       <p key={i}>{line}</p>
-                                                   ))}
-                                               </div>
-                                           )}
-                                       </div>
-                                   )}
-                               </>
-                            )}
-                            {simulationStarted && activePhase === 'simulation' && (
-                                 <Card className="system-status-card">
-                                      <CardHeader>
-                                           <CardTitle>System Status</CardTitle>
-                                       </CardHeader>
-                                        <CardContent>
-                                           <div className="status-indicators">
-                                               <div className="indicator">
-                                                  <span>Time Left:</span>
-                                                   <SevenSegmentDisplay value={Math.floor(timeLeft / 60)} />
-                                               </div>
-                                                <div className="indicator">
-                                                   <span>Network Health:</span>
-                                                    <Progress value={systemStatus.networkHealth} max={100} />
-                                                </div>
-                                               <div className="indicator">
-                                                   <span>Server Load:</span>
-                                                  <Progress value={systemStatus.serverLoad} max={100} />
-                                              </div>
-                                               <div className="indicator">
-                                                    <span>Intrusions:</span>
-                                                    <span>{systemStatus.intrusionAttempts}</span>
-                                                </div>
-                                           </div>
-                                            <div className="progress-info">
-                                                <Progress value={progress} />
-                                                <span className="progress-text">{progress}% Complete</span>
-                                           </div>
-                                        </CardContent>
-                                    </Card>
-                           )}
-                       </CardContent>
-                  </Card>
-               </aside>
+                        <CardContent>
+                            {renderLeftColumnCardContent()} {/* Modularized rendering function */}
+                        </CardContent>
+                    </Card>
+                </aside>
+
                 <section className="main-content">
                     <div className="main-content-flex">
                         {errorMessage && (
-                           <div className="error-box">
-                               <h4 className="error-title">Error</h4>
+                            <div className="error-box">
+                                <h4 className="error-title">Error</h4>
                                 <p>{errorMessage}</p>
-                           </div>
+                            </div>
                         )}
-                        {!simulationComplete ? (
-                             scenario ? (
-                                  activePhase === 'setup' ?
-                                 <>
-                                   <CardHeader>
-                                     <div className="scenario-title-container">
-                                            {isScenarioEditable ? (
-                                                <input
-                                                    type="text"
-                                                    value={editableScenario.title}
-                                                    onChange={(e) => handleScenarioChange('title', e.target.value)}
-                                                    className="editable-scenario-title"
-                                                   style={{ fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%' }}
-                                               />
-                                         ) : (
-                                             <CardTitle>{scenario.title}</CardTitle>
-                                         )}
-                                            <div className="spinner-container">
-                                                {isFetching && (<BarLoader color="#0073e6" width="100%" />
-                                                )}
-                                            </div>
-
-                                            <div
-                                                className="scenario-description main-content-scenario-description"
-                                                style={{ position: 'relative' }}
-                                           >
-                                                {isScenarioEditable ? (
-                                                    <textarea
-                                                         value={editableScenario.context}
-                                                        onChange={(e) => handleScenarioChange('context', e.target.value)}
-                                                        className="editable-scenario-context"
-                                                        style={{ minHeight: '100px', resize: 'vertical' }}
-                                                    />
-                                                ) : (
-                                                   <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
-                                               )}
-
-                                           </div>
-                                        {scenarioGenerated && !isScenarioEditable && (
-                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
-                                               <span onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
-                                              </span>
-                                          </div>
-                                      )}
-                                      {isScenarioEditable && (
-                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap' }}>
-                                           <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
-                                               <Save style={{ marginLeft: '5px' }} />
-                                           </span>
-                                           <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
-                                              <X style={{ marginLeft: '5px' }} />
-                                           </span>
-                                         </div>
-                                      )}
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                          <div>
-                                             <div className="form-group">
-                                                  <label>Select your role</label>
-                                                <Select onValueChange={setRole} value={role} disabled={simulationStarted}>
-                                                      <option value="">Choose a role</option>
-                                                     {roles.map((r) => (
-                                                          <option key={r.value} value={r.value}>{r.title}</option>
-                                                      ))}
-                                               </Select>
-                                           </div>
-                                             <div className="form-group">
-                                                 <label>Select difficulty level</label>
-                                                <Select onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
-                                                      <option value="">Choose difficulty</option>
-                                                      {difficultyLevels.map((level) => (
-                                                          <option key={level.value} value={level.value}>{level.title}</option>
-                                                    ))}
-                                                 </Select>
-                                           </div>
-                                           {scenarioGenerated && (<Button onClick={startSimulation} disabled={isFetching}>
-                                                 {isFetching ? 'Starting...' : 'Start Simulation'}
-                                               </Button>)}
-                                       </div>
-                                    </CardContent>
-                                  </>
-                                  :
-                                 <div className="dashboard">
-                                    <div className="dashboard-grid">
-                                        <Card className="alerts-card">
-                                           <CardHeader>
-                                               <CardTitle>Active Alerts</CardTitle>
-                                               <div className="feedback-toggle-container">
-                                                   <label className="feedback-checkbox-label">
-                                                       <input
-                                                           type="checkbox"
-                                                            checked={showFeedback}
-                                                           onChange={toggleFeedback}
-                                                      />
-                                                        {showFeedback ?
-                                                           <CheckSquare className="checkbox-icon-filled"/>
-                                                            :
-                                                            <Square className="checkbox-icon-empty"/>}
-                                                       Show Feedback
-                                                  </label>
-                                               </div>
-                                           </CardHeader>
-                                             <CardContent>
-                                                {alerts.map((alert, index) => (
-                                                    <div
-                                                        key={alert.id}
-                                                        onClick={() => setSelectedAlert(alert)}
-                                                       className={`alert-item ${selectedAlert?.id === alert.id ? 'selected' : ''}`}
-                                                      draggable
-                                                        onDragStart={(e) => e.dataTransfer.setData('index', index)}
-                                                       onDrop={(e) => {
-                                                           e.preventDefault();
-                                                           const draggedIndex = e.dataTransfer.getData('index');
-                                                           handleAlertReorder(draggedIndex, index);
-                                                        }}
-                                                      onDragOver={(e) => e.preventDefault()}
-                                                   >
-                                                        <AlertTriangle className="icon" />
-                                                        <span>{alert.description}</span>
-                                                    </div>
-                                                ))}
-                                           </CardContent>
-                                       </Card>
-                                        <Card className="options-card">
-                                          <CardHeader>
-                                                <CardTitle>Response Options</CardTitle>
-                                               <div className="spinner-container">
-                                                 {isResponseLoading && <BeatLoader color="#0073e6" size={8} />}
-                                               </div>
-                                          </CardHeader>
-                                           <CardContent>
-                                              {selectedAlert && (
-                                                   <div className="options-container">
-                                                      {responseOptions && responseOptions.map((option, index) => (
-                                                           <Button
-                                                               key={index}
-                                                               onClick={() => handleResolution(index)}
-                                                                className={`option-button ${isResponseLoading ? 'loading' : ''}`}
-                                                               disabled={isResponseLoading || isButtonDisabled}
-                                                          >
-                                                               {option.name} - {option.description}
-                                                           </Button>
-                                                       ))}
-                                                    { selectedAlert?.options && selectedAlert.options.length > 0 && showFeedback && (
-                                                           <div className="feedback-box">
-                                                                <h4 className="feedback-title">
-                                                                   <Info className="icon" />
-                                                                    Feedback
-                                                                </h4>
-                                                                 {selectedAlert.options.map((option, index) => (
-                                                                   <p key={index}>{option.result}</p>
-                                                                ))}
-                                                          </div>
-                                                      )}
-                                                  </div>
-                                               )}
-                                           </CardContent>
-                                      </Card>
-                                  </div>
-                                    <Card className="logs-card">
-                                        <CardHeader>
-                                            <CardTitle>System Logs</CardTitle>
-                                        </CardHeader>
-                                       <CardContent className="logs-container">
-                                           <div className="logs-scroll">
-                                                {logs.map((log, index) => (
-                                                    <div key={index} className="log-item">
-                                                        <span className="log-message">{log.message}</span>
-                                                        <span className="log-timestamp">
-                                                            {log.timestamp.toLocaleTimeString()}
-                                                        </span>
-                                                   </div>
-                                                ))}
-                                                 <div ref={logsEndRef} />
-                                          </div>
-                                        </CardContent>
-                                  </Card>
-                                 </div>
-                             ) : (
-                                <Card className="setup-card">
-                                     <CardHeader>
-                                         <CardTitle>Setup Your Simulation</CardTitle>
-                                          <div className="spinner-container">
-                                                {isFetchingScenario && <BarLoader color="#0073e6" width="100%" />}
-                                          </div>
-                                     </CardHeader>
-                                     <CardContent>
-                                         <div className="form-group">
-                                             <label>Select your role</label>
-                                              <Select onValueChange={setRole} value={role} disabled={simulationStarted}>
-                                                  <option value="">Choose a role</option>
-                                                 {roles.map((r) => (
-                                                     <option key={r.value} value={r.value}>{r.title}</option>
-                                                ))}
-                                            </Select>
-                                         </div>
-                                          <div className="form-group">
-                                               <label>Select difficulty level</label>
-                                               <Select onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
-                                                  <option value="">Choose difficulty</option>
-                                                    {difficultyLevels.map((level) => (
-                                                      <option key={level.value} value={level.value}>{level.title}</option>
-                                                  ))}
-                                             </Select>
-                                          </div>
-                                           {!scenarioGenerated && (<Button onClick={generateScenario} disabled={isFetching}>
-                                              {isFetching ? 'Generating...' : 'Generate Scenario'}
-                                          </Button>)}
-                                         {scenarioGenerated && (<Button onClick={startSimulation} disabled={isFetching}>
-                                              {isFetching ? 'Starting...' : 'Start Simulation'}
-                                          </Button>)}
-                                      </CardContent>
-                                 </Card>
-                           )
-                        ) : (
-                             debriefing && (
-                                 <div className="debriefing-section">
-                                     <h4 className="debriefing-title">Simulation Debriefing</h4>
-                                       {radarData && (
-                                         <div style={{ width: '100%', height: 300 }}>
-                                             <ResponsiveContainer>
-                                                 <RadarChart data={radarData}>
-                                                     <PolarGrid />
-                                                     <PolarAngleAxis dataKey="skill" />
-                                                     <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                                                     <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                                                 </RadarChart>
-                                             </ResponsiveContainer>
-                                                <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
-                                                  This graph illustrates your scores in several key decision making tactics. The higher the score, the better you demonstrated that tactic.
-                                                </p>
-                                         </div>
-                                     )}
-                                     {performanceData.length > 0 && (
-                                         <div style={{ width: '100%', height: 300 }}>
-                                            <ResponsiveContainer>
-                                                 <LineChart data={performanceData}>
-                                                     <CartesianGrid strokeDasharray="3 3" />
-                                                     <XAxis dataKey="time" />
-                                                     <YAxis />
-                                                    <Tooltip />
-                                                    <Legend />
-                                                    <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
-                                                  </LineChart>
-                                              </ResponsiveContainer>
-                                             <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
-                                          </div>
-                                      )}
-                                       <p>
-                                            <strong>Summary:</strong>
-                                             {debriefing.summary?.split('\n').map((line, i) => (
-                                                <p key={i}>{line}</p>
-                                           ))}
-                                        </p>
-                                       <p>
-                                            <strong>Outcome:</strong> {debriefing.outcome}
-                                             {debriefing.outcomeReason && (
-                                                 <>
-                                                   <br/><strong>Reason:</strong> {debriefing.outcomeReason}
-                                                 </>
-                                             )}
-                                       </p>
-                                       <p>
-                                           <strong>Strengths:</strong>
-                                            {debriefing.strengths && debriefing.strengths.length > 0 ? (
-                                             <ul className="debriefing-list">
-                                                 {debriefing.strengths.map((strength, i) => (
-                                                   <li key={i}>
-                                                         {strength}
-                                                          {debriefing.tactics && debriefing.tactics[strength]?.examples &&
-                                                              <ul className="debriefing-examples">
-                                                                  {debriefing.tactics[strength].examples.map((ex, idx) => (
-                                                                      <li key={idx}>
-                                                                           {ex}
-                                                                       </li>
-                                                                  ))}
-                                                              </ul>
-                                                          }
-                                                     </li>
-                                                 ))}
-                                            </ul>
-                                       ) : 'None'}
-                                    </p>
-                                     <p>
-                                         <strong>Areas for Improvement:</strong>
-                                          {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
-                                             <ul className="debriefing-list">
-                                                {debriefing.areasForImprovement.map((area, i) => (
-                                                   <li key={i}>
-                                                      {area}
-                                                     {debriefing.tactics && debriefing.tactics[area]?.examples &&
-                                                         <ul className="debriefing-examples">
-                                                            {debriefing.tactics[area].examples.map((ex, idx) => (
-                                                                <li key={idx}>
-                                                                    {ex}
-                                                                  </li>
-                                                             ))}
-                                                         </ul>
-                                                         }
-                                                   </li>
-                                                ))}
-                                            </ul>
-                                         ) : 'None'}
-                                    </p>
-                                     <p>
-                                         <strong>Overall Score:</strong> {debriefing.overallScore}
-                                     </p>
-                                    <p>
-                                         <strong>Letter Grade:</strong> {debriefing.letterGrade}
-                                   </p>
-                                     <p>
-                                        <strong>Recommendations:</strong> {debriefing.advice}
-                                      </p>
-                                      <Button onClick={() => setShowTranscript(!showTranscript)}>
-                                           {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
-                                       </Button>
-                                      {showTranscript && (
-                                          <div className="transcript">
-                                               <h5>Full Transcript:</h5>
-                                              {debriefing.transcript.map((log, index) => (
-                                                    <div key={index}>
-                                                        <strong>Time:</strong> {log.timestamp.toLocaleTimeString()}
-                                                           <br />
-                                                       <strong>Message:</strong> {log.message}
-                                                   </div>
-                                                ))}
-                                         </div>
-                                      )}
-                                   <div className="action-buttons">
-                                         <Button onClick={() => setSimulationComplete(false)}>
-                                            Try Different Choices
-                                         </Button>
-                                        <Button onClick={resetSimulation}>
-                                            Run as Different Role
-                                        </Button>
-                                    </div>
-                               </div>
-                            )
-                         )}
-                     </div>
-                 </section>
-                  <section className="notifications">
-                     <h4>Notifications</h4>
-                       {notifications.map((note, index) => (
-                         <div key={index} className="notification">
-                               {note}
-                           </div>
-                       ))}
+                        {renderMainContent()}
+                    </div>
+                </section>
+                <section className="notifications">
+                    <h4>Notifications</h4>
+                    {notifications.map((note, index) => (
+                        <div key={index} className="notification">
+                            {note}
+                        </div>
+                    ))}
                 </section>
             </main>
         </div>
     );
+
+    function renderLeftColumnCardContent() {
+        return (
+            <>
+                {simulationStarted && scenario ? (
+                    <div className="scenario-info">
+                        <h3 className="left-column-scenario-title">
+                            {scenario.title}
+                        </h3>
+                        <div className="module-description left-column-scenario-description">
+                            <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                        </div>
+                        <div className="module-info">
+                            <strong>Role:</strong>
+                            {role === 'custom' ? 'Custom Role' : roles.find((r) => r.value === role).title}
+                            <br />
+                            <strong>Difficulty:</strong> {difficultyLevels.find((level) => level.value === difficulty).title}
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <img
+                            src={metadata.imageUrl}
+                            alt="Scenario Illustration"
+                            className="scenario-image"
+                        />
+                        {!scenario && (
+                            <div className="module-description">
+                                <h2>Cybersecurity Simulator</h2>
+                                <p>
+                                    Welcome to the Cybersecurity Simulator, where you will
+                                    engage in a strategic battle of wits against a dynamic
+                                    simulation. Your objective is to make critical decisions to
+                                    defend against threats and protect your organization.
+                                </p>
+                                <Button
+                                    onClick={() => setShowInstructions(!showInstructions)}
+                                >
+                                    {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
+                                </Button>
+                                {showInstructions && (
+                                    <div dangerouslySetInnerHTML={{ __html: metadata.instructions }} />
+                                )}
+                            </div>
+                        )}
+                    </>
+                )}
+                {simulationStarted && activePhase === 'simulation' && !showInstructions && (
+                    <Card className="system-status-card">
+                        <CardHeader>
+                            <CardTitle>System Status</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="status-indicators">
+                                <div className="indicator">
+                                    <span>Time Left:</span>
+                                    <SevenSegmentDisplay value={Math.floor(timeLeft / 60)} />
+                                </div>
+                                <div className="indicator">
+                                    <span>Network Health:</span>
+                                    <Progress value={systemStatus.networkHealth} max={100} />
+                                </div>
+                                <div className="indicator">
+                                    <span>Server Load:</span>
+                                    <Progress value={systemStatus.serverLoad} max={100} />
+                                </div>
+                                <div className="indicator">
+                                    <span>Intrusions:</span>
+                                    <span>{systemStatus.intrusionAttempts}</span>
+                                </div>
+                            </div>
+                            <div className="progress-info">
+                                <Progress value={progress} />
+                                <span className="progress-text">{progress}% Complete</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+            </>
+        );
+    }
+
+    function renderMainContent() {
+        if (simulationComplete) {
+            return renderMainContentDebriefing();
+        }
+
+        if (scenario) {
+            if (simulationStarted) {
+                return renderMainContentSimulationActive();
+            } else {
+                return renderMainContentSetupCard();
+            }
+        } else {
+            return renderMainContentCardSetup();
+        }
+    }
+
+
+    function renderMainContentSimulationActive() {
+        return (
+            <div className="dashboard">
+                <div className="dashboard-grid">
+                    {/* Alerts Card */}
+                    <Card className="alerts-card">
+                        <CardHeader>
+                            <CardTitle>Active Alerts</CardTitle>
+                            <div className="feedback-toggle-container">
+                                <label className="feedback-checkbox-label">
+                                    <input
+                                        type="checkbox"
+                                        checked={showFeedback}
+                                        onChange={toggleFeedback}
+                                    />
+                                    {showFeedback ?
+                                        <CheckSquare className="checkbox-icon-filled" />
+                                        :
+                                        <Square className="checkbox-icon-empty" />}
+                                    Show Feedback
+                                </label>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {alerts.map((alert, index) => (
+                                <div
+                                    key={alert.id}
+                                    onClick={() => setSelectedAlert(alert)}
+                                    className={`alert-item ${selectedAlert?.id === alert.id ? 'selected' : ''}`}
+                                    draggable
+                                    onDragStart={(e) => e.dataTransfer.setData('index', index)}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        const draggedIndex = e.dataTransfer.getData('index');
+                                        handleAlertReorder(draggedIndex, index);
+                                    }}
+                                    onDragOver={(e) => e.preventDefault()}
+                                >
+                                    <AlertTriangle className="icon" />
+                                    <span>{alert.description}</span>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                    {/* Options Card */}
+                    <Card className="options-card">
+                        <CardHeader>
+                            <CardTitle>Response Options</CardTitle>
+                            <div className="spinner-container">
+                                {isResponseLoading && <BeatLoader color="#0073e6" size={8} />}
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {selectedAlert && (
+                                <div className="options-container">
+                                    {responseOptions && responseOptions.map((option, index) => (
+                                        <Button
+                                            key={index}
+                                            onClick={() => handleResolution(index)}
+                                            className={`option-button ${isResponseLoading ? 'loading' : ''}`}
+                                            disabled={isResponseLoading || isButtonDisabled}
+                                        >
+                                            {option.name} - {option.description}
+                                        </Button>
+                                    ))}
+                                    {selectedAlert?.options && selectedAlert.options.length > 0 && showFeedback && (
+                                        <div className="feedback-box">
+                                            <h4 className="feedback-title">
+                                                <Info className="icon" />
+                                                Feedback
+                                            </h4>
+                                            {selectedAlert.options.map((option, index) => (
+                                                <p key={index}>{option.result}</p>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+                {/* Logs Card */}
+                <Card className="logs-card">
+                    <CardHeader>
+                        <CardTitle>System Logs</CardTitle>
+                    </CardHeader>
+                    <CardContent className="logs-container">
+                        <div className="logs-scroll">
+                            {logs.map((log, index) => (
+                                <div key={index} className="log-item">
+                                    <span className="log-message">{log.message}</span>
+                                    <span className="log-timestamp">
+                                        {log.timestamp.toLocaleTimeString()}
+                                    </span>
+                                </div>
+                            ))}
+                            <div ref={logsEndRef} />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    function renderMainContentSetupCard() {
+        return (
+            <>
+                <CardHeader>
+                    <div className="scenario-title-container">
+                        {isScenarioEditable ? (
+                            <input
+                                type="text"
+                                value={editableScenario.title}
+                                onChange={(e) => handleScenarioChange('title', e.target.value)}
+                                className="editable-scenario-title"
+                                style={{ fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%' }}
+                            />
+                        ) : (
+                            <CardTitle>{scenario.title}</CardTitle>
+                        )}
+                        <div className="spinner-container">
+                            {isFetching && (<BarLoader color="#0073e6" width="100%" />
+                            )}
+                        </div>
+
+                        <div
+                            className="scenario-description main-content-scenario-description"
+                            style={{ position: 'relative' }}
+                        >
+                            {isScenarioEditable ? (
+                                <textarea
+                                    value={editableScenario.context}
+                                    onChange={(e) => handleScenarioChange('context', e.target.value)}
+                                    className="editable-scenario-context"
+                                    style={{ minHeight: '100px', resize: 'vertical' }}
+                                />
+                            ) : (
+                                <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                            )}
+                        </div>
+                        {scenarioGenerated && !isScenarioEditable && (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
+                                <span onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
+                                </span>
+                            </div>
+                        )}
+                        {isScenarioEditable && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap' }}>
+                                <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
+                                    <Save style={{ marginLeft: '5px' }} />
+                                </span>
+                                <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
+                                    <X style={{ marginLeft: '5px' }} />
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div>
+                        <div className="form-group">
+                            <label>Select your role</label>
+                            <Select onValueChange={setRole} value={role} disabled={simulationStarted}>
+                                <SelectItem value="">Choose a role</SelectItem>
+                                {roles.map((r) => (
+                                    <SelectItem key={r.value} value={r.value}>{r.title}</SelectItem>
+                                ))}
+                            </Select>
+                        </div>
+                        <div className="form-group">
+                            <label>Select difficulty level</label>
+                            <Select onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
+                                <SelectItem value="">Choose difficulty</SelectItem>
+                                {difficultyLevels.map((level) => (
+                                    <SelectItem key={level.value} value={level.value}>{level.title}</SelectItem>
+                                ))}
+                            </Select>
+                        </div>
+                        {scenarioGenerated && (<Button onClick={startSimulation} disabled={isFetching}>
+                            {isFetching ? 'Starting...' : 'Start Simulation'}
+                        </Button>)}
+                    </div>
+                </CardContent>
+            </>
+        );
+    }
+    function renderMainContentCardSetup() {
+        return (
+            <Card className="setup-card">
+                <CardHeader>
+                    <CardTitle className="header-title">Setup Your Simulation</CardTitle>
+                    <div className="spinner-container">
+                        {isFetchingScenario && <BarLoader color="#0073e6" width="100%" />}
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="form-group">
+                        <label>Select your role</label>
+                        <Select onValueChange={setRole} value={role} disabled={simulationStarted}>
+                            <SelectItem value="">Choose a role</SelectItem>
+                            {roles.map((r) => (
+                                <SelectItem key={r.value} value={r.value}>{r.title}</SelectItem>
+                            ))}
+                        </Select>
+                    </div>
+                    <div className="form-group">
+                        <label>Select difficulty level</label>
+                        <Select onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
+                            <SelectItem value="">Choose difficulty</SelectItem>
+                            {difficultyLevels.map((level) => (
+                                <SelectItem key={level.value} value={level.value}>{level.title}</SelectItem>
+                            ))}
+                        </Select>
+                    </div>
+                    {!scenarioGenerated && (<Button onClick={generateScenario} disabled={isFetching}>
+                        {isFetching ? 'Generating...' : 'Generate Scenario'}
+                    </Button>)}
+                    {scenarioGenerated && (<Button onClick={startSimulation} disabled={isFetching}>
+                        {isFetching ? 'Starting...' : 'Start Simulation'}
+                    </Button>)}
+                </CardContent>
+            </Card>
+        );
+    }
+
+    function renderMainContentDebriefing() {
+        return (
+            <div className="debriefing-section">
+                <h4 className="debriefing-title">Simulation Debriefing</h4>
+                {radarData && (
+                    <div style={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <RadarChart data={radarData}>
+                                <PolarGrid />
+                                <PolarAngleAxis dataKey="skill" />
+                                <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                                <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                        <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
+                            This graph illustrates your scores in several key decision making tactics. The higher the score, the better you demonstrated that tactic.
+                        </p>
+                    </div>
+                )}
+                {performanceData.length > 0 && (
+                    <div style={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer>
+                            <LineChart data={performanceData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="time" />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                        <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
+                    </div>
+                )}
+                <p>
+                    <strong>Summary:</strong>
+                    {debriefing.summary?.split('\n').map((line, i) => (
+                        <p key={i}>{line}</p>
+                    ))}
+                </p>
+                <p>
+                    <strong>Outcome:</strong> {debriefing.outcome}
+                    {debriefing.outcomeReason && (
+                        <>
+                            <br /><strong>Reason:</strong> {debriefing.outcomeReason}
+                        </>
+                    )}
+                </p>
+                <p>
+                    <strong>Strengths:</strong>
+                    {debriefing.strengths && debriefing.strengths.length > 0 ? (
+                        <ul className="debriefing-list">
+                            {debriefing.strengths.map((strength, i) => (
+                                <li key={i}>
+                                    {strength}
+                                    {debriefing.tactics && debriefing.tactics[strength]?.examples &&
+                                        <ul className="debriefing-examples">
+                                            {debriefing.tactics[strength].examples.map((ex, idx) => (
+                                                <li key={idx}>
+                                                    {ex}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    }
+                                </li>
+                            ))}
+                        </ul>
+                    ) : 'None'}
+                </p>
+                <p>
+                    <strong>Areas for Improvement:</strong>
+                    {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
+                        <ul className="debriefing-list">
+                            {debriefing.areasForImprovement.map((area, i) => (
+                                <li key={i}>
+                                    {area}
+                                    {debriefing.tactics && debriefing.tactics[area]?.examples &&
+                                        <ul className="debriefing-examples">
+                                            {debriefing.tactics[area].examples.map((ex, idx) => (
+                                                <li key={idx}>
+                                                    {ex}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    }
+                                </li>
+                            ))}
+                        </ul>
+                    ) : 'None'}
+                </p>
+                <p>
+                    <strong>Overall Score:</strong> {debriefing.overallScore}
+                </p>
+                <p>
+                    <strong>Letter Grade:</strong> {debriefing.letterGrade}
+                </p>
+                <p>
+                    <strong>Recommendations:</strong> {debriefing.advice}</p>
+                <div className="action-buttons">
+                    <Button onClick={() => setSimulationComplete(false)}>
+                        Try Different Choices
+                    </Button>
+                    <Button onClick={resetSimulation}>
+                        Run as Different Role
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 };
  // Metadata for the component
  export const metadata = {
     title: 'Cybersecurity Challenge',
-     description: 'Engage in a realistic cybersecurity incident simulation. Make critical decisions to defend against threats and protect your organization.',
+     description: 'Engage in a realistic cybersecurity incident response simulation. Make critical decisions to defend against threats and protect your organization.',
     imageUrl: '../images/CybersecurityModule.png',
    instructions: `
          <h2>Gameplay Overview</h2>
-            <p>Welcome to the Cybersecurity Simulator, where you will
-             engage in a strategic battle of wits against a dynamic
-            simulation. Your objective is to navigate the simulation and make critical decisions to defend against threats and protect your organization.</p>
+            <p>Welcome to the Cybersecurity Challenge module. Here, you will step into the role of a cybersecurity professional and navigate a dynamic incident response simulation. Your objective is to effectively manage and mitigate cybersecurity threats to protect your organization's digital assets.</p>
           <h3>Simulation Mechanism</h3>
-             <p>The simulation is driven by AI-generated scenarios, which
-            become increasingly challenging based on your chosen
-            difficulty level. Once you select a role and difficulty,
-             you'll enter a dynamic scenario, where you will prioritize
-            alerts and select appropriate responses from response
-            options to manage the threat.</p>
-          <p>The system will respond based on your actions, adapting its
-           alerts and challenges. Your task is to anticipate their
-             moves, counter their tactics, and steer the simulation
-             towards the best outcome.</p>
+             <p>The simulation presents you with a series of cybersecurity incidents, each requiring strategic decision-making. As threats emerge, you'll need to:</p>
+             <ol>
+                <li><strong>Prioritize Alerts:</strong> Review active security alerts and prioritize them based on severity and potential impact.</li>
+                <li><strong>Select Responses:</strong> Choose appropriate response options from a range of strategic actions to counter each threat.</li>
+                <li><strong>Manage System Status:</strong> Monitor key system metrics such as network health, server load, and intrusion attempts, which are dynamically affected by your decisions and the unfolding scenario.</li>
+                <li><strong>Analyze Logs:</strong> Utilize system logs to gain deeper insights into the nature of the threats and the effectiveness of your responses.</li>
+            </ol>
+          <p>The AI-driven simulation engine adapts to your actions, creating a dynamic and challenging experience that tests your cybersecurity knowledge and decision-making skills under pressure.</p>
+           <h3>Key Skills Assessed</h3>
+             <ul>
+                <li><strong>Threat Prioritization:</strong> Evaluate and prioritize security alerts to focus on the most critical issues.</li>
+                <li><strong>Incident Response:</strong> Select and implement effective response strategies to mitigate cyber threats.</li>
+                <li><strong>Resource Management:</strong> Manage system resources and balance security measures with operational impact.</li>
+                 <li><strong>Strategic Decision-Making:</strong> Make informed decisions under pressure, considering both immediate and long-term consequences.</li>
+                 <li><strong>Adaptability and Learning:</strong> Adjust your strategies based on the evolving nature of threats and feedback from the simulation.</li>
+             </ul>
            <h3>Outcome and Debriefing</h3>
-             <p>At the conclusion of the simulation, you will receive a
-            detailed debriefing. This includes a summary of the
-           simulation, feedback on your strengths and areas for
-            improvement, an overall score, and recommendations for
-           future simulations. Use this feedback to refine your
-           skills and prepare for real-world scenarios.</p>
+             <p>Upon completing the simulation, you will receive a comprehensive debriefing that includes:</p>
+             <ul>
+                <li><strong>Performance Summary:</strong> An overview of your performance in handling the cybersecurity incidents.</li>
+                <li><strong>Strengths and Areas for Improvement:</strong> Identification of your key strengths in cybersecurity decision-making and areas where you can enhance your skills.</li>
+                <li><strong>Tactical Scorecard:</strong> Scores and feedback on key decision-making tactics, with examples from your simulation transcript.</li>
+                <li><strong>Overall Performance Score and Grade:</strong> A quantitative score and letter grade reflecting your overall effectiveness in the simulation.</li>
+                <li><strong>Personalized Advice:</strong> Actionable recommendations and advice to further develop your cybersecurity expertise.</li>
+                <li><strong>Full Simulation Transcript:</strong> A detailed transcript of all system logs and your actions during the simulation for in-depth review.</li>
+             </ul>
+           <p>The Cybersecurity Challenge module provides a realistic and engaging platform to sharpen your cybersecurity skills, enhance your strategic thinking, and prepare you to effectively lead incident response efforts in real-world scenarios.</p>
    `,
      component: CybersecurityModule,
  };
