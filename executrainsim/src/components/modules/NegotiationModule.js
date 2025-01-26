@@ -12,7 +12,7 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 // Define API Base URLs
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const IMAGE_API_URL = process.env.REACT_APP_IMAGE_API_URL || 'http://localhost:5001';
+const IMAGE_API_URL = process.env.REACT_APP_IMAGE_API_URL || 'http://localhost:5000';
 
 // Define negotiation types with titles
 const negotiationTypes = [
@@ -364,7 +364,8 @@ const NegotiationModule = ({ onReturn }) => {
         const prompt = `Illustrate the negotiation scenario titled "${title}" with context: "${context}". The illustration should resemble colorful, writing-free, diverse universal stock art from the 1990s with simple, clean lines and a focus on clarity.`;
 
         try {
-            const endpoint = `${IMAGE_API_URL}/api/dalle/image`;
+            // Corrected Endpoint URL - Using API_BASE_URL
+            const endpoint = `${API_BASE_URL}/api/dalle/image`;
             const response = await axios.post(endpoint, { prompt });
             setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));
             setImageStatus('success');
@@ -657,11 +658,11 @@ const NegotiationModule = ({ onReturn }) => {
         return `
             You are ${opponent.name}, the ${opponent.role} in a ${scenario.type} negotiation (${scenario.subType}).
             Your goal is to ${opponent.objective}. You are negotiating with ${player.name} who is in the role of ${player.role}.
-             Engage in a conversational style typical of roommates discussing a pet. Use casual, colloquial language, avoiding overly formal phrases.
+             Engage in a conversational style typical of a business relationship. Use casual, colloquial language, avoiding overly formal phrases.
              Do not use conversational filler or rephrase previous statements too frequently. Vary your sentence structure and word choice to prevent repetitive phrases.
             Maintain a ${settings.tone} tone and employ ${settings.complexity} and utilize the strategy of being ${settings.strategy}.
-           **When starting a new negotiation, always offer a concrete proposal to begin negotiation as your first message. This should be a specific and measurable offer related to the type of negotiation**. You must include a deadline. This does not apply to any response messages, only the first one.
-            **You will analyze the user's last message and address the key points they have raised, responding to the specifics of their argument. The difficulty level indicates your flexibility in this response, with an 'easy' opponent being more likely to concede and an 'expert' opponent being more likely to challenge each point.**
+           **When starting a new negotiation, always offer a concrete proposal to begin negotiation as your first message. This should be a specific and measurable offer related to the type of negotiation**. You could also include a deadline, or by when you'd like completion to occur. This does not apply to any response messages, only the first one.
+            **You will analyze the user's last message and address the key points they have raised, responding to the specifics of their argument. The difficulty level indicates your flexibility in this response, with an 'easy' opponent being more likely to concede and an 'expert' opponent being more likely to challenge each point, or be more aggressive or erratic.**
             Keep your responses concise and directly address the points raised by ${player.name}.
             Do not reveal your negotiation strategy or desired outcome explicitly.
             Base your responses solely on the conversation history provided, and do not repeat points already addressed:
