@@ -4,6 +4,7 @@ const axios = require('axios');
 const cors = require('cors');
 const { AzureOpenAI } = require('openai');
 const readline = require('readline');
+const path = require('path');
 
 const app = express();
 
@@ -41,6 +42,10 @@ const assistantsClient = getClient();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'executrainsim-build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'executrainsim-build', 'index.html'));
+});
 
 // Function to clear the console
 const clearConsole = () => {

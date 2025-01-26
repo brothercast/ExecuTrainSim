@@ -52,7 +52,7 @@ echo "$(date) - Starting server with pm2-runtime on port $PORT, serving React cl
 PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
 
 # Correct pm2-runtime command to serve static files and start server.js
-pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --serve ./executrainsim-build --no-autorestart || {
+pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --no-autorestart {
   echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
   pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
   error_exit "pm2-runtime failed to start."
