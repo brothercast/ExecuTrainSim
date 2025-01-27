@@ -1,3 +1,4 @@
+# azure-deploy.yml (Refactored for Full App Deployment)
 name: Deploy Full Node.js App to Azure
 
 on:
@@ -59,7 +60,7 @@ jobs:
       with:
         app-name: 'ExecuTrainSim'
         slot-name: 'production'
-        package: deployment-package/executrainsim-build 
+        package: deployment-package
 
     - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # Workaround using Azure CLI
       run: |
