@@ -42,7 +42,8 @@ import {
 import DOMPurify from 'dompurify';
 
 // Define API Base URL - Unified to API_BASE_URL - CORRECTED
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+console.log("[CybersecurityModule] API_BASE_URL at runtime:", API_BASE_URL); // Added log for debugging
 
 const parseAiJson = (apiResponse) => {
     if (!apiResponse) {

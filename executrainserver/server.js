@@ -43,7 +43,7 @@ app.use(cors());
 app.use(express.json());
 
 // Corrected path to serve static files from React app's build directory
-app.use(express.static(path.join(__dirname, '..', 'executrainsim', 'build')));
+app.use(express.static(path.join(__dirname, '../executrainsim-build')));
 
 // Serve the React app's index.html for all routes not handled by API endpoints
 app.get('*', (req, res) => {
