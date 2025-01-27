@@ -345,7 +345,6 @@ const NegotiationModule = ({ onReturn }) => {
         });
     };
 
-
     // Handler for changes to selected role
     const handleRoleChange = (newRole) => {
         setNegotiationRole(newRole);

@@ -529,7 +529,7 @@ h3 {
 }
 
 .debriefing-text-container {
- margin-bottom: 20px; /* Adds space below each block */
+ margin-top: 20px;
 }
 
 .debriefing-list {
