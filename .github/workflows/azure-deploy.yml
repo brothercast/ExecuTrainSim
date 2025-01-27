@@ -20,35 +20,35 @@ jobs:
 
     - name: Install and Build - Full Application
       run: |
-        log_step "Starting Install and Build process for full application..."
-        log_step "➡️ Building executrainsim (React Client)..."
+        echo "--- STEP: Starting Install and Build process for full application... ---" # Inlined log_step
+        echo "--- STEP: ➡️ Building executrainsim (React Client)... ---" # Inlined log_step
         cd executrainsim
         npm ci # Clean install for client
         npm run build
-        log_step "✅ executrainsim build complete."
+        echo "--- STEP: ✅ executrainsim build complete. ---" # Inlined log_step
         cd ..
-        log_step "➡️ Installing executrainserver (Node.js Server) dependencies..."
+        echo "--- STEP: ➡️ Installing executrainserver (Node.js Server) dependencies... ---" # Inlined log_step
         cd executrainserver
         npm ci # Clean install for server
-        log_step "✅ executrainserver dependencies installed."
-        log_step "✅ Install and build process for full application complete."
+        echo "--- STEP: ✅ executrainserver dependencies installed. ---" # Inlined log_step
+        echo "--- STEP: ✅ Install and build process for full application complete. ---" # Inlined log_step
         cd ..
 
     - name: Prepare Deployment Package - Full App
       run: |
-        log_step "📦 Creating deployment package for full application..."
+        echo "--- STEP: 📦 Creating deployment package for full application... ---" # Inlined log_step
         rm -rf deployment-package # Ensure clean deployment package
         mkdir deployment-package
-        log_step "   📂 Copying executrainserver files..."
+        echo "--- STEP:    📂 Copying executrainserver files... ---" # Inlined log_step
         cp -r executrainserver/* deployment-package/
-        log_step "   📂 Creating executrainsim-build directory..."
+        echo "--- STEP:    📂 Creating executrainsim-build directory... ---" # Inlined log_step
         mkdir deployment-package/executrainsim-build
-        log_step "   📂 Copying executrainsim build output..."
+        echo "--- STEP:    📂 Copying executrainsim build output... ---" # Inlined log_step
         cp -r executrainsim/build/* deployment-package/executrainsim-build/
-        log_step "   📂 Copying startup.sh to deployment root..."
+        echo "--- STEP:    📂 Copying startup.sh to deployment root... ---" # Inlined log_step
         cp startup.sh deployment-package/ # Ensure startup.sh is in the deployment root
-        log_step "✅ Deployment package for full application created."
-        log_step "   🔍 Listing contents of deployment-package:"
+        echo "--- STEP: ✅ Deployment package for full application created. ---" # Inlined log_step
+        echo "--- STEP:    🔍 Listing contents of deployment-package: ---" # Inlined log_step
         ls -l deployment-package # Debugging: list package contents
 
     - name: Login to Azure
@@ -65,6 +65,7 @@ jobs:
 
     - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # Workaround - might not be needed
       run: |
-        log_step "🛠️ Setting WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI..."
+        echo "--- STEP: 🛠️ Setting WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI... ---" # Inlined log_step
         az webapp config appsettings set --resource-group ExecuTrainSimGroup --name ExecuTrainSim --settings WEBSITE_NODE_DEFAULT_VERSION="~20"
-        log_step "✅ WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI."
+        echo "--- STEP: ✅ WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI. ---" # Inlined log_step
+
