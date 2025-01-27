@@ -1,84 +1,71 @@
-# azure-deploy.yml - Optimized Workflow (Previous Commit Packaging) for Azure
-name: 🚀 Deploy Full Node.js App to Azure Web App
+# azure-deploy.yml (Refactored for Full App Deployment) - SLIGHTLY OPTIMIZED
+name: Deploy Full Node.js App to Azure
 
 on:
   push:
     branches:
-      - main # or your production branch
-
-  workflow_dispatch: # Enable manual triggering from GitHub Actions UI
-
-env:
-  AZURE_WEBAPP_NAME: 'ExecuTrainSim' # ⚙️ Replace with your Azure Web App name
-  AZURE_RESOURCE_GROUP: 'ExecuTrainSimGroup' # ⚙️ Replace with your Azure Resource Group name
-  NODE_VERSION: '20.x' # ⚙️ Set your desired Node.js version here
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: production # Marks this as a production deployment
 
     steps:
-      - name: ☁️ Checkout code # ⬇️ Get code from GitHub repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: 🛠️ Set up Node.js environment # ⚙️ Define Node.js environment for build and deploy
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }} # Use version defined in workflow environment variables
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
 
-      - name: 🏗️ Install and Build Application # 📦 Install dependencies and build both client and server
-        run: |
-          echo "⚙️ Starting full application install and build process..."
-          echo "  ➡️ Building executrainsim (React Client)..."
-          cd executrainsim
-          npm ci # ⚡️ Use npm ci for clean and faster installs in CI
-          npm run build # 🔨 Build React application
-          echo "  ✅ executrainsim build completed successfully."
-          cd ..
-          echo "  ➡️ Installing executrainserver (Node.js Server) dependencies..."
-          cd executrainserver
-          npm ci # ⚡️ Use npm ci for clean and faster server dependency install
-          echo "  ✅ executrainserver dependencies installed successfully."
-          echo "✅ Full application install and build process completed."
-          cd .. # Return to workspace root
+    - name: Install and Build - Full App
+      run: |
+        echo "Starting Install and Build process for full application..."
+        echo "➡️ Building executrainsim (React Client)..."
+        cd executrainsim
+        npm ci
+        npm run build
+        echo "✅ executrainsim build complete."
+        cd ..
+        echo "➡️ Installing executrainserver (Node.js Server) dependencies..."
+        cd executrainserver
+        npm ci
+        echo "✅ executrainserver dependencies installed."
+        echo "✅ Install and build process for full application complete."
+        cd ..
+    - name: Prepare Deployment Package - Full App
+      run: |
+        echo "📦 Creating deployment package for full application..."
+        rm -rf deployment-package
+        mkdir deployment-package
+        echo "   📂 Copying executrainserver files..."
+        cp -r executrainserver/* deployment-package/
+        echo "   📂 Creating executrainsim-build directory..."
+        mkdir deployment-package/executrainsim-build
+        echo "   📂 Copying executrainsim build output..."
+        cp -r executrainsim/build/* deployment-package/executrainsim-build/
+        echo "   📂 Copying startup.sh..."
+        cp startup.sh deployment-package/
+        echo "✅ Deployment package for full application created."
+        echo "   🔍 Listing contents of deployment-package root:"
+        ls -l deployment-package
+        echo "  🔍 Listing contents of deployment-package/executrainsim-build:" # Added this line
+        ls -l deployment-package/executrainsim-build # Added this line
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 📦 Prepare Deployment Package # 📂 Create deployment package with necessary files in simpler 'deploy' structure (Previous Commit)
-        run: |
-          echo "📦 Preparing deployment package..."
-          rm -rf deploy # 🧹 Clean up any previous package - now using 'deploy' directory
-          mkdir deploy # 📂 Create a fresh 'deploy' directory - simpler structure
+    - name: Deploy to Azure Web App - Full App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'ExecuTrainSim'
+        slot-name: 'production'
+        package: deployment-package
 
-          echo "  ➡️ Copying executrainserver files to deploy root..." # Adjusted log message
-          cp -r executrainserver/* deploy/ # 📂 Copy server files directly to 'deploy' root
-
-          echo "  ➡️ Copying executrainsim build output to deploy/executrainsim-build..." # Adjusted log message
-          mkdir deploy/executrainsim-build # 📂 Create client build subdirectory in 'deploy'
-          cp -r executrainsim/build/* deploy/executrainsim-build/ # 📂 Copy client build to subdirectory in 'deploy'
-
-          echo "  ➡️ Copying startup.sh to deploy root..."
-          cp startup.sh deploy/ # 📂 Copy startup script to 'deploy' root
-
-          echo "✅ Deployment package created successfully at 'deploy'." # Adjusted log message
-          echo "  🔍 Listing contents of deploy root:" # Adjusted log message
-          ls -l deploy
-          echo "  🔍 Listing contents of deploy/executrainsim-build:" # Adjusted log message
-          ls -l deploy/executrainsim-build
-
-      - name: 🔒 Login to Azure # 🔑 Authenticate with Azure using Service Principal
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }} # 🔑 Use AZURE_CREDENTIALS secret
-
-      - name: 🚀 Deploy to Azure Web App # ☁️ Deploy 'deploy' package to Azure Web App - Adjusted package path
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }} # ⚙️ Use Web App name from environment variable
-          slot-name: 'production' # 🎯 Deploy to production slot
-          package: deploy # 📦 Deploy the 'deploy' directory - Adjusted package path
-
-      - name: ⚙️ Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # 🛠️ Ensure correct Node.js version on Azure
-        run: |
-          echo "⚙️ Setting WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI..."
-          az webapp config appsettings set --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.AZURE_WEBAPP_NAME }} --settings WEBSITE_NODE_DEFAULT_VERSION="${{ env.NODE_VERSION }}"
-          echo "✅ WEBSITE_NODE_DEFAULT_VERSION App Setting set to ${{ env.NODE_VERSION }} via Azure CLI."
+    - name: Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # Workaround using Azure CLI
+      run: |
+        echo "🛠️ Setting WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI..."
+        az webapp config appsettings set --resource-group ExecuTrainSimGroup --name ExecuTrainSim --settings WEBSITE_NODE_DEFAULT_VERSION="~20"
+        echo "✅ WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI."

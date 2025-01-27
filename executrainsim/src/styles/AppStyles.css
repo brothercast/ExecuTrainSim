@@ -527,6 +527,11 @@ h3 {
   display: flex;
   flex-direction: column;
 }
+
+.debriefing-text-container {
+ margin-bottom: 20px; /* Adds space below each block */
+}
+
 .debriefing-list {
   margin-left: 20px;
   padding: 0;
@@ -790,9 +795,11 @@ h3 {
   display: none;
 }
 .feedback-toggle-container {
-   margin-bottom: 10px;
-    padding: 0px 10px;
-  }
+  margin-bottom: 10px;
+  padding: 0px 10px;
+  display: flex;
+  flex-direction: row-reverse;
+}
 
 .chat-history-container {
   flex-grow: 1;

@@ -755,7 +755,7 @@ const NegotiationModule = ({ onReturn }) => {
            - Bargain
            - Emotional Appeal
            - Information Gathering
-            - Value-Based Approach
+           - Back Down
           Do not mention specific numbers or phrases.  Focus on high level strategies.
         Return the response in the JSON format:\\n        {\n            "options": [{ "name": "string", "description": "string" }]\n        }\n    `;
     // Handle user message API response
@@ -897,79 +897,87 @@ const NegotiationModule = ({ onReturn }) => {
     };
 
      // Send user reply and process AI response
-        const sendUserReply = async () => {
-            if (!userDraft.trim()) {
-              setErrorMessage('Please type a reply before sending.');
-              return;
-            }
-            setErrorMessage('');
-            const userMessage = convertLineBreaksToParagraphs(userDraft);
-            setUserDraft('');
-            setIsUserTurn(false);
-    
-            // Get the delay time
-            const delay = getRandomDelay();
-            const feedbackDelay = delay * 0.5;
-            const animationDelay = delay * 0.25;
-    
-            // Start loader animation
-              setTimeout(() => {
-              setIsFetchingOpponent(true);
-              }, animationDelay);
-    
-            // Add user message to chat history *immediately* - ENSURE ADDED ONLY ONCE HERE
-            console.log("[sendUserReply] Before first addMessageToHistory (User Message)"); // ADD THIS LOG
-            addMessageToHistory(userMessage, 'user');
-            console.log("[sendUserReply] After first addMessageToHistory (User Message)");  // ADD THIS LOG
-    
-    
-            // Generate feedback if the toggle is on and add it to history
-            let feedbackContent = null;
-            let scores;
-            if (showFeedback) {
-              const rawFeedback = await generateFeedback(userMessage);
-              if (rawFeedback) {
-                feedbackContent = rawFeedback.feedback;
-                scores = rawFeedback.scores;
-                setTimeout(() => {
-                  console.log("[sendUserReply] Before addMessageToHistory (Feedback Message)"); // ADD THIS LOG
-                  addMessageToHistory(feedbackContent, 'feedback', scores); // Add feedback message
-                  console.log("[sendUserReply] After addMessageToHistory (Feedback Message)");  // ADD THIS LOG
-                }, feedbackDelay);
-              }
-            }
-    
-            const outcome = await assessNegotiationOutcome();
-            if (outcome && outcome.outcome !== 'Draw') {
-              finalizeSimulation();
-              return;
-            }
-    
-            // Send Response
-            setTimeout(async () => {
-              // Directly pass the user's message to generateOpponentResponse
-              const opponentMessageContent = await generateOpponentResponse(userMessage);
-              if (opponentMessageContent) {
-                const initialScore = 0;
-                console.log("[sendUserReply] Before addMessageToHistory (Opponent Message)"); // ADD THIS LOG
-                addMessageToHistory(opponentMessageContent, 'opponent', initialScore); // Add opponent message
-                console.log("[sendUserReply] After addMessageToHistory (Opponent Message)");  // ADD THIS LOG
-              } else {
-                console.error("Opponent message is null or undefined.");
-                setErrorMessage('Failed to generate opponent message.');
-              }
-              setIsUserTurn(true);
-              setIsFetchingOpponent(false);
-              generateResponseOptions(scenario?.context);
-              let scaledProgress = (performanceScore / scenario.goal) * 100;
-              if (scaledProgress > 100) {
-                scaledProgress = 100;
-              }
-              updateProgress(scaledProgress, scores);
-              setCurrentTurnIndex((prev) => prev + 1);
-    
-            }, delay);
-          };
+     const sendUserReply = async () => {
+        if (!userDraft.trim()) {
+            setErrorMessage('Please type a reply before sending.');
+            return;
+        }
+
+        if (userDraft.trim() === "#KaosControl") {
+            console.log("Cheat command #KaosControl activated! Jumping to summary.");
+            setUserDraft(''); // Clear the input field
+            await finalizeSimulation();
+            return; // Exit this function immediately
+        }
+
+        setErrorMessage('');
+        const userMessage = convertLineBreaksToParagraphs(userDraft);
+        setUserDraft('');
+        setIsUserTurn(false);
+
+        // Get the delay time
+        const delay = getRandomDelay();
+        const feedbackDelay = delay * 0.5;
+        const animationDelay = delay * 0.25;
+
+        // Start loader animation
+          setTimeout(() => {
+          setIsFetchingOpponent(true);
+          }, animationDelay);
+
+        // Add user message to chat history *immediately* - ENSURE ADDED ONLY ONCE HERE
+        console.log("[sendUserReply] Before first addMessageToHistory (User Message)"); // ADD THIS LOG
+        addMessageToHistory(userMessage, 'user');
+        console.log("[sendUserReply] After first addMessageToHistory (User Message)");  // ADD THIS LOG
+
+
+        // Generate feedback if the toggle is on and add it to history
+        let feedbackContent = null;
+        let scores;
+        if (showFeedback) {
+          const rawFeedback = await generateFeedback(userMessage);
+          if (rawFeedback) {
+            feedbackContent = rawFeedback.feedback;
+            scores = rawFeedback.scores;
+            setTimeout(() => {
+              console.log("[sendUserReply] Before addMessageToHistory (Feedback Message)"); // ADD THIS LOG
+              addMessageToHistory(feedbackContent, 'feedback', scores); // Add feedback message
+              console.log("[sendUserReply] After addMessageToHistory (Feedback Message)");  // ADD THIS LOG
+            }, feedbackDelay);
+          }
+        }
+
+        const outcome = await assessNegotiationOutcome();
+        if (outcome && outcome.outcome !== 'Draw') {
+          finalizeSimulation();
+          return;
+        }
+
+        // Send Response
+        setTimeout(async () => {
+          // Directly pass the user's message to generateOpponentResponse
+          const opponentMessageContent = await generateOpponentResponse(userMessage);
+          if (opponentMessageContent) {
+            const initialScore = 0;
+            console.log("[sendUserReply] Before addMessageToHistory (Opponent Message)"); // ADD THIS LOG
+            addMessageToHistory(opponentMessageContent, 'opponent', initialScore); // Add opponent message
+            console.log("[sendUserReply] After addMessageToHistory (Opponent Message)");  // ADD THIS LOG
+          } else {
+            console.error("Opponent message is null or undefined.");
+            setErrorMessage('Failed to generate opponent message.');
+          }
+          setIsUserTurn(true);
+          setIsFetchingOpponent(false);
+          generateResponseOptions(scenario?.context);
+           let scaledProgress = (performanceScore / scenario.goal) * 100;
+          if (scaledProgress > 100) {
+            scaledProgress = 100;
+          }
+          updateProgress(scaledProgress, scores);
+          setCurrentTurnIndex((prev) => prev + 1);
+
+        }, delay);
+      };
 
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
@@ -1221,7 +1229,7 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
     //  Update the progress to factor in scores
-      const updateProgress = (newProgress, scores = null) => {
+    const updateProgress = (newProgress, scores = null) => {
         let scoreSum = 0;
         if (scores) {
           scoreSum = Object.values(scores).reduce((sum, score) => sum + score, 0);
@@ -1815,104 +1823,118 @@ const NegotiationModule = ({ onReturn }) => {
                         ) : (
                             debriefing && (
                                 <div className="debriefing-section">
-                                    <h4 className="debriefing-title">Simulation Debriefing</h4>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between'}}>
-                                    {radarData && (
-                                        <div style={{ width: '48%', height: 300 }}>
-                                            <ResponsiveContainer>
-                                                <RadarChart data={radarData}>
-                                                    <PolarGrid />
-                                                    <PolarAngleAxis dataKey="skill" />
-                                                    <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                                                    <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                                                </RadarChart>
-                                            </ResponsiveContainer>
-                                            <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
-                                                This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
-                                            </p>
-                                        </div>
-                                    )}
-                                     {performanceData.length > 0 && (
-                                        <div style={{ width: '48%', height: 300 }}>
-                                            <ResponsiveContainer>
-                                                <LineChart data={performanceData}>
-                                                    <CartesianGrid strokeDasharray="3 3" />
-                                                    <XAxis dataKey="turn" />
-                                                    <YAxis />
-                                                    <Tooltip />
-                                                    <Legend />
-                                                    <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
-                                                </LineChart>
-                                            </ResponsiveContainer>
-                                            <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
-                                        </div>
-                                    )}
-                                    </div>
-                                    <p>
-                                        <strong>Summary:</strong>
-                                        {debriefing.summary?.split('\n').map((line, i) => (
-                                            <p key={i}>{line}</p>
-                                        ))}
-                                    </p>
+                                <h4 className="debriefing-title">Simulation Debriefing</h4>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between'}}>
+                                   {radarData && (
+                                      <div style={{ width: '48%', height: 300 }}>
+                                         <ResponsiveContainer>
+                                             <RadarChart data={radarData}>
+                                                 <PolarGrid />
+                                                 <PolarAngleAxis dataKey="skill" />
+                                                 <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                                                 <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                                             </RadarChart>
+                                         </ResponsiveContainer>
+                                         <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
+                                             This graph illustrates your scores in several key negotiation tactics. The higher the score, the better you demonstrated that tactic.
+                                         </p>
+                                     </div>
+                                  )}
+                                    {performanceData.length > 0 && (
+                                       <div style={{ width: '48%', height: 300 }}>
+                                          <ResponsiveContainer>
+                                             <LineChart data={performanceData}>
+                                                <CartesianGrid strokeDasharray="3 3" />
+                                                <XAxis dataKey="turn" />
+                                                <YAxis />
+                                                <Tooltip />
+                                                <Legend />
+                                                <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                                            </LineChart>
+                                         </ResponsiveContainer>
+                                          <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
+                                      </div>
+                                  )}
+                               </div>
+                                <div className="debriefing-text-container">
+                                  <p>
+                                      <strong>Summary:</strong>
+                                      {debriefing.summary?.split('\n').map((line, i) => (
+                                         <p key={i}>{line}</p>
+                                      ))}
+                                  </p>
+                                </div>
+                                <div className="debriefing-text-container">
                                     <p>
                                         <strong>Outcome:</strong> {debriefing.outcome}
                                         {debriefing.outcomeReason && (
-                                            <>
-                                                <br /><strong>Reason:</strong> {debriefing.outcomeReason}
-                                            </>
-                                        )}
-                                    </p>
-                                    <p>
-                                        <strong>Strengths:</strong>
-                                        {debriefing.strengths && debriefing.strengths.length > 0 ? (
-                                            <ul className="debriefing-list">
-                                                {debriefing.strengths.map((strength, i) => (
-                                                    <li key={i}>
-                                                        {strength}
-                                                        {debriefing.tactics && debriefing.tactics[strength]?.examples &&
-                                                            <ul className="debriefing-examples">
-                                                                {debriefing.tactics[strength].examples.map((ex, idx) => (
-                                                                    <li key={idx}>
-                                                                        {ex}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        }
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        ) : 'None'}
-                                    </p>
-                                    <p>
-                                        <strong>Areas for Improvement:</strong>
-                                        {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
-                                            <ul className="debriefing-list">
+                                           <>
+                                              <br /><strong>Reason:</strong> {debriefing.outcomeReason}
+                                           </>
+                                         )}
+                                     </p>
+                                </div>
+                               <div className="debriefing-text-container">
+                                  <p>
+                                      <strong>Strengths:</strong>
+                                      {debriefing.strengths && debriefing.strengths.length > 0 ? (
+                                         <ul className="debriefing-list">
+                                            {debriefing.strengths.map((strength, i) => (
+                                               <li key={i}>
+                                                 {strength}
+                                                  {debriefing.tactics && debriefing.tactics[strength]?.examples &&
+                                                    <ul className="debriefing-examples">
+                                                      {debriefing.tactics[strength].examples.map((ex, idx) => (
+                                                         <li key={idx}>
+                                                            {ex}
+                                                         </li>
+                                                     ))}
+                                                 </ul>
+                                                }
+                                             </li>
+                                         ))}
+                                         </ul>
+                                     ) : 'None'}
+                                  </p>
+                                </div>
+                                    <div className="debriefing-text-container">
+                                        <p>
+                                            <strong>Areas for Improvement:</strong>
+                                            {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
+                                                <ul className="debriefing-list">
                                                 {debriefing.areasForImprovement.map((area, i) => (
                                                     <li key={i}>
                                                         {area}
                                                         {debriefing.tactics && debriefing.tactics[area]?.examples &&
                                                             <ul className="debriefing-examples">
-                                                                {debriefing.tactics[area].examples.map((ex, idx) => (
-                                                                    <li key={idx}>
-                                                                        {ex}
-                                                                    </li>
-                                                                ))}
+                                                            {debriefing.tactics[area].examples.map((ex, idx) => (
+                                                                <li key={idx}>
+                                                                    {ex}
+                                                                </li>
+                                                            ))}
                                                             </ul>
                                                         }
                                                     </li>
                                                 ))}
                                             </ul>
                                         ) : 'None'}
-                                    </p>
-                                    <p>
-                                        <strong>Overall Score:</strong> {debriefing.overallScore}
-                                    </p>
-                                    <p>
-                                        <strong>Letter Grade:</strong> {debriefing.letterGrade}
-                                    </p>
-                                    <p>
+                                        </p>
+                                    </div>
+                                        <div className="debriefing-text-container">
+                                        <p>
+                                            <strong>Overall Score:</strong> {debriefing.overallScore}
+                                        </p>
+                                    </div>
+                                        <div className="debriefing-text-container">
+                                        <p>
+                                            <strong>Letter Grade:</strong> {debriefing.letterGrade}
+                                        </p>
+                                    </div>
+                                    <div className="debriefing-text-container">
+                                        <p>
                                         <strong>Recommendations:</strong> {debriefing.advice}
                                     </p>
+                                    </div>
                                     <Button onClick={() => setShowTranscript(!showTranscript)}>
                                         {showTranscript ? 'Hide Transcript' : 'Show Transcript'}
                                     </Button>
