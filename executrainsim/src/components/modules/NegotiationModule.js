@@ -151,6 +151,7 @@ const logMessage = (message, data) => {
     console.log(`[DEBUG] ${message}:`, data);
 };
 
+
 // Timestamp logic for messages
 let lastTimestamp = new Date();
 const generateSequentialTimestamp = () => {
@@ -274,6 +275,12 @@ const NegotiationModule = ({ onReturn }) => {
     // Ref for scrolling chat history
     const chatHistoryContainerRef = useRef(null);
 
+    useLayoutEffect(() => {
+        if (chatHistoryContainerRef.current) {
+             chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+         }
+        }, [chatHistory]);
+
       // Function to convert HTML-like <p> tags to line breaks
       const convertParagraphsToLineBreaks = (htmlString) => {
         if (!htmlString) return '';
@@ -337,10 +344,10 @@ const NegotiationModule = ({ onReturn }) => {
 
         setChatHistory((prevHistory) => {
             const updatedHistory = [...prevHistory, newMessage];
-            // After setting the state, we trigger the scroll
-            if (chatHistoryContainerRef.current) { // Check if ref is valid before accessing current
-                chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
-            }
+             // After setting the state, we trigger the scroll
+                if (chatHistoryContainerRef.current) { // Check if ref is valid before accessing current
+                    chatHistoryContainerRef.current.scrollTop = chatHistoryContainerRef.current.scrollHeight;
+                }
             return updatedHistory
         });
     };
