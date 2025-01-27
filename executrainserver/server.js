@@ -5,12 +5,51 @@ const cors = require('cors');
 const { AzureOpenAI } = require('openai');
 const readline = require('readline');
 const path = require('path');
-
+const morgan = require('morgan'); // 🌟 HTTP request logger
 
 const app = express();
-const port = process.env.PORT || 5000; // Main API Server Port - CORRECT: Use process.env.PORT for Azure
+const port = process.env.PORT || 5000; // Main API Server Port - Azure uses process.env.PORT
 
-// Load environment variables
+// --- Logging Setup ---
+app.use(morgan('dev')); // 🌟 Enable HTTP request logging in 'dev' format
+
+const logMessage = (message, data) => {
+    console.log(`[DEBUG] ${message}:`, JSON.stringify(data, null, 2));
+};
+
+const logError = (message, error) => {
+    console.error(`[ERROR] ${message}:`, error); // 🌟 Dedicated error logger
+};
+
+// --- Environment Variable Checks (Startup Validation) ---
+const checkEnvironmentVariables = () => {
+    const requiredEnvVars = [
+        'AZURE_OPENAI_API_KEY',
+        'AZURE_OPENAI_ENDPOINT',
+        'AZURE_DEPLOYMENT_NAME',
+        'AZURE_OPENAI_API_VERSION',
+        'AZURE_ASSISTANT_API_VERSION',
+        'AZURE_DALLE_API_VERSION'
+    ];
+
+    requiredEnvVars.forEach(varName => {
+        if (!process.env[varName]) {
+            logError('Startup Error', `Missing required environment variable: ${varName}`); // 🌟 Log missing env vars as errors
+            throw new Error(`Missing required environment variable: ${varName}`); // 🌟 Terminate on missing env vars
+        }
+    });
+    console.log('[Startup] All required environment variables are present.'); // 🌟 Startup success log
+};
+
+try {
+    checkEnvironmentVariables(); // 🌟 Validate environment variables on startup
+} catch (error) {
+    console.error('[Startup Error] Application startup failed due to missing environment variables.');
+    process.exit(1); // 🌟 Exit process on startup failure
+}
+
+
+// Load environment variables (after checks - variables are assumed to be present now)
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
 const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
 const azureDeploymentName = process.env.AZURE_DEPLOYMENT_NAME;
@@ -18,17 +57,14 @@ const azureOpenAiAPIVersion = process.env.AZURE_OPENAI_API_VERSION;
 const azureAssistantAPIVersion = process.env.AZURE_ASSISTANT_API_VERSION;
 const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;
 
-// Define API endpoints
+// Define API endpoints - Construct endpoints once at startup
 const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;
 const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;
 
-const logMessage = (message, data) => {
-    console.log(`[DEBUG] ${message}:`, JSON.stringify(data, null, 2));
-};
 
-// Initialize Azure OpenAI Client
+// Initialize Azure OpenAI Client - Initialize client once at startup
 const getClient = () => {
-    console.log('Initializing Azure OpenAI Client');
+    console.log('[Startup] Initializing Azure OpenAI Client');
     return new AzureOpenAI({
         endpoint: azureEndpoint,
         apiVersion: azureAssistantAPIVersion,
@@ -36,41 +72,36 @@ const getClient = () => {
     });
 };
 
-const assistantsClient = getClient();
-
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'executrainsim-build')));
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'executrainsim-build', 'index.html'));
-});
-
-// Function to clear the console
-const clearConsole = () => {
-    process.stdout.write('\x1Bc');
-};
-
-// Setup readline to listen for keypress events
-readline.emitKeypressEvents(process.stdin);
-if (process.stdin.isTTY) {
-    process.stdin.setRawMode(true);
+let assistantsClient; // Declare outside try-catch to access in both scopes
+try {
+    assistantsClient = getClient(); // Initialize Azure OpenAI Client
+    console.log('[Startup] Azure OpenAI Client initialized successfully.'); // 🌟 Startup success log
+} catch (clientError) {
+    logError('Azure OpenAI Client Initialization Error', clientError); // 🌟 Log client init errors
+    console.error('[Startup Error] Failed to initialize Azure OpenAI Client. Check Azure OpenAI configuration.');
+    process.exit(1); // 🌟 Exit process on client init failure
 }
 
-// Listen for keypresses
-process.stdin.on('keypress', (str, key) => {
-    if (key.ctrl && key.name === 'l') {
-        clearConsole();
-    } else if (key.ctrl && key.name === 'c') {
-        console.log('Terminating the server...');
-        process.exit(); // Manually exit the process
-    }
+
+// --- Express Middleware ---
+app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(express.json()); // Parse JSON request bodies
+
+// --- Static File Serving ---
+const clientBuildPath = path.join(__dirname, 'executrainsim-build'); // 🌟 Define path to client build
+app.use(express.static(clientBuildPath)); // Serve static files from client build path
+
+// --- Route Handlers ---
+// Health Check Endpoint (for Azure health probes)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
 });
 
 // ChatGPT Text Generation Endpoint
 app.post('/api/generate', async (req, res) => {
     const { messages, temperature, max_tokens } = req.body;
 
-    logMessage('API Generate Request:', req.body); // Log request body
+    logMessage('API Generate Request Received', req.body);
 
     try {
         const response = await axios.post(chatGptEndpoint, {
@@ -85,7 +116,7 @@ app.post('/api/generate', async (req, res) => {
             }
         });
 
-        logMessage('API Generate Response:', response.data); // Log response data
+        logMessage('API Generate Response Sent', response.data);
 
         if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {
             let scenarioData = response.data.choices[0].message.content;
@@ -95,23 +126,17 @@ app.post('/api/generate', async (req, res) => {
                 const parsedScenario = JSON.parse(scenarioData);
                 res.json(parsedScenario);
             } catch (parseError) {
-                logMessage('Failed to parse JSON response:', { error: parseError.message, scenarioData });
-                res.status(500).json({
-                    error: 'Failed to parse JSON response',
-                    details: parseError.message
-                });
+                logError('JSON Parse Error in API Generate Response', parseError);
+                return res.status(500).json({ error: 'Failed to parse JSON response from OpenAI', details: parseError.message });
             }
         } else {
-            logMessage('Unexpected response structure', response.data)
-            throw new Error('Unexpected response structure');
+            const errorDetail = 'Unexpected response structure from OpenAI API';
+            logError('API Generate Response Error', errorDetail);
+            return res.status(500).json({ error: errorDetail, details: response.data });
         }
-    } catch (error) {
-        console.error('API Generate Error:', error);
-        logMessage('API Generate Error:', error);
-        res.status(500).json({
-            error: 'Failed to generate scenario',
-            details: error.response ? error.response.data : error.message
-        });
+    } catch (apiError) {
+        logError('API Generate Request Error', apiError);
+        res.status(500).json({ error: 'Failed to generate scenario', details: apiError.response ? apiError.response.data : apiError.message });
     }
 });
 
@@ -127,6 +152,8 @@ app.post('/api/dalle/image', async (req, res) => {
         style: "vivid"
     };
 
+    logMessage('DALL-E Image Request Received', { prompt: prompt });
+
     try {
         const response = await axios.post(dalleEndpoint, requestBody, {
             headers: {
@@ -135,25 +162,51 @@ app.post('/api/dalle/image', async (req, res) => {
             }
         });
 
+        logMessage('DALL-E Image Response Sent', response.data);
+
         if (response.data && response.data.data.length > 0) {
             const imageUrl = response.data.data[0].url;
             res.json({ imagePath: imageUrl });
         } else {
-            res.status(500).json({ error: 'No images generated.' });
+            const errorDetail = 'No images generated in DALL-E API response';
+            logError('DALL-E Image Generation Error', errorDetail);
+            return res.status(500).json({ error: errorDetail, details: response.data });
         }
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to generate image', details: error.message });
+    } catch (apiError) {
+        logError('DALL-E Image Request Error', apiError);
+        res.status(500).json({ error: 'Failed to generate image', details: apiError.response ? apiError.response.data : apiError.message });
     }
 });
 
-app.get('/health', (req, res) => {
-    res.status(200).send('OK');
+// --- Client App Serving (Fallback - MUST be last route) ---
+// * Catch-all route to serve React app's index.html for any unmatched routes *
+app.get('*', (req, res) => {
+    res.sendFile(path.join(clientBuildPath, 'index.html')); // Serve index.html for all other routes
 });
 
-console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);
-console.log(`DALL-E Endpoint: ${dalleEndpoint}`);
 
-app.listen(port, () => { // CORRECTED: Single app.listen using 'port' variable
-    console.log(`ExecuTrainSim Server listening on port ${port}`); // Main port log - CORRECT: Now logs the main port
-    console.log(`Press "CTRL + L" to clear Log.`);
+// --- Start Server ---
+app.listen(port, () => {
+    console.log(`ExecuTrainSim Server listening on port ${port}`); // 🌟 Startup log with port
+    console.log('[Startup] Server initialization complete.'); // 🌟 Startup completion log
+    console.log('Press "CTRL + L" to clear Log.');
 });
+
+// --- Console Clear on Ctrl+L (Optional for local dev - remove for production if not needed) ---
+if (process.env.NODE_ENV !== 'production') { // Disable readline in production
+    readline.emitKeypressEvents(process.stdin);
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode(true);
+    }
+    process.stdin.on('keypress', (str, key) => {
+        if (key.ctrl && key.name === 'l') {
+            clearConsole();
+        } else if (key.ctrl && key.name === 'c') {
+            console.log('Terminating the server...');
+            process.exit(); // Manually exit the process
+        }
+    });
+    const clearConsole = () => {
+        process.stdout.write('\x1Bc');
+    };
+}

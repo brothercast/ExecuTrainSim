@@ -1,66 +1,73 @@
 #!/bin/bash
-# startup.sh - Refactored and Compliant Version for Azure App Service
+# startup.sh - Optimized and Refactored for Azure App Service Robustness
 
-echo "Starting startup script - Refactored and Compliant Version..."
+echo "Starting startup script - Optimized Version..."
 
-# --- Debugging and Error Handling ---
+# --- Enhanced Debugging and Error Handling ---
 set -x  # Enable shell debugging - print every command
+set -e  # Exit immediately if a command exits with a non-zero status (error)
+
 error_exit() {
-  echo "ERROR: $1"
+  echo "$(date) - ERROR: $1"
   exit 1
 }
+
 LOG_FILE="/home/LogFiles/startup.log"
 exec &> >(tee -a "$LOG_FILE") # Redirect all output to log file and stdout
 
-echo "$(date) - Startup script started."
+echo "$(date) - Startup script execution started. Logging to $LOG_FILE"
 
-# --- Determine Port - Prioritize WEBSITE_PORT, then PORT, then default to 8080 (Azure Convention) ---
+# --- Determine Port - Azure Convention Prioritization ---
 PORT=${WEBSITE_PORT:-$PORT}  # Prioritize WEBSITE_PORT if set by Azure
-PORT=${PORT:-8080}          # Default to 8080 if neither is set (Azure expects 8080)
+PORT=${PORT:-8080}          # Default to 8080 if neither is set (Standard Azure Default)
 export PORT                  # Ensure PORT is exported for Node.js
 
-echo "$(date) - Determined PORT to be: $PORT" # Explicitly log the determined port
+echo "$(date) - Determined PORT for application to listen on: $PORT"
 
-# --- Set Node.js Version (Redundant if WEBSITE_NODE_DEFAULT_VERSION is set, but safer) ---
+# --- Set Node.js Version - Azure Standard Approach ---
+NODE_VERSION="~20" # Define desired Node.js version here (e.g., "~20", "~18", etc.)
 if [ -z "$WEBSITE_NODE_DEFAULT_VERSION" ]; then
-  echo "$(date) - WEBSITE_NODE_DEFAULT_VERSION is not set, setting to ~20"
-  export WEBSITE_NODE_DEFAULT_VERSION="~20" # Or your desired version
-fi
-echo "$(date) - Using Node.js version: $WEBSITE_NODE_DEFAULT_VERSION"
-nvm use "$WEBSITE_NODE_DEFAULT_VERSION" || error_exit "Failed to set Node.js version using NVM"
-node -v
-npm -v
-
-# --- Navigate to Deployment Package Root ---
-echo "$(date) - Current directory: $(pwd)"
-echo "$(date) - Listing contents of /home/site/wwwroot/deployment-package:"
-ls -l /home/site/wwwroot/deployment-package/
-cd /home/site/wwwroot/deployment-package || error_exit "Failed to navigate to /home/site/wwwroot/deployment-package"
-echo "$(date) - Successfully navigated to /home/site/wwwroot/deployment-package"
-
-# --- Install Server Dependencies ---
-echo "$(date) - Checking and installing server dependencies with npm ci..."
-if [ -f package.json ]; then # Check for package.json in deployment-package (where server.js is)
-  npm ci || error_exit "Server dependencies installation failed!"
-  echo "$(date) - Server dependencies check complete"
+  echo "$(date) - Setting WEBSITE_NODE_DEFAULT_VERSION to $NODE_VERSION for Azure App Service"
+  export WEBSITE_NODE_DEFAULT_VERSION="$NODE_VERSION"
 else
-  echo "$(date) - WARNING: package.json not found in /home/site/wwwroot/deployment-package. Skipping npm ci (assuming dependencies are deployed)."
+  echo "$(date) - WEBSITE_NODE_DEFAULT_VERSION already set to: $WEBSITE_NODE_DEFAULT_VERSION. Using existing value."
+fi
+echo "$(date) - Ensuring Node.js version: $WEBSITE_NODE_DEFAULT_VERSION is used."
+nvm use "$WEBSITE_NODE_DEFAULT_VERSION" || error_exit "Failed to set Node.js version using NVM. Check Node.js version availability on Azure."
+echo "$(date) - Node.js version: $(node -v)"
+echo "$(date) - npm version: $(npm -v)"
+
+# --- Navigate to Server Directory within Deployment Package ---
+SERVER_DIR="/home/site/wwwroot/deployment-package/executrainserver" # Explicitly define server directory
+echo "$(date) - Navigating to server directory: $SERVER_DIR"
+cd "$SERVER_DIR" || error_exit "Failed to navigate to server directory: $SERVER_DIR. Check deployment package structure."
+echo "$(date) - Successfully navigated to: $(pwd)"
+
+# --- Install Server Dependencies - Robust Check ---
+echo "$(date) - Checking for server dependencies and installing using npm ci..."
+if [ -f package.json ]; then
+  echo "$(date) - Found package.json. Proceeding with npm ci."
+  npm ci || error_exit "Server dependencies installation failed! Check npm ci logs for errors."
+  echo "$(date) - Server dependencies installation completed successfully."
+else
+  echo "$(date) - WARNING: package.json not found in server directory ($(pwd)). Assuming dependencies are pre-installed."
 fi
 
-# --- Start the Node.js Server using PM2 (Corrected Command with Error Handling) ---
-echo "$(date) - Starting server with pm2-runtime on port $PORT, serving React client (if configured in server.js)..."
-PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
+# --- Start Node.js Server using PM2 Runtime - Azure Compliant Start ---
+echo "$(date) - Starting Node.js server with pm2-runtime..."
+PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file path
 
-# Correct pm2-runtime command with standard if-then error checking
-if ! pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --no-autorestart; then
-  echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
-  pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
-  error_exit "pm2-runtime failed to start."
+# Robust pm2-runtime start with detailed error handling
+if ! pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --no-autorestart; then
+  echo "ERROR: pm2-runtime failed to start the server! Check PM2 logs for details: $PM2_LOG_FILE"
+  pm2 logs executrainserver --lines 100 --error # Show last 100 lines of pm2 error logs
+  error_exit "PM2 server startup failure. Terminating startup script."
+else
+  echo "$(date) - Node.js server started successfully with pm2-runtime on port $PORT. PM2 logs: $PM2_LOG_FILE"
 fi
 
-echo "$(date) - Successfully started server with pm2-runtime, listening on port $PORT"
-echo "$(date) - Application (server component) is running on port $PORT"
+echo "$(date) - Startup script execution completed successfully. Application should be running."
 
-# --- Keep Container Running ---
-echo "$(date) - Startup script execution finished. Keeping container running with tail -f /dev/null"
+# --- Keep Container Running - Azure Requirement ---
+echo "$(date) - Keeping container alive using 'tail -f /dev/null'"
 tail -f /dev/null
