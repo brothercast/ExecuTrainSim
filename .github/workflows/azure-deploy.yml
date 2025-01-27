@@ -62,8 +62,6 @@ jobs:
           echo "✅ Deployment package created successfully at 'deploy'." # Adjusted log message
           echo "  🔍 Listing contents of deploy root:" # Adjusted log message
           ls -l deploy
-          echo "  🔍 Listing contents of deploy/executrainserver:" # Adjusted log message
-          ls -l deploy/executrainserver
           echo "  🔍 Listing contents of deploy/executrainsim-build:" # Adjusted log message
           ls -l deploy/executrainsim-build
 
