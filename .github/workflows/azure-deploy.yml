@@ -68,10 +68,3 @@ jobs:
         log_step "🛠️ Setting WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI..."
         az webapp config appsettings set --resource-group ExecuTrainSimGroup --name ExecuTrainSim --settings WEBSITE_NODE_DEFAULT_VERSION="~20"
         log_step "✅ WEBSITE_NODE_DEFAULT_VERSION App Setting set via Azure CLI."
-
-# --- Helper function for logging (for clarity in YAML) ---
-functions:
-  log_step:
-    params: [message]
-    steps:
-      - run: echo "--- ${{ parameters.message }} ---"
