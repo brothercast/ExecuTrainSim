@@ -8,7 +8,7 @@ const path = require('path');
 const morgan = require('morgan'); // 🌟 HTTP request logger
 
 const app = express();
-const port = process.env.PORT || 5000; // Main API Server Port - Azure uses process.env.PORT
+const port = process.env.PORT || 8080; // Main API Server Port - Azure uses process.env.PORT
 
 // --- Logging Setup ---
 app.use(morgan('dev')); // 🌟 Enable HTTP request logging in 'dev' format
@@ -88,7 +88,7 @@ app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Parse JSON request bodies
 
 // --- Static File Serving ---
-const clientBuildPath = path.join(__dirname, 'executrainsim-build'); // 🌟 Define path to client build
+const clientBuildPath = path.join(__dirname, 'executrainsim-build'); // 🌟 Define path to client build - Adjusted path
 app.use(express.static(clientBuildPath)); // Serve static files from client build path
 
 // --- Route Handlers ---

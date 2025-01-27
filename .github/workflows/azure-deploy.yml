@@ -1,4 +1,4 @@
-# azure-deploy.yml - Optimized Workflow for Full App Deployment to Azure
+# azure-deploy.yml - Optimized Workflow (Previous Commit Packaging) for Azure
 name: 🚀 Deploy Full Node.js App to Azure Web App
 
 on:
@@ -43,44 +43,41 @@ jobs:
           echo "✅ Full application install and build process completed."
           cd .. # Return to workspace root
 
-      - name: 📦 Prepare Deployment Package # 📂 Create deployment package with necessary files in correct structure
+      - name: 📦 Prepare Deployment Package # 📂 Create deployment package with necessary files in simpler 'deploy' structure (Previous Commit)
         run: |
           echo "📦 Preparing deployment package..."
-          rm -rf deployment-package # 🧹 Clean up any previous package
-          mkdir deployment-package # 📂 Create a fresh deployment package directory
+          rm -rf deploy # 🧹 Clean up any previous package - now using 'deploy' directory
+          mkdir deploy # 📂 Create a fresh 'deploy' directory - simpler structure
 
-          echo "  📂 Creating deployment-package/executrainserver directory"
-          mkdir deployment-package/executrainserver # 📂 Create server subdirectory
-          echo "  ➡️ Copying executrainserver files..."
-          cp -r executrainserver/* deployment-package/executrainserver/ # 📂 Copy server files into subdirectory
+          echo "  ➡️ Copying executrainserver files to deploy root..." # Adjusted log message
+          cp -r executrainserver/* deploy/ # 📂 Copy server files directly to 'deploy' root
 
-          echo "  📂 Creating deployment-package/executrainsim-build directory"
-          mkdir deployment-package/executrainsim-build # 📂 Create client build subdirectory
-          echo "  ➡️ Copying executrainsim build output..."
-          cp -r executrainsim/build/* deployment-package/executrainsim-build/ # 📂 Copy client build to subdirectory
+          echo "  ➡️ Copying executrainsim build output to deploy/executrainsim-build..." # Adjusted log message
+          mkdir deploy/executrainsim-build # 📂 Create client build subdirectory in 'deploy'
+          cp -r executrainsim/build/* deploy/executrainsim-build/ # 📂 Copy client build to subdirectory in 'deploy'
 
-          echo "  ➡️ Copying startup.sh to deployment package root..."
-          cp startup.sh deployment-package/ # 📂 Copy startup script to package root
+          echo "  ➡️ Copying startup.sh to deploy root..."
+          cp startup.sh deploy/ # 📂 Copy startup script to 'deploy' root
 
-          echo "✅ Deployment package created successfully at deployment-package."
-          echo "  🔍 Listing contents of deployment-package root:"
-          ls -l deployment-package
-          echo "  🔍 Listing contents of deployment-package/executrainserver:"
-          ls -l deployment-package/executrainserver
-          echo "  🔍 Listing contents of deployment-package/executrainsim-build:"
-          ls -l deployment-package/executrainsim-build
+          echo "✅ Deployment package created successfully at 'deploy'." # Adjusted log message
+          echo "  🔍 Listing contents of deploy root:" # Adjusted log message
+          ls -l deploy
+          echo "  🔍 Listing contents of deploy/executrainserver:" # Adjusted log message
+          ls -l deploy/executrainserver
+          echo "  🔍 Listing contents of deploy/executrainsim-build:" # Adjusted log message
+          ls -l deploy/executrainsim-build
 
       - name: 🔒 Login to Azure # 🔑 Authenticate with Azure using Service Principal
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # 🔑 Use AZURE_CREDENTIALS secret
 
-      - name: 🚀 Deploy to Azure Web App # ☁️ Deploy deployment package to Azure Web App
+      - name: 🚀 Deploy to Azure Web App # ☁️ Deploy 'deploy' package to Azure Web App - Adjusted package path
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }} # ⚙️ Use Web App name from environment variable
           slot-name: 'production' # 🎯 Deploy to production slot
-          package: deployment-package # 📦 Deploy the 'deployment-package' directory
+          package: deploy # 📦 Deploy the 'deploy' directory - Adjusted package path
 
       - name: ⚙️ Set WEBSITE_NODE_DEFAULT_VERSION App Setting via Azure CLI # 🛠️ Ensure correct Node.js version on Azure
         run: |
