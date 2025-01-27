@@ -8,8 +8,8 @@ const path = require('path');
 
 const app = express();
 
-// Determine port based on environment (Azure expects 8080, local can be 5000)
-const port = process.env.PORT || 8080; // Default to 8080 for Azure, can be overridden by process.env.PORT for local
+// Determine port based on environment (Azure expects 8080, local can be overridden by process.env.PORT)
+const port = process.env.PORT || 8080;
 
 // Load environment variables
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
@@ -19,7 +19,7 @@ const azureOpenAiAPIVersion = process.env.AZURE_OPENAI_API_VERSION;
 const azureAssistantAPIVersion = process.env.AZURE_ASSISTANT_API_VERSION;
 const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;
 
-// Define API endpoints - now using the main 'port' for all
+// Define API endpoints - using the main 'port' for all
 const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;
 const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;
 
@@ -41,9 +41,13 @@ const assistantsClient = getClient();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'executrainsim-build')));
+
+// Corrected path to serve static files from React app's build directory
+app.use(express.static(path.join(__dirname, '..', 'executrainsim', 'build')));
+
+// Serve the React app's index.html for all routes not handled by API endpoints
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'executrainsim-build', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'executrainsim', 'build', 'index.html'));
 });
 
 // Function to clear the console
@@ -51,13 +55,13 @@ const clearConsole = () => {
     process.stdout.write('\x1Bc');
 };
 
-// Setup readline to listen for keypress events
+// Setup readline to listen for keypress events for local development convenience
 readline.emitKeypressEvents(process.stdin);
 if (process.stdin.isTTY) {
     process.stdin.setRawMode(true);
 }
 
-// Listen for keypresses
+// Listen for keypresses - for local development convenience (clear log, exit)
 process.stdin.on('keypress', (str, key) => {
     if (key.ctrl && key.name === 'l') {
         clearConsole();
@@ -147,6 +151,7 @@ app.post('/api/dalle/image', async (req, res) => {
     }
 });
 
+// Health check endpoint - useful for Azure App Service health probes
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });

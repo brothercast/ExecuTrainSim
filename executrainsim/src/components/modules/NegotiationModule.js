@@ -11,8 +11,10 @@ import DOMPurify from 'dompurify';
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 
 // Define API Base URLs
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const IMAGE_API_URL = process.env.REACT_APP_IMAGE_API_URL || API_BASE_URL; 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+console.log("[NegotiationModule] API_BASE_URL at runtime:", API_BASE_URL);
+console.log("[NegotiationModule] API_BASE_URL AFTER:", API_BASE_URL);
+const IMAGE_API_URL = process.env.REACT_APP_IMAGE_API_URL || API_BASE_URL;
 
 // Define negotiation types with titles
 const negotiationTypes = [
