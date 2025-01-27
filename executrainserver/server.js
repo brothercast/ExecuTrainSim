@@ -6,12 +6,10 @@ const { AzureOpenAI } = require('openai');
 const readline = require('readline');
 const path = require('path');
 
-
 const app = express();
 
-const port = process.env.PORT || 5000; // Main API Server Port - CORRECT: Use process.env.PORT for Azure
-const GPT_PORT = process.env.GPT_PORT || 5000; // Keep GPT_PORT for internal config/logging if needed
-const DALLE_PORT = process.env.DALLE_PORT || 5001; // Keep DALLE_PORT for internal config/logging if needed
+// Determine port based on environment (Azure expects 8080, local can be 5000)
+const port = process.env.PORT || 8080; // Default to 8080 for Azure, can be overridden by process.env.PORT for local
 
 // Load environment variables
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
@@ -21,7 +19,7 @@ const azureOpenAiAPIVersion = process.env.AZURE_OPENAI_API_VERSION;
 const azureAssistantAPIVersion = process.env.AZURE_ASSISTANT_API_VERSION;
 const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;
 
-// Define API endpoints
+// Define API endpoints - now using the main 'port' for all
 const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;
 const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;
 
@@ -45,7 +43,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'executrainsim-build')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'executrainsim-build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'executrainsim-build', 'index.html'));
 });
 
 // Function to clear the console
@@ -73,7 +71,7 @@ process.stdin.on('keypress', (str, key) => {
 app.post('/api/generate', async (req, res) => {
     const { messages, temperature, max_tokens } = req.body;
 
-    logMessage('API Generate Request:', req.body); // Log request body
+    logMessage('API Generate Request:', req.body);
 
     try {
         const response = await axios.post(chatGptEndpoint, {
@@ -88,7 +86,7 @@ app.post('/api/generate', async (req, res) => {
             }
         });
 
-        logMessage('API Generate Response:', response.data); // Log response data
+        logMessage('API Generate Response:', response.data);
 
         if (response.data.choices && response.data.choices[0] && response.data.choices[0].message) {
             let scenarioData = response.data.choices[0].message.content;
@@ -105,7 +103,7 @@ app.post('/api/generate', async (req, res) => {
                 });
             }
         } else {
-            logMessage('Unexpected response structure', response.data)
+            logMessage('Unexpected response structure', response.data);
             throw new Error('Unexpected response structure');
         }
     } catch (error) {
@@ -156,7 +154,7 @@ app.get('/health', (req, res) => {
 console.log(`ChatGPT Endpoint: ${chatGptEndpoint}`);
 console.log(`DALL-E Endpoint: ${dalleEndpoint}`);
 
-app.listen(port, () => { // CORRECTED: Single app.listen using 'port' variable
-    console.log(`ExecuTrainSim Server listening on port ${port}`); // Main port log - CORRECT: Now logs the main port
+app.listen(port, () => {
+    console.log(`ExecuTrainSim Server listening on port ${port}`);
     console.log(`Press "CTRL + L" to clear Log.`);
 });
