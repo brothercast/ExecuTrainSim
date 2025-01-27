@@ -88,7 +88,7 @@ app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Parse JSON request bodies
 
 // --- Static File Serving ---
-const clientBuildPath = path.join(__dirname, 'executrainsim-build'); // 🌟 Define path to client build - Adjusted path
+const clientBuildPath = path.join(__dirname, 'executrainsim'); // 🌟 Define path to client build - Adjusted path
 app.use(express.static(clientBuildPath)); // Serve static files from client build path
 
 // --- Route Handlers ---
