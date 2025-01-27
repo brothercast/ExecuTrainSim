@@ -1,69 +1,66 @@
 #!/bin/bash
-# Optimized startup.sh for Azure App Service - ExecuTrainSim
+# startup.sh - Refactored and Compliant Version for Azure App Service
 
-echo "Starting optimized startup script..."
+echo "Starting startup script - Refactored and Compliant Version..."
 
-# --- Setup & Debugging ---
-set -e  # Exit immediately on error
-set -x  # Enable debug mode for detailed logging
-
+# --- Debugging and Error Handling ---
+set -x  # Enable shell debugging - print every command
+error_exit() {
+  echo "ERROR: $1"
+  exit 1
+}
 LOG_FILE="/home/LogFiles/startup.log"
 exec &> >(tee -a "$LOG_FILE") # Redirect all output to log file and stdout
 
-echo "$(date) - Startup script initialized. Logging to $LOG_FILE"
+echo "$(date) - Startup script started."
 
-# --- Helper Functions ---
-error_exit() {
-  echo "$(date) - ERROR: $1"
-  echo "$(date) - Check $LOG_FILE for detailed logs."
-  exit 1
-}
+# --- Determine Port - Prioritize WEBSITE_PORT, then PORT, then default to 8080 (Azure Convention) ---
+PORT=${WEBSITE_PORT:-$PORT}  # Prioritize WEBSITE_PORT if set by Azure
+PORT=${PORT:-8080}          # Default to 8080 if neither is set (Azure expects 8080)
+export PORT                  # Ensure PORT is exported for Node.js
 
-log_step() {
-  echo "$(date) - --- STEP: $1 ---"
-}
+echo "$(date) - Determined PORT to be: $PORT" # Explicitly log the determined port
 
-# --- Determine Port (Azure Standard) ---
-PORT="${PORT:=8080}" # Default to 8080 if PORT env var is not set (Azure convention)
-export PORT
-log_step "Using PORT: $PORT"
-
-# --- Set Node.js Version (Explicitly set engine in package.json is preferred, but this is a fallback) ---
-NODE_VERSION="~20" # Specify desired Node.js version here
+# --- Set Node.js Version (Redundant if WEBSITE_NODE_DEFAULT_VERSION is set, but safer) ---
 if [ -z "$WEBSITE_NODE_DEFAULT_VERSION" ]; then
-  log_step "WEBSITE_NODE_DEFAULT_VERSION not set, defaulting to $NODE_VERSION"
-  export WEBSITE_NODE_DEFAULT_VERSION="$NODE_VERSION"
-else
-  log_step "WEBSITE_NODE_DEFAULT_VERSION is set to: $WEBSITE_NODE_DEFAULT_VERSION"
+  echo "$(date) - WEBSITE_NODE_DEFAULT_VERSION is not set, setting to ~20"
+  export WEBSITE_NODE_DEFAULT_VERSION="~20" # Or your desired version
 fi
-
-log_step "Setting Node.js version using NVM to: $WEBSITE_NODE_DEFAULT_VERSION"
-nvm use "$WEBSITE_NODE_DEFAULT_VERSION" || error_exit "Failed to set Node.js version using NVM. Ensure NVM is correctly configured."
+echo "$(date) - Using Node.js version: $WEBSITE_NODE_DEFAULT_VERSION"
+nvm use "$WEBSITE_NODE_DEFAULT_VERSION" || error_exit "Failed to set Node.js version using NVM"
 node -v
 npm -v
 
-# --- Navigate to Server Directory ---
-log_step "Navigating to server directory: /home/site/wwwroot/deployment-package/executrainserver"
-cd /home/site/wwwroot/deployment-package/executrainserver || error_exit "Navigation to server directory failed!"
+# --- Navigate to Deployment Package Root ---
+echo "$(date) - Current directory: $(pwd)"
+echo "$(date) - Listing contents of /home/site/wwwroot/deployment-package:"
+ls -l /home/site/wwwroot/deployment-package/
+cd /home/site/wwwroot/deployment-package || error_exit "Failed to navigate to /home/site/wwwroot/deployment-package"
+echo "$(date) - Successfully navigated to /home/site/wwwroot/deployment-package"
 
 # --- Install Server Dependencies ---
-log_step "Installing server dependencies using npm ci (clean install)..."
-if [ -f package.json ]; then
-  npm ci || error_exit "npm ci failed for server dependencies. Check npm logs for errors."
-  log_step "Server dependencies installed successfully."
+echo "$(date) - Checking and installing server dependencies with npm ci..."
+if [ -f package.json ]; then # Check for package.json in deployment-package (where server.js is)
+  npm ci || error_exit "Server dependencies installation failed!"
+  echo "$(date) - Server dependencies check complete"
 else
-  log_step "WARNING: package.json not found in server directory. Assuming dependencies are pre-installed."
+  echo "$(date) - WARNING: package.json not found in /home/site/wwwroot/deployment-package. Skipping npm ci (assuming dependencies are deployed)."
 fi
 
-# --- Start Server with PM2 ---
-log_step "Starting server with pm2-runtime..."
-PM2_LOG_FILE="/home/LogFiles/pm2.log"
-pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port "$PORT" --no-autorestart || error_exit "PM2 failed to start server. Check PM2 logs: $PM2_LOG_FILE"
+# --- Start the Node.js Server using PM2 (Corrected Command with Error Handling) ---
+echo "$(date) - Starting server with pm2-runtime on port $PORT, serving React client (if configured in server.js)..."
+PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file variable
 
-log_step "Server started successfully with pm2-runtime on port $PORT."
+# Correct pm2-runtime command with standard if-then error checking
+if ! pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --port $PORT --no-autorestart; then
+  echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
+  pm2 logs executrainserver --lines 50 --error # Show last 50 lines of pm2 error logs
+  error_exit "pm2-runtime failed to start."
+fi
 
-echo "$(date) - Startup script completed successfully."
+echo "$(date) - Successfully started server with pm2-runtime, listening on port $PORT"
+echo "$(date) - Application (server component) is running on port $PORT"
 
 # --- Keep Container Running ---
-log_step "Keeping container alive with tail -f /dev/null"
+echo "$(date) - Startup script execution finished. Keeping container running with tail -f /dev/null"
 tail -f /dev/null

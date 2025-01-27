@@ -879,14 +879,15 @@ const NegotiationModule = ({ onReturn }) => {
                 throw new Error('Opponent response is empty or invalid JSON.');
             }
              logMessage('Final Opponent Message', finalMessage);
-            const initialScore = 0;
-            addMessageToHistory(finalMessage.trim(), 'opponent', initialScore);
+            // Removed addMessageToHistory from here
+            // const initialScore = 0;
+            // addMessageToHistory(finalMessage.trim(), 'opponent', initialScore);
             const outcome = await assessNegotiationOutcome();
             if (outcome && outcome.outcome !== 'Draw') {
                 finalizeSimulation();
                 return;
             }
-            return finalMessage.trim();
+            return finalMessage.trim(); // Return only the message content
         } catch (error) {
              logMessage('Error generating opponent response:', error);
             console.error('Failed to generate opponent response:', error);
@@ -895,80 +896,80 @@ const NegotiationModule = ({ onReturn }) => {
         }
     };
 
-    // Send user reply and process AI response
-    const sendUserReply = async () => {
-        if (!userDraft.trim()) {
-          setErrorMessage('Please type a reply before sending.');
-          return;
-        }
-        setErrorMessage('');
-        const userMessage = convertLineBreaksToParagraphs(userDraft);
-        setUserDraft('');
-        setIsUserTurn(false);
-
-        // Get the delay time
-        const delay = getRandomDelay();
-        const feedbackDelay = delay * 0.5;
-        const animationDelay = delay * 0.25;
-
-        // Start loader animation
-          setTimeout(() => {
-          setIsFetchingOpponent(true);
-          }, animationDelay);
-
-        // Add user message to chat history *immediately* - ENSURE ADDED ONLY ONCE HERE
-        console.log("[sendUserReply] Before first addMessageToHistory (User Message)"); // ADD THIS LOG
-        addMessageToHistory(userMessage, 'user');
-        console.log("[sendUserReply] After first addMessageToHistory (User Message)");  // ADD THIS LOG
-
-
-        // Generate feedback if the toggle is on and add it to history
-        let feedbackContent = null;
-        let scores;
-        if (showFeedback) {
-          const rawFeedback = await generateFeedback(userMessage);
-          if (rawFeedback) {
-            feedbackContent = rawFeedback.feedback;
-            scores = rawFeedback.scores;
-            setTimeout(() => {
-              console.log("[sendUserReply] Before addMessageToHistory (Feedback Message)"); // ADD THIS LOG
-              addMessageToHistory(feedbackContent, 'feedback', scores); // Add feedback message
-              console.log("[sendUserReply] After addMessageToHistory (Feedback Message)");  // ADD THIS LOG
-            }, feedbackDelay);
-          }
-        }
-
-        const outcome = await assessNegotiationOutcome();
-        if (outcome && outcome.outcome !== 'Draw') {
-          finalizeSimulation();
-          return;
-        }
-
-        // Send Response
-        setTimeout(async () => {
-          // Directly pass the user's message to generateOpponentResponse
-          const opponentMessageContent = await generateOpponentResponse(userMessage);
-          if (opponentMessageContent) {
-            const initialScore = 0;
-            console.log("[sendUserReply] Before addMessageToHistory (Opponent Message)"); // ADD THIS LOG
-            addMessageToHistory(opponentMessageContent, 'opponent', initialScore); // Add opponent message
-            console.log("[sendUserReply] After addMessageToHistory (Opponent Message)");  // ADD THIS LOG
-          } else {
-            console.error("Opponent message is null or undefined.");
-            setErrorMessage('Failed to generate opponent message.');
-          }
-          setIsUserTurn(true);
-          setIsFetchingOpponent(false);
-          generateResponseOptions(scenario?.context);
-          let scaledProgress = (performanceScore / scenario.goal) * 100;
-          if (scaledProgress > 100) {
-            scaledProgress = 100;
-          }
-          updateProgress(scaledProgress, scores);
-          setCurrentTurnIndex((prev) => prev + 1);
-
-        }, delay);
-      };
+     // Send user reply and process AI response
+        const sendUserReply = async () => {
+            if (!userDraft.trim()) {
+              setErrorMessage('Please type a reply before sending.');
+              return;
+            }
+            setErrorMessage('');
+            const userMessage = convertLineBreaksToParagraphs(userDraft);
+            setUserDraft('');
+            setIsUserTurn(false);
+    
+            // Get the delay time
+            const delay = getRandomDelay();
+            const feedbackDelay = delay * 0.5;
+            const animationDelay = delay * 0.25;
+    
+            // Start loader animation
+              setTimeout(() => {
+              setIsFetchingOpponent(true);
+              }, animationDelay);
+    
+            // Add user message to chat history *immediately* - ENSURE ADDED ONLY ONCE HERE
+            console.log("[sendUserReply] Before first addMessageToHistory (User Message)"); // ADD THIS LOG
+            addMessageToHistory(userMessage, 'user');
+            console.log("[sendUserReply] After first addMessageToHistory (User Message)");  // ADD THIS LOG
+    
+    
+            // Generate feedback if the toggle is on and add it to history
+            let feedbackContent = null;
+            let scores;
+            if (showFeedback) {
+              const rawFeedback = await generateFeedback(userMessage);
+              if (rawFeedback) {
+                feedbackContent = rawFeedback.feedback;
+                scores = rawFeedback.scores;
+                setTimeout(() => {
+                  console.log("[sendUserReply] Before addMessageToHistory (Feedback Message)"); // ADD THIS LOG
+                  addMessageToHistory(feedbackContent, 'feedback', scores); // Add feedback message
+                  console.log("[sendUserReply] After addMessageToHistory (Feedback Message)");  // ADD THIS LOG
+                }, feedbackDelay);
+              }
+            }
+    
+            const outcome = await assessNegotiationOutcome();
+            if (outcome && outcome.outcome !== 'Draw') {
+              finalizeSimulation();
+              return;
+            }
+    
+            // Send Response
+            setTimeout(async () => {
+              // Directly pass the user's message to generateOpponentResponse
+              const opponentMessageContent = await generateOpponentResponse(userMessage);
+              if (opponentMessageContent) {
+                const initialScore = 0;
+                console.log("[sendUserReply] Before addMessageToHistory (Opponent Message)"); // ADD THIS LOG
+                addMessageToHistory(opponentMessageContent, 'opponent', initialScore); // Add opponent message
+                console.log("[sendUserReply] After addMessageToHistory (Opponent Message)");  // ADD THIS LOG
+              } else {
+                console.error("Opponent message is null or undefined.");
+                setErrorMessage('Failed to generate opponent message.');
+              }
+              setIsUserTurn(true);
+              setIsFetchingOpponent(false);
+              generateResponseOptions(scenario?.context);
+              let scaledProgress = (performanceScore / scenario.goal) * 100;
+              if (scaledProgress > 100) {
+                scaledProgress = 100;
+              }
+              updateProgress(scaledProgress, scores);
+              setCurrentTurnIndex((prev) => prev + 1);
+    
+            }, delay);
+          };
 
     // dismiss the feedback bubble
     const dismissFeedback = (messageId) => {
