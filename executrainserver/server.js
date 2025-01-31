@@ -5,22 +5,22 @@ const cors = require('cors');
 const { AzureOpenAI } = require('openai');
 const readline = require('readline');
 const path = require('path');
-const morgan = require('morgan'); // 🌟 HTTP request logger
-const compression = require('compression');
+const morgan = require('morgan');
+const compression = require('compression'); // Import compression
 const rateLimit = require('express-rate-limit');
 
 const app = express();
-const port = process.env.PORT || 8080; // Main API Server Port - Azure uses process.env.PORT
+const port = process.env.PORT || 8080;
 
 // --- Logging Setup ---
-app.use(morgan('dev')); // 🌟 Enable HTTP request logging in 'dev' format
+app.use(morgan('dev'));
 
 const logMessage = (message, data) => {
     console.log(`[DEBUG] ${message}:`, JSON.stringify(data, null, 2));
 };
 
 const logError = (message, error) => {
-    console.error(`[ERROR] ${message}:`, error); // 🌟 Dedicated error logger
+    console.error(`[ERROR] ${message}:`, error);
 };
 
 // --- Environment Variable Checks (Startup Validation) ---
@@ -36,20 +36,19 @@ const checkEnvironmentVariables = () => {
 
     requiredEnvVars.forEach(varName => {
         if (!process.env[varName]) {
-            logError('Startup Error', `Missing required environment variable: ${varName}`); // 🌟 Log missing env vars as errors
-            throw new Error(`Missing required environment variable: ${varName}`); // 🌟 Terminate on missing env vars
+            logError('Startup Error', `Missing required environment variable: ${varName}`);
+            throw new Error(`Missing required environment variable: ${varName}`);
         }
     });
-    console.log('[Startup] All required environment variables are present.'); // 🌟 Startup success log
+    console.log('[Startup] All required environment variables are present.');
 };
 
 try {
-    checkEnvironmentVariables(); // 🌟 Validate environment variables on startup
+    checkEnvironmentVariables();
 } catch (error) {
     console.error('[Startup Error] Application startup failed due to missing environment variables.');
-    process.exit(1); // 🌟 Exit process on startup failure
+    process.exit(1);
 }
-
 
 // Load environment variables (after checks - variables are assumed to be present now)
 const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
@@ -63,7 +62,6 @@ const azureDalleAPIVersion = process.env.AZURE_DALLE_API_VERSION;
 const chatGptEndpoint = `${azureEndpoint}/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureOpenAiAPIVersion}`;
 const dalleEndpoint = `${azureEndpoint}/openai/deployments/Dalle3/images/generations?api-version=${azureDalleAPIVersion}`;
 
-
 // Initialize Azure OpenAI Client - Initialize client once at startup
 const getClient = () => {
     console.log('[Startup] Initializing Azure OpenAI Client');
@@ -74,32 +72,33 @@ const getClient = () => {
     });
 };
 
-let assistantsClient; // Declare outside try-catch to access in both scopes
+let assistantsClient;
 try {
-    assistantsClient = getClient(); // Initialize Azure OpenAI Client
-    console.log('[Startup] Azure OpenAI Client initialized successfully.'); // 🌟 Startup success log
+    assistantsClient = getClient();
+    console.log('[Startup] Azure OpenAI Client initialized successfully.');
 } catch (clientError) {
-    logError('Azure OpenAI Client Initialization Error', clientError); // 🌟 Log client init errors
+    logError('Azure OpenAI Client Initialization Error', clientError);
     console.error('[Startup Error] Failed to initialize Azure OpenAI Client. Check Azure OpenAI configuration.');
-    process.exit(1); // 🌟 Exit process on client init failure
+    process.exit(1);
 }
 
 // --- Express Middleware ---
 const corsOptions = {
-    origin: 'https://executrainsim.azurewebsites.net', // Replace with your actual domain
+    origin: 'https://executrainsim.azurewebsites.net',
     optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions)); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Parse JSON request bodies
+app.use(cors(corsOptions));
+app.use(express.json());
+// Enable compression BEFORE static files are served
+app.use(compression({ level: 6 }));
 
 // --- Static File Serving ---
 const clientBuildPath = path.join(__dirname, 'executrainsim-build');
-app.use(compression({ level: 6 }));
 app.use(express.static(clientBuildPath, {
-    maxAge: '1d', // Cache static assets for a day
+    maxAge: '1d',
     setHeaders: (res, path) => {
         if (path.endsWith('.html')) {
-            res.setHeader('Cache-Control', 'no-cache, no-store'); // Prevent caching HTML
+            res.setHeader('Cache-Control', 'no-cache, no-store');
         }
     }
 }));
@@ -107,20 +106,16 @@ app.use(express.static(clientBuildPath, {
 // --- API Rate Limiting ---
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per 15 minutes
+    max: 100,
     message: "Too many requests from this IP, please try again after 15 minutes"
 });
-
-app.use('/api/', apiLimiter); // Apply to all API routes
-
+app.use('/api/', apiLimiter);
 
 // --- Route Handlers ---
-// Health Check Endpoint (for Azure health probes)
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
 });
 
-// ChatGPT Text Generation Endpoint
 app.post('/api/generate', async (req, res) => {
     const { messages, temperature, max_tokens } = req.body;
 
@@ -163,7 +158,6 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-// DALL-E Image Generation Endpoint
 app.post('/api/dalle/image', async (req, res) => {
     const { prompt } = req.body;
 
@@ -202,26 +196,24 @@ app.post('/api/dalle/image', async (req, res) => {
 });
 
 // --- Client App Serving (Fallback - MUST be last route) ---
-// * Catch-all route to serve React app's index.html for any unmatched routes *
 app.get('*', (req, res) => {
     try {
-      res.sendFile(path.join(clientBuildPath, 'index.html')); // Serve index.html for all other routes
+      res.sendFile(path.join(clientBuildPath, 'index.html'));
     } catch (error) {
       console.error(`[ROUTING ERROR] Failed to serve index.html: ${error.message}`);
       res.status(500).send('Application loading failed - contact support');
     }
 });
 
-
 // --- Start Server ---
 app.listen(port, () => {
-    console.log(`ExecuTrainSim Server listening on port ${port}`); // 🌟 Startup log with port
-    console.log('[Startup] Server initialization complete.'); // 🌟 Startup completion log
+    console.log(`ExecuTrainSim Server listening on port ${port}`);
+    console.log('[Startup] Server initialization complete.');
     console.log('Press "CTRL + L" to clear Log.');
 });
 
 // --- Console Clear on Ctrl+L (Optional for local dev - remove for production if not needed) ---
-if (process.env.NODE_ENV !== 'production') { // Disable readline in production
+if (process.env.NODE_ENV !== 'production') {
     readline.emitKeypressEvents(process.stdin);
     if (process.stdin.isTTY) {
         process.stdin.setRawMode(true);
@@ -231,7 +223,7 @@ if (process.env.NODE_ENV !== 'production') { // Disable readline in production
             clearConsole();
         } else if (key.ctrl && key.name === 'c') {
             console.log('Terminating the server...');
-            process.exit(); // Manually exit the process
+            process.exit();
         }
     });
     const clearConsole = () => {
