@@ -88,8 +88,15 @@ app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Parse JSON request bodies
 
 // --- Static File Serving ---
-const clientBuildPath = path.join(__dirname, 'executrainsim'); // 🌟 Define path to client build - Adjusted path
-app.use(express.static(clientBuildPath)); // Serve static files from client build path
+const clientBuildPath = path.join(__dirname, 'executrainsim-build');  
+app.use(express.static(clientBuildPath, {
+    maxAge: '1d', // Cache static assets
+    setHeaders: (res, path) => {
+        if (path.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store');
+        }
+    }
+}));
 
 // --- Route Handlers ---
 // Health Check Endpoint (for Azure health probes)
@@ -178,10 +185,13 @@ app.post('/api/dalle/image', async (req, res) => {
     }
 });
 
-// --- Client App Serving (Fallback - MUST be last route) ---
-// * Catch-all route to serve React app's index.html for any unmatched routes *
 app.get('*', (req, res) => {
-    res.sendFile(path.join(clientBuildPath, 'index.html')); // Serve index.html for all other routes
+    try {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
+    } catch (error) {
+        console.error(`[ROUTING ERROR] Failed to serve index.html: ${error.message}`);
+        res.status(500).send('Application loading failed - contact support');
+    }
 });
 
 
