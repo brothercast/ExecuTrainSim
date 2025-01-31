@@ -6,6 +6,8 @@ const { AzureOpenAI } = require('openai');
 const readline = require('readline');
 const path = require('path');
 const morgan = require('morgan'); // 🌟 HTTP request logger
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = process.env.PORT || 8080; // Main API Server Port - Azure uses process.env.PORT
@@ -82,21 +84,35 @@ try {
     process.exit(1); // 🌟 Exit process on client init failure
 }
 
-
 // --- Express Middleware ---
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+const corsOptions = {
+    origin: 'https://executrainsim.azurewebsites.net', // Replace with your actual domain
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions)); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Parse JSON request bodies
 
 // --- Static File Serving ---
-const clientBuildPath = path.join(__dirname, 'executrainsim-build');  
+const clientBuildPath = path.join(__dirname, 'executrainsim-build');
+app.use(compression({ level: 6 }));
 app.use(express.static(clientBuildPath, {
-    maxAge: '1d', // Cache static assets
+    maxAge: '1d', // Cache static assets for a day
     setHeaders: (res, path) => {
         if (path.endsWith('.html')) {
-            res.setHeader('Cache-Control', 'no-cache, no-store');
+            res.setHeader('Cache-Control', 'no-cache, no-store'); // Prevent caching HTML
         }
     }
 }));
+
+// --- API Rate Limiting ---
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per 15 minutes
+    message: "Too many requests from this IP, please try again after 15 minutes"
+});
+
+app.use('/api/', apiLimiter); // Apply to all API routes
+
 
 // --- Route Handlers ---
 // Health Check Endpoint (for Azure health probes)
@@ -185,12 +201,14 @@ app.post('/api/dalle/image', async (req, res) => {
     }
 });
 
+// --- Client App Serving (Fallback - MUST be last route) ---
+// * Catch-all route to serve React app's index.html for any unmatched routes *
 app.get('*', (req, res) => {
     try {
-        res.sendFile(path.join(clientBuildPath, 'index.html'));
+      res.sendFile(path.join(clientBuildPath, 'index.html')); // Serve index.html for all other routes
     } catch (error) {
-        console.error(`[ROUTING ERROR] Failed to serve index.html: ${error.message}`);
-        res.status(500).send('Application loading failed - contact support');
+      console.error(`[ROUTING ERROR] Failed to serve index.html: ${error.message}`);
+      res.status(500).send('Application loading failed - contact support');
     }
 });
 
