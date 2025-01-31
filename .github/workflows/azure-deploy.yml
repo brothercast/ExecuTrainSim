@@ -1,4 +1,3 @@
-# azure-deploy.yml (Refactored for Full App Deployment) - SLIGHTLY OPTIMIZED
 name: Deploy Full Node.js App to Azure
 
 on:

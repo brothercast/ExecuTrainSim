@@ -59,7 +59,7 @@ const App = () => {
                     React.createElement(selectedModule)
                 ) : (
                     <>
-                        <h1 className="title">Simulation Library</h1>
+                        <h1 className="title">Kaos Monkey Suite</h1>
                         <div className="module-cards-container">
                             {modulesMetadata.length > 0 ? (
                                 modulesMetadata.map((module, index) => (

@@ -670,8 +670,8 @@ h3 {
   }
 
   .chat-history {
-    height: 200px;
-    max-height: none;
+    max-height: 60vh;
+    overflow-y: auto;
   }
 }
 
@@ -802,12 +802,9 @@ h3 {
 }
 
 .chat-history-container {
-  flex-grow: 1;
-  max-height: 60vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0px;
+  position: relative;
+  flex: 1;
+  padding-bottom: 40px;
 }
 
 .chat-history {
