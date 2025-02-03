@@ -41,32 +41,69 @@ import {
 } from 'recharts';
 import DOMPurify from 'dompurify';
 
-// Define API Base URL - Unified to API_BASE_URL - CORRECTED
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-console.log("[CybersecurityModule] API_BASE_URL at runtime:", API_BASE_URL); // Added log for debugging
+// ---------------------------------------------------------------------
+// Unified API Base URL setup:
+// In development, if REACT_APP_API_URL is not set, use http://localhost:8080.
+// In production, default to a relative URL.
+const API_BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : '');
+console.log("[CybersecurityModule] API_BASE_URL at runtime:", API_BASE_URL);
 
+// Helper to construct full endpoint URLs.
+const constructEndpoint = (baseURL, path) => `${baseURL}${path}`;
+
+// ---------------------------------------------------------------------
+// JSON Parsing Helper:
+// Strips any triple-backticks (and an optional "json" specifier) before parsing.
 const parseAiJson = (apiResponse) => {
     if (!apiResponse) {
         console.error('parseAiJson: No response data to parse.');
         return null;
     }
-    try {
-        if (typeof apiResponse === 'string') {
-            const cleaned = apiResponse.replace(/```json|```/g, '').trim();
+    if (typeof apiResponse === 'string') {
+        const cleaned = apiResponse
+            .replace(/^```(?:json)?\s*/i, '')
+            .replace(/```$/i, '')
+            .trim();
+        try {
+            return JSON.parse(cleaned);
+        } catch (parseError) {
+            console.error('parseAiJson: Failed to parse cleaned string as JSON:', parseError);
+            console.log('parseAiJson: Raw cleaned content:', cleaned);
+            return cleaned; // Fallback to returning the raw cleaned string.
+        }
+    }
+    // If the API response is in ChatGPT style with a choices array,
+    // extract the message content and attempt to parse it.
+    if (
+        apiResponse.choices &&
+        Array.isArray(apiResponse.choices) &&
+        apiResponse.choices.length > 0 &&
+        apiResponse.choices[0].message &&
+        apiResponse.choices[0].message.content
+    ) {
+        const messageContent = apiResponse.choices[0].message.content;
+        if (typeof messageContent === 'string') {
+            const cleaned = messageContent
+                .replace(/^```(?:json)?\s*/i, '')
+                .replace(/```$/i, '')
+                .trim();
             try {
                 return JSON.parse(cleaned);
-            } catch (parseError) {
-                return apiResponse;
+            } catch (error) {
+                console.error('parseAiJson: Failed to parse choices message content as JSON:', error);
+                console.log('parseAiJson: Raw cleaned content:', cleaned);
+                return cleaned;
             }
         }
-        return apiResponse;
-    } catch (err) {
-        console.error('Failed to parse AI JSON:', err, apiResponse);
-        return null;
+        return messageContent;
     }
+    return apiResponse;
 };
 
+// ---------------------------------------------------------------------
+// Cybersecurity Module Component
 const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
+    // State variables
     const [role, setRole] = useState('');
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [difficulty, setDifficulty] = useState('');
@@ -84,7 +121,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     const [notifications, setNotifications] = useState([]);
     const [responseOptions, setResponseOptions] = useState([]);
     const [simulationStarted, setSimulationStarted] = useState(false);
-    const [showInstructions, setShowInstructions] = useState(false); // State for instructions toggle
+    const [showInstructions, setShowInstructions] = useState(false);
     const [systemStatus, setSystemStatus] = useState({
         networkHealth: 100,
         serverLoad: 0,
@@ -103,7 +140,8 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     const [activePhase, setActivePhase] = useState('setup');
     const [currentTurnIndex, setCurrentTurnIndex] = useState(1);
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-      // Define roles and difficulty levels
+
+    // Define roles and difficulty levels for Cybersecurity
     const roles = [
         { value: 'security-analyst', title: 'Security Analyst' },
         { value: 'it-manager', title: 'IT Manager' },
@@ -114,659 +152,577 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     const difficultyLevels = [
         { value: 'easy', title: 'Easy' },
         { value: 'medium', title: 'Medium' },
-       { value: 'hard', title: 'Hard' },
+        { value: 'hard', title: 'Hard' },
         { value: 'expert', title: 'Expert' },
     ];
-    // Utility function to scroll to bottom
+
+    // ---------------------------------------------------------------------
+    // Scroll logs to bottom
     const scrollToBottom = () => {
-       logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
     useEffect(() => {
-       if (logs.length > 0) {
+        if (logs.length > 0) {
             scrollToBottom();
         }
-   }, [logs]);
-     // Effect for timer
+    }, [logs]);
+
+    // ---------------------------------------------------------------------
+    // Timer effect
     useEffect(() => {
         if (timeLeft <= 0) {
             setSimulationComplete(true);
             finalizeSimulation();
-       } else if (simulationStarted) {
+        } else if (simulationStarted) {
             const timer = setInterval(() => {
-                setTimeLeft((prevTime) => setTimeLeft(prev => prev - 1));
+                setTimeLeft(prev => prev - 1);
             }, 1000);
-           return () => clearInterval(timer);
-       }
-   }, [timeLeft, simulationStarted]);
-     // Effect for difficulty based event triggers
-   useEffect(() => {
-       if (difficulty === 'expert' && simulationStarted) {
+            return () => clearInterval(timer);
+        }
+    }, [timeLeft, simulationStarted]);
+
+    // ---------------------------------------------------------------------
+    // Difficulty-based event triggers (example for expert difficulty)
+    useEffect(() => {
+        if (difficulty === 'expert' && simulationStarted) {
             const eventInterval = setInterval(() => {
-               addNotification("New security incident detected!");
-                setSystemStatus((prev) => ({
-                   ...prev,
+                addNotification("New security incident detected!");
+                setSystemStatus(prev => ({
+                    ...prev,
                     intrusionAttempts: prev.intrusionAttempts + 5,
                     networkHealth: Math.max(0, prev.networkHealth - 2),
-               }));
-           }, 60000);
-           return () => clearInterval(eventInterval);
+                }));
+            }, 60000);
+            return () => clearInterval(eventInterval);
         }
-   }, [difficulty, simulationStarted]);
-     // Effect to trigger response option generation
+    }, [difficulty, simulationStarted]);
+
+    // ---------------------------------------------------------------------
+    // Trigger response options when an alert is selected and simulation is started
     useEffect(() => {
-       if (selectedAlert && simulationStarted) {
-           generateResponseOptions(selectedAlert?.description);
+        if (selectedAlert && simulationStarted) {
+            generateResponseOptions(selectedAlert.description);
         }
-   }, [selectedAlert, simulationStarted]);
-     // Function to add a log
+    }, [selectedAlert, simulationStarted]);
+
+    // ---------------------------------------------------------------------
+    // Utility functions for logs and notifications
     const addLog = (log) => {
-        setLogs((prevLogs) => [...prevLogs, { message: log, timestamp: new Date() }]);
+        setLogs(prev => [...prev, { message: log, timestamp: new Date() }]);
     };
-    // Function to add a notification
-   const addNotification = (message) => {
-        setNotifications((prev) => [...prev, message]);
+    const addNotification = (message) => {
+        setNotifications(prev => [...prev, message]);
     };
-     // Function to fetch from OpenAI API
+
+    // ---------------------------------------------------------------------
+    // Unified API Call Function (using constructEndpoint)
     const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {
         setIsFetching(true);
         if (isUserAction) {
-            setIsUserReplyLoading(true)
-        } else {
-            setIsFetching(true);
+            setIsUserReplyLoading(true);
         }
         try {
-           const endpoint = `${API_BASE_URL}${endpointPath}`;
+            const endpoint = constructEndpoint(API_BASE_URL, endpointPath);
             console.log('Requesting:', endpoint, 'with payload:', input);
-           const response = await axios.post(endpoint, input, {
+            const response = await axios.post(endpoint, input, {
                 headers: { 'Content-Type': 'application/json' },
-           });
+            });
             console.log('Response received:', response.data);
-             return response.data;
+            return response.data;
         } catch (error) {
             console.error('Error fetching from OpenAI:', error.message);
-           if (error.response) {
+            if (error.response) {
                 console.error('API Error Details:', error.response.data);
             }
             setErrorMessage('Failed to communicate with the server. Please check the console for details.');
             return null;
-         } finally {
-           if (isUserAction) {
+        } finally {
+            if (isUserAction) {
                 setIsUserReplyLoading(false);
-          }
+            }
             setIsFetching(false);
         }
     };
-     const handleScenarioEditToggle = () => {
-       setIsScenarioEditable(!isScenarioEditable);
-   };
+
+    // ---------------------------------------------------------------------
+    // Scenario editing functions
+    const handleScenarioEditToggle = () => {
+        setIsScenarioEditable(!isScenarioEditable);
+    };
     const handleCancelScenarioEdit = () => {
         setEditableScenario(scenario);
         setIsScenarioEditable(false);
-    }
+    };
     const handleScenarioChange = (field, value) => {
-         setEditableScenario(prev => ({
-           ...prev,
-           [field]: value
-       }));
-   };
+        setEditableScenario(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
     const handleSaveScenario = () => {
-         setScenario(prev => ({
-           ...prev,
+        setScenario(prev => ({
+            ...prev,
             title: editableScenario.title,
             context: editableScenario.context,
-       }));
+        }));
         setIsScenarioEditable(false);
     };
-     // Function to generate the scenario
+
+    // ---------------------------------------------------------------------
+    // Generate the scenario using OpenAI API
     const generateScenario = async () => {
-       setIsFetchingScenario(true);
+        setIsFetchingScenario(true);
         try {
-            const selectedRoleTitle = roles.find((r) => r.value === role)?.title;
-             const selectedDifficultyTitle = difficultyLevels.find((level) => level.value === difficulty)?.title;
-             if (!selectedRoleTitle || !selectedDifficultyTitle) {
-                 setErrorMessage('Please select a role and difficulty.');
-                 return;
-           }
+            const selectedRoleTitle = roles.find(r => r.value === role)?.title;
+            const selectedDifficultyTitle = difficultyLevels.find(level => level.value === difficulty)?.title;
+            if (!selectedRoleTitle || !selectedDifficultyTitle) {
+                setErrorMessage('Please select a role and difficulty.');
+                return;
+            }
             setErrorMessage('');
             const prompt = `
                Create a detailed cybersecurity simulation scenario for a ${selectedRoleTitle} at ${selectedDifficultyTitle} difficulty level.
-             The scenario should include a title, a detailed context, specific objectives, a description of the starting state of the system, and a series of interconnected decision points to be resolved by the user.
-             Each decision point should have:
-                - an ID
-                - a description of the security alert,
-                - 3-5 options to choose from with a brief description of the intended action.
-                - expected results of each option.
-                 - a "points" value that is awarded to the user on completion.
-                 - a "consequences" response that includes specific values for networkHealth, serverLoad, and intrusionAttempts
-                Provide a 'feedback' message that is to be delivered after a given user response is registered. This feedback should be concise and direct, and provide some guidance to the user on the efficacy of their response.
+               The scenario should include a title, a detailed context, specific objectives, a description of the starting state of the system, and a series of interconnected decision points to be resolved by the user.
+               Each decision point should have:
+                  - an ID
+                  - a description of the security alert,
+                  - 3-5 options to choose from with a brief description of the intended action,
+                  - expected results of each option,
+                  - a "points" value awarded on completion,
+                  - and a "consequences" object with specific values for networkHealth, serverLoad, and intrusionAttempts.
+               Also provide a brief 'feedback' message to be delivered after a user response.
                Return the result in JSON format:
-              {
+               {
                  "scenario": {
-                    "title": "string",
-                    "context": "string",
+                   "title": "string",
+                   "context": "string",
                    "objectives": ["string"],
-                    "startingState": {
-                         "networkHealth": number,
-                         "serverLoad": number,
-                         "intrusionAttempts": number
-                    },
-                     "decision_points": [
-                        {
-                           "id": number,
-                            "description": "string",
-                          "options": [
-                               { "name": "string", "description": "string", "result": "string", "consequences": {  "networkHealth": number, "serverLoad": number, "intrusionAttempts": number }, "points": number }
-                             ]
-                        }
-                     ],
-                     "feedback": "string"
-                }
-             }
+                   "startingState": {
+                      "networkHealth": number,
+                      "serverLoad": number,
+                      "intrusionAttempts": number
+                   },
+                   "decision_points": [
+                     {
+                        "id": number,
+                        "description": "string",
+                        "options": [
+                           { "name": "string", "description": "string", "result": "string", "consequences": { "networkHealth": number, "serverLoad": number, "intrusionAttempts": number }, "points": number }
+                        ]
+                     }
+                   ],
+                   "feedback": "string"
+                 }
+               }
             `;
             const rawScenarioData = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: prompt }] },
-                '/api/generate',
-           );
+                '/api/generate'
+            );
             const parsedScenario = parseAiJson(rawScenarioData);
-           if (parsedScenario?.scenario) {
+            if (parsedScenario?.scenario) {
                 setScenario(parsedScenario.scenario);
-                 setEditableScenario(parsedScenario.scenario);
-               setScenarioGenerated(true);
-              setSystemStatus(parsedScenario.scenario.startingState);
-             } else {
+                setEditableScenario(parsedScenario.scenario);
+                setScenarioGenerated(true);
+                setSystemStatus(parsedScenario.scenario.startingState);
+            } else {
                 setErrorMessage('Failed to generate scenario. Please try again.');
             }
-       } catch (error) {
-           setErrorMessage('An error occurred while generating the scenario.');
+        } catch (error) {
+            setErrorMessage('An error occurred while generating the scenario.');
         }
         setIsFetchingScenario(false);
     };
-     // Function to start the simulation
-     const startSimulation = async () => {
+
+    // ---------------------------------------------------------------------
+    // Start the simulation after scenario generation
+    const startSimulation = async () => {
         if (!role || !difficulty) {
-             setErrorMessage('Please select a role and difficulty.');
+            setErrorMessage('Please select a role and difficulty.');
             return;
-       }
-        if (!scenario) {
-             setErrorMessage('Please generate a scenario first.');
-           return;
         }
-       setSimulationStarted(true);
+        if (!scenario) {
+            setErrorMessage('Please generate a scenario first.');
+            return;
+        }
+        setSimulationStarted(true);
         setErrorMessage('');
-        setSystemStatus(scenario.startingState)
-        addLog(`Simulation started. Role: ${roles.find((r) => r.value === role).title}, Difficulty: ${difficultyLevels.find((level) => level.value === difficulty).title}`);
+        setSystemStatus(scenario.startingState);
+        addLog(`Simulation started. Role: ${roles.find(r => r.value === role).title}, Difficulty: ${difficultyLevels.find(level => level.value === difficulty).title}`);
         try {
             if (scenario?.decision_points && scenario.decision_points.length > 0) {
-                const initialAlerts = [
-                    {
-                       id: scenario.decision_points[0].id,
-                       description: scenario.decision_points[0].description,
-                       options: scenario.decision_points[0].options,
-                    }
-                ];
-               setAlerts(initialAlerts);
+                const initialAlerts = [{
+                    id: scenario.decision_points[0].id,
+                    description: scenario.decision_points[0].description,
+                    options: scenario.decision_points[0].options,
+                }];
+                setAlerts(initialAlerts);
                 setSelectedAlert(initialAlerts[0]);
+            } else {
+                setAlerts([]);
             }
-            else{
-                setAlerts([])
-           }
-       }
-        catch (error) {
-           setErrorMessage('Failed to start the simulation. Please try again.');
+        } catch (error) {
+            setErrorMessage('Failed to start the simulation. Please try again.');
         }
-        setActivePhase('simulation')
-     };
-     // Function to generate response options
+        setActivePhase('simulation');
+    };
+
+    // ---------------------------------------------------------------------
+    // Generate response options
     const generateResponseOptions = async (context) => {
         if (!role || !difficulty) {
             console.warn('Role or difficulty not set. Skipping response option generation.');
-             return;
+            return;
         }
-         const prompt = `
+        const prompt = `
              Based on the active simulation and the current alert: "${context}",
              generate 3 to 5 strategic response options that the user could employ.
              Each option should be concise and directly related to the current issue.
              Return the response in the JSON format:
              {
                 "options": [{ "name": "string", "description": "string" }]
-            }
-         `;
+             }
+        `;
         try {
             const rawResponse = await fetchOpenAIResponse({
-               messages: [{ role: 'system', content: prompt }],
-               temperature: 0.7,
+                messages: [{ role: 'system', content: prompt }],
+                temperature: 0.7,
                 max_tokens: 400,
-           }, '/api/generate');
+            }, '/api/generate');
             handleResponseOptions(rawResponse);
         } catch (error) {
             console.error('Failed to generate response options:', error);
-           setErrorMessage('Failed to generate response options. Please try again.');
+            setErrorMessage('Failed to generate response options. Please try again.');
         }
-   };
-    // Function to handle response options
-   const handleResponseOptions = (rawResponse) => {
+    };
+
+    // ---------------------------------------------------------------------
+    // Handle response options (parse and update state)
+    const handleResponseOptions = (rawResponse) => {
         if (!rawResponse) {
-             console.error('Received empty response from API.');
-           setErrorMessage('Failed to generate response options. Please try again.');
+            console.error('Received empty response from API.');
+            setErrorMessage('Failed to generate response options. Please try again.');
             return;
-       }
+        }
         const parsed = parseAiJson(rawResponse);
         if (parsed?.options) {
-             console.log('Generated response options:', parsed.options);
-           setResponseOptions(parsed.options);
-       } else {
+            console.log('Generated response options:', parsed.options);
+            setResponseOptions(parsed.options);
+        } else {
             console.error('Invalid response structure:', parsed);
             setErrorMessage('Failed to generate response options. Please try again.');
-       }
-   };
+        }
+    };
 
-    // Function to handle resolution
-   const handleResolution = async (actionIndex) => {
-         if (!selectedAlert) return;
-         setIsResponseLoading(true);
-        setIsButtonDisabled(true)
-         setIsUserReplyLoading(true);
-         const selectedOption = responseOptions[actionIndex] || null;
+    // ---------------------------------------------------------------------
+    // Handle resolution (simulate system response based on user action)
+    const handleResolution = async (actionIndex) => {
+        if (!selectedAlert) return;
+        setIsResponseLoading(true);
+        setIsButtonDisabled(true);
+        setIsUserReplyLoading(true);
+        const selectedOption = responseOptions[actionIndex] || null;
         const actionDescription = selectedOption ? selectedOption.description : 'No action selected';
-         addLog(`User action: ${actionDescription}.`);
+        addLog(`User action: ${actionDescription}.`);
         const systemPrompt = `
-              As a simulation engine, in the role of a cybersecurity system, respond to the user's action based on a previous threat: "${selectedAlert.description}".
-            Evaluate the effectiveness of user's choice: "${actionDescription}" and adjust the simulation.
-             Provide a follow up message that includes the next steps or challenges the user will face. Do not use conversational filler, and keep your message brief and to the point.
-           Also ensure that you are using the system context already provided by the initial scenario prompt.
-             Return the response in JSON format with the following structure:
-             {
+              As a simulation engine in a cybersecurity environment, respond to the user's action based on the current alert: "${selectedAlert.description}".
+              Evaluate the effectiveness of the user's choice: "${actionDescription}" and adjust the simulation accordingly.
+              Provide a follow-up message that includes next steps or challenges the user will face. Keep the message brief and to the point.
+              Return the response in JSON format with the following structure:
+              {
                  "message": "string",
                  "feedback": "string",
-                  "updatedScenario": {
+                 "updatedScenario": {
                       "title": "string",
-                     "context": "string",
+                      "context": "string",
                       "objectives": ["string"],
-                     "startingState": {
+                      "startingState": {
                           "networkHealth": number,
                           "serverLoad": number,
-                           "intrusionAttempts": number
-                    },
-                     "decision_points": [
+                          "intrusionAttempts": number
+                      },
+                      "decision_points": [
                         {
                            "id": number,
-                            "description": "string",
+                           "description": "string",
                            "options": [
-                               { "option": "string", "result": "string" , "consequences": {  "networkHealth": number, "serverLoad": number, "intrusionAttempts": number }, "points": number }
-                                ]
+                               { "option": "string", "result": "string", "consequences": { "networkHealth": number, "serverLoad": number, "intrusionAttempts": number }, "points": number }
+                           ]
                         }
-                    ],
-                    "feedback": "string"
-                },
+                     ],
+                     "feedback": "string"
+                 },
                  "nextAlert": {
                      "id": number,
                      "description": "string",
-                      "options": [
-                        { "option": "string", "result": "string"  }
-                         ]
-                   }
-           }
-         `;
+                     "options": [
+                        { "option": "string", "result": "string" }
+                     ]
+                 }
+              }
+        `;
         try {
-           const rawResponse = await fetchOpenAIResponse({
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                ],
-               temperature: 0.7,
-                 max_tokens: 1000,
-           }, '/api/generate');
+            const rawResponse = await fetchOpenAIResponse({
+                messages: [{ role: 'system', content: systemPrompt }],
+                temperature: 0.7,
+                max_tokens: 1000,
+            }, '/api/generate');
             if (!rawResponse) {
                 throw new Error('No response from AI server');
             }
             const parsed = parseAiJson(rawResponse);
-           const systemMessage = parsed?.message;
-           const systemFeedback = parsed?.feedback;
+            const systemMessage = parsed?.message;
+            const systemFeedback = parsed?.feedback;
             const nextAlert = parsed?.nextAlert;
             const updatedScenario = parsed?.updatedScenario;
-           if (!systemMessage || !updatedScenario) {
-               throw new Error('System response is empty or invalid JSON.');
+            if (!systemMessage || !updatedScenario) {
+                throw new Error('System response is empty or invalid JSON.');
             }
-             addLog(`System message: ${systemMessage}`);
-             if (updatedScenario?.decision_points) {
-                 const nextAlerts = updatedScenario.decision_points.map((dp) => ({
-                     id: dp.id,
-                     description: dp.description,
-                     options: dp.options,
-                 }));
-                 setAlerts(nextAlerts);
-             } else {
-                 setAlerts([]);
-             }
-             addLog(`System feedback: ${systemFeedback}`);
-             setSelectedAlert(nextAlert);
-             setScenario(updatedScenario);
+            addLog(`System message: ${systemMessage}`);
+            if (updatedScenario?.decision_points) {
+                const nextAlerts = updatedScenario.decision_points.map((dp) => ({
+                    id: dp.id,
+                    description: dp.description,
+                    options: dp.options,
+                }));
+                setAlerts(nextAlerts);
+            } else {
+                setAlerts([]);
+            }
+            addLog(`System feedback: ${systemFeedback}`);
+            setSelectedAlert(nextAlert);
+            setScenario(updatedScenario);
             setSystemStatus(updatedScenario.startingState);
             if (progress >= 100 || alerts.length === 0) {
-                 finalizeSimulation();
+                finalizeSimulation();
             } else {
-                 setProgress((prev) => {
-                     const newProgress = prev + 20;
-                      updateProgress(newProgress, selectedOption.points)
-                     return newProgress;
-                 });
-                 setSystemStatus(prev => ({
-                      ...prev,
-                     networkHealth: Math.max(0, prev.networkHealth + updatedScenario.startingState.networkHealth ),
-                     serverLoad: Math.max(0, prev.serverLoad + updatedScenario.startingState.serverLoad),
-                     intrusionAttempts: Math.max(0, prev.intrusionAttempts + updatedScenario.startingState.intrusionAttempts)
-                  }))
+                setProgress(prev => Math.min(prev + 20, 100));
+                setSystemStatus(prev => ({
+                    ...prev,
+                    networkHealth: Math.max(0, prev.networkHealth + updatedScenario.startingState.networkHealth),
+                    serverLoad: Math.max(0, prev.serverLoad + updatedScenario.startingState.serverLoad),
+                    intrusionAttempts: Math.max(0, prev.intrusionAttempts + updatedScenario.startingState.intrusionAttempts)
+                }));
             }
         } catch (error) {
             console.error('Failed to generate simulation response:', error);
             setErrorMessage('Failed to generate simulation response. Please try again.');
-       } finally {
-           setIsResponseLoading(false);
-          setIsUserReplyLoading(false);
-          setIsButtonDisabled(false)
+        } finally {
+            setIsResponseLoading(false);
+            setIsUserReplyLoading(false);
+            setIsButtonDisabled(false);
         }
     };
-     const assessSimulationOutcome = async () => {
+
+    // ---------------------------------------------------------------------
+    // Outcome assessment and analysis functions
+    const assessSimulationOutcome = async () => {
         try {
-           const userStrategyEffectiveness = logs.reduce((acc, log) => {
-              if(log.message.includes("User action")){
-                 return acc + 1
-                 } else {
-                  return acc;
-               }
-          }, 0)
-           const totalMessages = logs.length;
-          const effectivenessScore = (userStrategyEffectiveness/totalMessages) * 100
-          const outcome = effectivenessScore > 50 ? 'Win' : 'Lose';
-          return {
-              outcome: outcome,
-              reason: outcome === 'Win' ? 'The user effectively addressed the threats.' : 'The user could have been more effective in managing the threats.',
-          };
-       }
-        catch (error) {
-           console.error('Failed to assess simulation outcome', error);
-           return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
+            const userStrategyEffectiveness = logs.reduce((acc, log) => {
+                return log.message.includes("User action") ? acc + 1 : acc;
+            }, 0);
+            const totalMessages = logs.length;
+            const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
+            const outcome = effectivenessScore > 50 ? 'Win' : 'Lose';
+            return {
+                outcome: outcome,
+                reason: outcome === 'Win'
+                    ? 'The user effectively managed the threats.'
+                    : 'The user could have been more effective in handling the threats.',
+            };
+        } catch (error) {
+            console.error('Failed to assess simulation outcome', error);
+            return { outcome: 'draw', reason: 'Failed to assess the outcome. Try again.' };
         }
-   };
-   const analyzeSimulation = async () => {
-         const analysisPrompt = `
-           Analyze the following simulation transcript and provide an in-depth analysis, with a focus on the user's performance based on their responses to the challenges presented.
-          Evaluate the user’s performance based on several key decision making tactics and provide a score on a scale of 1-10 for each tactic.
-            For each tactic, provide 2-3 specific examples from the transcript to illustrate where the user demonstrated that tactic effectively or ineffectively.
-           Provide an overall summary that describes the user’s strategy in the simulation, and specific examples of when they employed those strategies well, or not so well.
-             Start your summary with a sentence directly addressing the user by name and role, before proceeding to the rest of your summary.
-           Provide concise and actionable recommendations to improve the user’s performance in these areas, making the language encouraging.
-           Return the result in JSON format with the following structure, ensuring that keys appear in Sentence Case, and recommendations are offered as a string array:
-             {
-                  "Summary": "string",
-                 "Tactics": {
-                      "Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+    };
+
+    const analyzeSimulation = async () => {
+        const analysisPrompt = `
+           Analyze the following simulation transcript and provide an in-depth analysis of the user's performance based on their responses.
+           Evaluate the user’s performance on key decision-making tactics and provide a score (1-10) for each tactic.
+           For each tactic, include 2-3 specific examples from the transcript.
+           Provide an overall summary that describes the user’s strategy, and actionable recommendations.
+           Return the result in JSON format with keys in Sentence Case:
+           {
+                "Summary": "string",
+                "Tactics": {
+                     "Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] },
                      "Decision Making": { "score": number, "examples": ["string"], "recommendations": ["string"] },
                      "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                      "Strategic Thinking": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                     "Strategic Thinking": { "score": number, "examples": ["string"], "recommendations": ["string"] },
                      "Technical Knowledge": { "score": number, "examples": ["string"], "recommendations": ["string"] }
-               }
-            }
-            The simulation transcript:
-            ${JSON.stringify(logs, null, 2)}
+                }
+           }
+           The simulation transcript:
+           ${JSON.stringify(logs, null, 2)}
         `;
         try {
             const rawAnalysisResponse = await fetchOpenAIResponse({
                 messages: [{ role: 'system', content: analysisPrompt }],
-             }, '/api/generate');
-             const parsedAnalysis = parseAiJson(rawAnalysisResponse);
-             if (parsedAnalysis) {
-                 const sentenceCaseKeys = (obj) => {
-                     if (typeof obj !== 'object' || obj === null) {
-                         return obj;
-                     }
-                     if (Array.isArray(obj)) {
-                         return obj.map(sentenceCaseKeys)
-                     }
-                     const newObj = {};
-                     for (const key in obj) {
-                         if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            }, '/api/generate');
+            const parsedAnalysis = parseAiJson(rawAnalysisResponse);
+            if (parsedAnalysis) {
+                const sentenceCaseKeys = (obj) => {
+                    if (typeof obj !== 'object' || obj === null) return obj;
+                    if (Array.isArray(obj)) return obj.map(sentenceCaseKeys);
+                    const newObj = {};
+                    for (const key in obj) {
+                        if (Object.prototype.hasOwnProperty.call(obj, key)) {
                             const newKey = key.charAt(0).toUpperCase() + key.slice(1);
                             newObj[newKey] = sentenceCaseKeys(obj[key]);
                         }
                     }
-                    return newObj
-                 };
+                    return newObj;
+                };
                 const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
-                setDebriefing((prev) => ({
+                setDebriefing(prev => ({
                     ...prev,
-                   summary: formattedAnalysis.Summary,
+                    summary: formattedAnalysis.Summary,
                     tactics: formattedAnalysis.Tactics,
                 }));
-                 const radarData = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
-                     skill: name,
-                     score: value.score,
-                 }));
-                 setRadarData(radarData);
-                 return formattedAnalysis;
-             } else {
-                 setErrorMessage('Failed to analyze simulation. Please try again.');
+                const radarDataFormatted = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
+                    skill: name,
+                    score: value.score,
+                }));
+                setRadarData(radarDataFormatted);
+                return formattedAnalysis;
+            } else {
+                setErrorMessage('Failed to analyze simulation. Please try again.');
                 return null;
             }
-         } catch (error) {
-           setErrorMessage('Failed to analyze simulation. Please try again.');
-             console.error('Error analyzing simulation:', error);
-           return null;
-         }
-     };
-     // Function to finalize the simulation
-     const finalizeSimulation = async () => {
-         const outcomeData = await assessSimulationOutcome();
-          const analysisData = await analyzeSimulation()
-          const userStrategyEffectiveness = logs.reduce((acc, log) => {
-            if (log.message.includes("User action")) {
-                return acc + 1
-             } else {
-                 return acc;
-              }
-         }, 0)
+        } catch (error) {
+            setErrorMessage('Failed to analyze simulation. Please try again.');
+            console.error('Error analyzing simulation:', error);
+            return null;
+        }
+    };
+
+    const finalizeSimulation = async () => {
+        const outcomeData = await assessSimulationOutcome();
+        const analysisData = await analyzeSimulation();
+        const userStrategyEffectiveness = logs.reduce((acc, log) => {
+            return log.message.includes("User action") ? acc + 1 : acc;
+        }, 0);
         const totalMessages = logs.length;
-         const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100
-       if (analysisData && outcomeData) {
-           const outcome = outcomeData.outcome;
-          const outcomeReason = outcomeData.reason;
-            setDebriefing((prev) => ({
+        const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
+        if (analysisData && outcomeData) {
+            const outcome = outcomeData.outcome;
+            const outcomeReason = outcomeData.reason;
+            setDebriefing(prev => ({
                 ...prev,
-               strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
-                  .filter(([, value]) => value.score > 7)
+                strengths: analysisData.Tactics ? Object.entries(analysisData.Tactics)
+                    .filter(([, value]) => value.score > 7)
                     .map(([key]) => key) : ['None'],
-                 areasForImprovement: analysisData.Tactics ? Object.entries(analysisData.Tactics)
+                areasForImprovement: analysisData.Tactics ? Object.entries(analysisData.Tactics)
                     .filter(([, value]) => value.score < 6)
-                      .map(([key]) => key) : ['None'],
-                 overallScore: Math.round(effectivenessScore),
-               letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
-               advice: outcome === 'Win' ? 'Continue refining your security strategies.' : 'Consider a different approach for improved results.',
-               transcript: logs,
-                 outcome: outcome,
-              outcomeReason: outcomeReason,
+                    .map(([key]) => key) : ['None'],
+                overallScore: Math.round(effectivenessScore),
+                letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
+                advice: outcome === 'Win'
+                    ? 'Continue refining your cybersecurity strategies.'
+                    : 'Consider a different approach for improved threat mitigation.',
+                transcript: logs,
+                outcome: outcome,
+                outcomeReason: outcomeReason,
                 summary: analysisData.Summary,
                 tactics: analysisData.Tactics,
-             }));
+            }));
         } else {
-             setErrorMessage('Failed to generate a proper summary. Please try again.');
-           setDebriefing(null);
+            setErrorMessage('Failed to generate a proper summary. Please try again.');
+            setDebriefing(null);
         }
         setSimulationComplete(true);
         setActivePhase('debriefing');
-   };
-   const toggleFeedback = () => {
-        setShowFeedback(prevShowFeedback => !prevShowFeedback);
     };
-     // Function to reset the simulation
-   const resetSimulation = () => {
+
+    // ---------------------------------------------------------------------
+    // Reset simulation
+    const resetSimulation = () => {
         setScenario(null);
-       setEditableScenario(null);
-       setAlerts([]);
+        setEditableScenario(null);
+        setAlerts([]);
         setSelectedAlert(null);
         setProgress(0);
-        setPerformanceScore(0)
-       setSimulationComplete(false);
+        setPerformanceScore(0);
+        setSimulationComplete(false);
         setDebriefing(null);
         setErrorMessage('');
-       setTimeLeft(300);
-         setNotifications([]);
-         setResponseOptions([]);
+        setTimeLeft(300);
+        setNotifications([]);
+        setResponseOptions([]);
         setSimulationStarted(false);
         setSystemStatus({ networkHealth: 100, serverLoad: 0, intrusionAttempts: 0 });
         setLogs([]);
-       setScenarioGenerated(false);
+        setScenarioGenerated(false);
         setRadarData(null);
-       setShowFeedback(false);
-       setIsScenarioEditable(false);
-        setPerformanceData([])
-       setActivePhase('setup');
-       setCurrentTurnIndex(1)
+        setShowFeedback(false);
+        setIsScenarioEditable(false);
+        setPerformanceData([]);
+        setActivePhase('setup');
+        setCurrentTurnIndex(1);
     };
-      // Function to reorder alerts
-     const handleAlertReorder = (draggedIndex, droppedIndex) => {
-         const reorderedAlerts = [...alerts];
-       const [draggedAlert] = reorderedAlerts.splice(draggedIndex, 1);
+
+    // ---------------------------------------------------------------------
+    // Alert reordering
+    const handleAlertReorder = (draggedIndex, droppedIndex) => {
+        const reorderedAlerts = [...alerts];
+        const [draggedAlert] = reorderedAlerts.splice(draggedIndex, 1);
         reorderedAlerts.splice(droppedIndex, 0, draggedAlert);
         setAlerts(reorderedAlerts);
     };
 
+    // ---------------------------------------------------------------------
+    // Update progress & performance
     const updateProgress = (newProgress, points = 0) => {
-           setPerformanceScore((prev) => {
-            const updatedValue = prev + points;
-           return updatedValue
-        });
-          setPerformanceData((prevData) => [...prevData, { time: (300- timeLeft), score: performanceScore }])
+        setPerformanceScore(prev => prev + points);
+        setPerformanceData(prev => [...prev, { time: (300 - timeLeft), score: performanceScore }]);
     };
-     const goToPreviousTurn = () => {
+
+    const goToPreviousTurn = () => {
         if (currentTurnIndex > 1 && simulationComplete) {
-            setCurrentTurnIndex(prevIndex => prevIndex - 1);
+            setCurrentTurnIndex(prev => prev - 1);
         }
     };
-     const goToNextTurn = () => {
+
+    const goToNextTurn = () => {
         const totalTurns = Math.ceil(logs.length / 2);
-       if (currentTurnIndex < totalTurns && simulationComplete) {
-            setCurrentTurnIndex(prevIndex => prevIndex + 1);
+        if (currentTurnIndex < totalTurns && simulationComplete) {
+            setCurrentTurnIndex(prev => prev + 1);
         }
-   };
-     const renderPhaseHeader = () => {
-         switch (activePhase) {
-             case 'setup':
-                 return <span>Simulation Setup</span>;
-             case 'simulation':
-                 return <span>Simulation Active</span>;
-            case 'debriefing':
-                return <span>Simulation Debriefing</span>
-            default:
-                 return <span>Simulation Setup</span>;
-       }
-    };
-     const renderMetricsLineChart = () => {
-        if (!performanceData || performanceData.length === 0) {
-           return <p>No metric data available yet.</p>;
-        }
-        return (
-            <ResponsiveContainer width="100%" height={300}>
-               <LineChart data={performanceData}>
-                   <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" label={{ value: "Time Elapsed", position: 'insideBottom', offset: -5 }} />
-                    <YAxis label={{ value: 'Metrics', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip />
-                   <Legend />
-                  <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
-               </LineChart>
-           </ResponsiveContainer>
-       );
     };
 
-     // Return JSX for the UI
-     return (
-        <div className="app-container">
-            <header className="app-header">
-                <div className="header-box">
-                    <span className="header-title">{metadata.title}</span>
-                    <Menu className="hamburger-icon" onClick={() => setDropdownVisible(!dropdownVisible)} />
-                    {dropdownVisible && (
-                        <div className="dropdown-menu">
-                            <div onClick={onReturn}>Return to Module Library</div>
-                            {modules.map((module, index) => (
-                                <div key={index} onClick={() => onSelectModule(module.title)}>
-                                    {module.title}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </header>
+    const toggleFeedback = () => {
+        setShowFeedback(prev => !prev);
+    };
 
-            <main className="content-grid">
-                <aside className="left-column">
-                    {/* Left Column - Details Card - Modularized Rendering */}
-                    <Card className="details-card">
-                        <CardContent>
-                            {renderLeftColumnCardContent()} {/* Modularized rendering function */}
-                        </CardContent>
-                    </Card>
-                </aside>
-
-                <section className="main-content">
-                    <div className="main-content-flex">
-                        {errorMessage && (
-                            <div className="error-box">
-                                <h4 className="error-title">Error</h4>
-                                <p>{errorMessage}</p>
-                            </div>
-                        )}
-                        {renderMainContent()}
-                    </div>
-                </section>
-                <section className="notifications">
-                    <h4>Notifications</h4>
-                    {notifications.map((note, index) => (
-                        <div key={index} className="notification">
-                            {note}
-                        </div>
-                    ))}
-                </section>
-            </main>
-        </div>
-    );
-
-    function renderLeftColumnCardContent() {
+    // ---------------------------------------------------------------------
+    // Render Functions
+    const renderLeftColumnCardContent = () => {
         return (
             <>
                 {simulationStarted && scenario ? (
                     <div className="scenario-info">
-                        <h3 className="left-column-scenario-title">
-                            {scenario.title}
-                        </h3>
+                        <h3 className="left-column-scenario-title">{scenario.title}</h3>
                         <div className="module-description left-column-scenario-description">
                             <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
                         </div>
                         <div className="module-info">
-                            <strong>Role:</strong>
-                            {role === 'custom' ? 'Custom Role' : roles.find((r) => r.value === role).title}
+                            <strong>Role:</strong> {role ? roles.find(r => r.value === role)?.title : ''}
                             <br />
-                            <strong>Difficulty:</strong> {difficultyLevels.find((level) => level.value === difficulty).title}
+                            <strong>Difficulty:</strong> {difficulty ? difficultyLevels.find(l => l.value === difficulty)?.title : ''}
                         </div>
                     </div>
                 ) : (
                     <>
-                        <img
-                            src={metadata.imageUrl}
-                            alt="Scenario Illustration"
-                            className="scenario-image"
-                        />
+                        <img src={metadata.imageUrl} alt="Scenario Illustration" className="scenario-image" />
                         {!scenario && (
                             <div className="module-description">
                                 <h2>Cybersecurity Simulator</h2>
                                 <p>
-                                    Welcome to the Cybersecurity Simulator, where you will
-                                    engage in a strategic battle of wits against a dynamic
-                                    simulation. Your objective is to make critical decisions to
-                                    defend against threats and protect your organization.
+                                    Welcome to the Cybersecurity Simulator, where you will engage in a dynamic simulation
+                                    to defend against cyber threats. Your objective is to make critical decisions to safeguard your organization.
                                 </p>
-                                <Button
-                                    onClick={() => setShowInstructions(!showInstructions)}
-                                >
+                                <Button onClick={() => setShowInstructions(!showInstructions)}>
                                     {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
                                 </Button>
                                 {showInstructions && (
@@ -809,13 +765,12 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                 )}
             </>
         );
-    }
+    };
 
-    function renderMainContent() {
+    const renderMainContent = () => {
         if (simulationComplete) {
             return renderMainContentDebriefing();
         }
-
         if (scenario) {
             if (simulationStarted) {
                 return renderMainContentSimulationActive();
@@ -825,10 +780,9 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
         } else {
             return renderMainContentCardSetup();
         }
-    }
+    };
 
-
-    function renderMainContentSimulationActive() {
+    const renderMainContentSimulationActive = () => {
         return (
             <div className="dashboard">
                 <div className="dashboard-grid">
@@ -843,10 +797,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                                         checked={showFeedback}
                                         onChange={toggleFeedback}
                                     />
-                                    {showFeedback ?
-                                        <CheckSquare className="checkbox-icon-filled" />
-                                        :
-                                        <Square className="checkbox-icon-empty" />}
+                                    {showFeedback ? <CheckSquare className="checkbox-icon-filled" /> : <Square className="checkbox-icon-empty" />}
                                     Show Feedback
                                 </label>
                             </div>
@@ -883,7 +834,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                         <CardContent>
                             {selectedAlert && (
                                 <div className="options-container">
-                                    {responseOptions && responseOptions.map((option, index) => (
+                                    {responseOptions.map((option, index) => (
                                         <Button
                                             key={index}
                                             onClick={() => handleResolution(index)}
@@ -919,9 +870,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                             {logs.map((log, index) => (
                                 <div key={index} className="log-item">
                                     <span className="log-message">{log.message}</span>
-                                    <span className="log-timestamp">
-                                        {log.timestamp.toLocaleTimeString()}
-                                    </span>
+                                    <span className="log-timestamp">{log.timestamp.toLocaleTimeString()}</span>
                                 </div>
                             ))}
                             <div ref={logsEndRef} />
@@ -930,9 +879,9 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                 </Card>
             </div>
         );
-    }
+    };
 
-    function renderMainContentSetupCard() {
+    const renderMainContentSetupCard = () => {
         return (
             <>
                 <CardHeader>
@@ -949,14 +898,9 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                             <CardTitle>{scenario.title}</CardTitle>
                         )}
                         <div className="spinner-container">
-                            {isFetching && (<BarLoader color="#0073e6" width="100%" />
-                            )}
+                            {isFetching && (<BarLoader color="#0073e6" width="100%" />)}
                         </div>
-
-                        <div
-                            className="scenario-description main-content-scenario-description"
-                            style={{ position: 'relative' }}
-                        >
+                        <div className="scenario-description main-content-scenario-description" style={{ position: 'relative' }}>
                             {isScenarioEditable ? (
                                 <textarea
                                     value={editableScenario.context}
@@ -970,7 +914,8 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                         </div>
                         {scenarioGenerated && !isScenarioEditable && (
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
-                                <span onClick={handleScenarioEditToggle} className="edit-control-label"><Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
+                                <span onClick={handleScenarioEditToggle} className="edit-control-label">
+                                    <Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
                                 </span>
                             </div>
                         )}
@@ -1006,15 +951,18 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                                 ))}
                             </Select>
                         </div>
-                        {scenarioGenerated && (<Button onClick={startSimulation} disabled={isFetching}>
-                            {isFetching ? 'Starting...' : 'Start Simulation'}
-                        </Button>)}
+                        {scenarioGenerated && (
+                            <Button onClick={startSimulation} disabled={isFetching}>
+                                {isFetching ? 'Starting...' : 'Start Simulation'}
+                            </Button>
+                        )}
                     </div>
                 </CardContent>
             </>
         );
-    }
-    function renderMainContentCardSetup() {
+    };
+
+    const renderMainContentCardSetup = () => {
         return (
             <Card className="setup-card">
                 <CardHeader>
@@ -1042,18 +990,22 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                             ))}
                         </Select>
                     </div>
-                    {!scenarioGenerated && (<Button onClick={generateScenario} disabled={isFetching}>
-                        {isFetching ? 'Generating...' : 'Generate Scenario'}
-                    </Button>)}
-                    {scenarioGenerated && (<Button onClick={startSimulation} disabled={isFetching}>
-                        {isFetching ? 'Starting...' : 'Start Simulation'}
-                    </Button>)}
+                    {!scenarioGenerated && (
+                        <Button onClick={generateScenario} disabled={isFetching}>
+                            {isFetching ? 'Generating...' : 'Generate Scenario'}
+                        </Button>
+                    )}
+                    {scenarioGenerated && (
+                        <Button onClick={startSimulation} disabled={isFetching}>
+                            {isFetching ? 'Starting...' : 'Start Simulation'}
+                        </Button>
+                    )}
                 </CardContent>
             </Card>
         );
-    }
+    };
 
-    function renderMainContentDebriefing() {
+    const renderMainContentDebriefing = () => {
         return (
             <div className="debriefing-section">
                 <h4 className="debriefing-title">Simulation Debriefing</h4>
@@ -1068,7 +1020,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                             </RadarChart>
                         </ResponsiveContainer>
                         <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
-                            This graph illustrates your scores in several key decision making tactics. The higher the score, the better you demonstrated that tactic.
+                            This graph illustrates your scores in key decision-making tactics.
                         </p>
                     </div>
                 )}
@@ -1077,8 +1029,8 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                         <ResponsiveContainer>
                             <LineChart data={performanceData}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="time" />
-                                <YAxis />
+                                <XAxis dataKey="time" label={{ value: "Time Elapsed", position: 'insideBottom', offset: -5 }} />
+                                <YAxis label={{ value: 'Metrics', angle: -90, position: 'insideLeft' }} />
                                 <Tooltip />
                                 <Legend />
                                 <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
@@ -1102,46 +1054,10 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                     )}
                 </p>
                 <p>
-                    <strong>Strengths:</strong>
-                    {debriefing.strengths && debriefing.strengths.length > 0 ? (
-                        <ul className="debriefing-list">
-                            {debriefing.strengths.map((strength, i) => (
-                                <li key={i}>
-                                    {strength}
-                                    {debriefing.tactics && debriefing.tactics[strength]?.examples &&
-                                        <ul className="debriefing-examples">
-                                            {debriefing.tactics[strength].examples.map((ex, idx) => (
-                                                <li key={idx}>
-                                                    {ex}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    }
-                                </li>
-                            ))}
-                        </ul>
-                    ) : 'None'}
+                    <strong>Strengths:</strong> {debriefing.strengths ? debriefing.strengths.join(', ') : 'None'}
                 </p>
                 <p>
-                    <strong>Areas for Improvement:</strong>
-                    {debriefing.areasForImprovement && debriefing.areasForImprovement.length > 0 ? (
-                        <ul className="debriefing-list">
-                            {debriefing.areasForImprovement.map((area, i) => (
-                                <li key={i}>
-                                    {area}
-                                    {debriefing.tactics && debriefing.tactics[area]?.examples &&
-                                        <ul className="debriefing-examples">
-                                            {debriefing.tactics[area].examples.map((ex, idx) => (
-                                                <li key={idx}>
-                                                    {ex}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    }
-                                </li>
-                            ))}
-                        </ul>
-                    ) : 'None'}
+                    <strong>Areas for Improvement:</strong> {debriefing.areasForImprovement ? debriefing.areasForImprovement.join(', ') : 'None'}
                 </p>
                 <p>
                     <strong>Overall Score:</strong> {debriefing.overallScore}
@@ -1150,56 +1066,94 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                     <strong>Letter Grade:</strong> {debriefing.letterGrade}
                 </p>
                 <p>
-                    <strong>Recommendations:</strong> {debriefing.advice}</p>
+                    <strong>Recommendations:</strong> {debriefing.advice}
+                </p>
                 <div className="action-buttons">
-                    <Button onClick={() => setSimulationComplete(false)}>
-                        Try Different Choices
-                    </Button>
-                    <Button onClick={resetSimulation}>
-                        Run as Different Role
-                    </Button>
+                    <Button onClick={() => setSimulationComplete(false)}>Try Different Choices</Button>
+                    <Button onClick={resetSimulation}>Run as Different Role</Button>
                 </div>
             </div>
         );
-    }
+    };
+
+    // ---------------------------------------------------------------------
+    // Main Render
+    return (
+        <div className="app-container">
+            <header className="app-header">
+                <div className="header-box">
+                    <span className="header-title">{metadata.title}</span>
+                    <Menu className="hamburger-icon" onClick={() => setDropdownVisible(!dropdownVisible)} />
+                    {dropdownVisible && (
+                        <div className="dropdown-menu">
+                            <div onClick={onReturn}>Return to Module Library</div>
+                            {modules.map((module, index) => (
+                                <div key={index} onClick={() => onSelectModule(module.title)}>
+                                    {module.title}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </header>
+            <main className="content-grid">
+                <aside className="left-column">
+                    <Card className="details-card">
+                        <CardContent>
+                            {renderLeftColumnCardContent()}
+                        </CardContent>
+                    </Card>
+                </aside>
+                <section className="main-content">
+                    <div className="main-content-flex">
+                        {errorMessage && (
+                            <div className="error-box">
+                                <h4 className="error-title">Error</h4>
+                                <p>{errorMessage}</p>
+                            </div>
+                        )}
+                        {renderMainContent()}
+                    </div>
+                </section>
+                <section className="notifications">
+                    <h4>Notifications</h4>
+                    {notifications.map((note, index) => (
+                        <div key={index} className="notification">{note}</div>
+                    ))}
+                </section>
+            </main>
+        </div>
+    );
 };
- // Metadata for the component
- export const metadata = {
+
+// ---------------------------------------------------------------------
+// Metadata for the Cybersecurity Module
+export const metadata = {
     title: 'Cybersecurity Challenge',
-     description: 'Engage in a realistic cybersecurity incident response simulation. Make critical decisions to defend against threats and protect your organization.',
+    description: 'Engage in a realistic cybersecurity incident response simulation. Make critical decisions to defend against threats and protect your organization.',
     imageUrl: '../images/CybersecurityModule.png',
-   instructions: `
+    instructions: `
          <h2>Gameplay Overview</h2>
-            <p>Welcome to the Cybersecurity Challenge module. Here, you will step into the role of a cybersecurity professional and navigate a dynamic incident response simulation. Your objective is to effectively manage and mitigate cybersecurity threats to protect your organization's digital assets.</p>
-          <h3>Simulation Mechanism</h3>
-             <p>The simulation presents you with a series of cybersecurity incidents, each requiring strategic decision-making. As threats emerge, you'll need to:</p>
-             <ol>
-                <li><strong>Prioritize Alerts:</strong> Review active security alerts and prioritize them based on severity and potential impact.</li>
-                <li><strong>Select Responses:</strong> Choose appropriate response options from a range of strategic actions to counter each threat.</li>
-                <li><strong>Manage System Status:</strong> Monitor key system metrics such as network health, server load, and intrusion attempts, which are dynamically affected by your decisions and the unfolding scenario.</li>
-                <li><strong>Analyze Logs:</strong> Utilize system logs to gain deeper insights into the nature of the threats and the effectiveness of your responses.</li>
-            </ol>
-          <p>The AI-driven simulation engine adapts to your actions, creating a dynamic and challenging experience that tests your cybersecurity knowledge and decision-making skills under pressure.</p>
-           <h3>Key Skills Assessed</h3>
-             <ul>
-                <li><strong>Threat Prioritization:</strong> Evaluate and prioritize security alerts to focus on the most critical issues.</li>
-                <li><strong>Incident Response:</strong> Select and implement effective response strategies to mitigate cyber threats.</li>
-                <li><strong>Resource Management:</strong> Manage system resources and balance security measures with operational impact.</li>
-                 <li><strong>Strategic Decision-Making:</strong> Make informed decisions under pressure, considering both immediate and long-term consequences.</li>
-                 <li><strong>Adaptability and Learning:</strong> Adjust your strategies based on the evolving nature of threats and feedback from the simulation.</li>
-             </ul>
-           <h3>Outcome and Debriefing</h3>
-             <p>Upon completing the simulation, you will receive a comprehensive debriefing that includes:</p>
-             <ul>
-                <li><strong>Performance Summary:</strong> An overview of your performance in handling the cybersecurity incidents.</li>
-                <li><strong>Strengths and Areas for Improvement:</strong> Identification of your key strengths in cybersecurity decision-making and areas where you can enhance your skills.</li>
-                <li><strong>Tactical Scorecard:</strong> Scores and feedback on key decision-making tactics, with examples from your simulation transcript.</li>
-                <li><strong>Overall Performance Score and Grade:</strong> A quantitative score and letter grade reflecting your overall effectiveness in the simulation.</li>
-                <li><strong>Personalized Advice:</strong> Actionable recommendations and advice to further develop your cybersecurity expertise.</li>
-                <li><strong>Full Simulation Transcript:</strong> A detailed transcript of all system logs and your actions during the simulation for in-depth review.</li>
-             </ul>
-           <p>The Cybersecurity Challenge module provides a realistic and engaging platform to sharpen your cybersecurity skills, enhance your strategic thinking, and prepare you to effectively lead incident response efforts in real-world scenarios.</p>
-   `,
-     component: CybersecurityModule,
- };
- export default CybersecurityModule;
+         <p>Welcome to the Cybersecurity Challenge module. Here, you will step into the role of a cybersecurity professional and navigate a dynamic incident response simulation. Your objective is to effectively manage and mitigate cybersecurity threats to protect your organization's digital assets.</p>
+         <h3>Simulation Mechanism</h3>
+         <ol>
+            <li><strong>Prioritize Alerts:</strong> Review active security alerts and prioritize them based on severity and potential impact.</li>
+            <li><strong>Select Responses:</strong> Choose appropriate response options from a range of strategic actions to counter each threat.</li>
+            <li><strong>Manage System Status:</strong> Monitor key system metrics such as network health, server load, and intrusion attempts, which are dynamically affected by your decisions and the unfolding scenario.</li>
+            <li><strong>Analyze Logs:</strong> Utilize system logs to gain deeper insights into the nature of the threats and the effectiveness of your responses.</li>
+         </ol>
+         <h3>Key Skills Assessed</h3>
+         <ul>
+            <li><strong>Threat Prioritization:</strong> Evaluate and prioritize security alerts to focus on the most critical issues.</li>
+            <li><strong>Incident Response:</strong> Select and implement effective response strategies to mitigate cyber threats.</li>
+            <li><strong>Resource Management:</strong> Manage system resources and balance security measures with operational impact.</li>
+            <li><strong>Strategic Decision-Making:</strong> Make informed decisions under pressure, considering both immediate and long-term consequences.</li>
+            <li><strong>Adaptability and Learning:</strong> Adjust your strategies based on the evolving nature of threats and feedback from the simulation.</li>
+         </ul>
+         <h3>Outcome and Debriefing</h3>
+         <p>Upon completing the simulation, you will receive a comprehensive debriefing that includes a performance summary, identification of strengths and areas for improvement, tactical scorecard, overall score and grade, personalized advice, and a full transcript of your simulation actions.</p>
+    `,
+    component: CybersecurityModule,
+};
+
+export default CybersecurityModule;

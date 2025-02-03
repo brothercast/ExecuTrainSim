@@ -24,6 +24,10 @@ jobs:
         echo "➡️ Building executrainsim (React Client)..."
         cd executrainsim
         npm ci
+        # -------------------- ADD THIS SECTION --------------------
+        echo "Setting REACT_APP_API_URL environment variable..."
+        echo "REACT_APP_API_URL=https://executrainsim.azurewebsites.net" >> .env.production # Create .env.production
+        # --------------------------------------------------------
         npm run build
         echo "✅ executrainsim build complete."
         cd ..

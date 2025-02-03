@@ -5,6 +5,8 @@
         "build": "cd executrainsim && npm run build"
     },
     "dependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@babel/plugin-proposal-private-property-in-object": "^7.21.11"

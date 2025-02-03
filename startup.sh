@@ -44,6 +44,8 @@ echo "$(date) - Successfully navigated to: $(pwd)"
 echo "$(date) - Checking and installing server dependencies with npm ci..."
 if [ -f package.json ]; then
   echo "$(date) - Found package.json. Proceeding with npm ci."
+  npm install compression
+  npm install express-rate-limit
   npm ci || error_exit "Server dependencies installation failed! Check npm ci logs for errors."
   echo "$(date) - Server dependencies installation completed successfully."
 else
@@ -54,12 +56,19 @@ fi
 echo "$(date) - Starting server with pm2-runtime..."
 PM2_LOG_FILE="/home/LogFiles/pm2.log" # Define PM2 log file path
 
+# --- Check if pm2-runtime is installed, and install if missing ---
+if ! command -v pm2-runtime &> /dev/null; then
+    echo "$(date) - pm2-runtime is not installed, attempting to install globally"
+    npm install -g pm2 || error_exit "pm2 installation failed"
+fi
+
 # Corrected pm2-runtime command with standard if-then error checking (SYNTAX CORRECTED, PORT REMOVED)
 if ! pm2-runtime start server.js --no-daemon --name executrainserver --update-env --log "$PM2_LOG_FILE" --no-autorestart; then
-  echo "ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
+  echo "$(date) - ERROR: pm2-runtime failed to start server! Check pm2 logs: $PM2_LOG_FILE"
   pm2 logs executrainserver --lines 100 --error # Show last 100 lines of pm2 error logs
   error_exit "pm2-runtime failed to start."
 fi
+
 
 echo "$(date) - Successfully started server with pm2-runtime. PM2 logs: $PM2_LOG_FILE"
 echo "$(date) - Application (server component) is now running."
