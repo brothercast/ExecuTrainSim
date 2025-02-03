@@ -409,8 +409,7 @@ const NegotiationModule = ({ onReturn }) => {
         const prompt = `Illustrate the negotiation scenario titled "${title}" with context: "${context}". The illustration should resemble colorful, writing-free, diverse universal stock art from the 1990s with simple, clean lines and a focus on clarity.`;
     
         try {
-            // Corrected Endpoint URL - Using EXPLICIT ABSOLUTE URL with BACKEND_API_SERVER_URL
-            const endpoint = `${BACKEND_API_SERVER_URL}/api/dalle/image`; // <-- Construct FULL URL using BACKEND_API_SERVER_URL
+            const endpoint = `${API_BASE_URL}/api/dalle/image`;
     
             const response = await axios.post(endpoint, { prompt });
             setImages((prevImages) => ({ ...prevImages, [0]: response.data.imagePath }));
