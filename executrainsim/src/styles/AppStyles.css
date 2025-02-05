@@ -801,6 +801,19 @@ h3 {
   flex-direction: row-reverse;
 }
 
+.feedback-tooltip {
+  position: absolute;
+  left: 100%;    /* Start at the right edge of the cursor/anchor element */
+  top: 100%;     /* Start at the bottom edge of the cursor/anchor element */
+  margin-left: 5px;
+  margin-top: 5px;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+}
+
 .chat-history-container {
   position: relative;
   flex: 1;

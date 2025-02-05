@@ -1,0 +1,131 @@
+/* src/styles/PitchModule.css */
+
+/* Style Selection UI */
+.pitch-style-selection-content {
+    padding: 20px;
+}
+
+.pitch-style-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.pitch-style-card {
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.pitch-style-card:hover {
+    transform: scale(1.05);
+}
+
+.pitch-style-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pitch-style-card .style-icon {
+    width: 24px;
+    height: 24px;
+    color: #007bff; /* Example icon color */
+}
+
+.pitch-style-card .card-title {
+    font-size: 1.2em;
+}
+
+/* Stage Presentation UI Styles */
+.stage-presentation-container {
+    padding: 20px;
+}
+
+.stage-presentation-title {
+    color: #007bff;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.stage-presentation-panelists {
+    /* Style for panelist area (avatars, names) */
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center; /* Example styling */
+}
+
+.stage-presentation-stage-area {
+    /* Style for user stage area, question display */
+    background-color: #f7f9fc;
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center; /* Example styling */
+}
+
+.stage-presentation-question-area {
+    /* Style for question display within stage area */
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+    margin-top: 15px;
+}
+
+
+.stage-presentation-response-options {
+    /* Style for response options buttons */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stage-presentation-pitch-log {
+    /* Style for pitch log */
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    height: 200px; /* Example height */
+    overflow-y: auto;
+    background-color: #f0f0f0; /* Example background */
+}
+
+
+/* Placeholder Style - for other UI styles under construction */
+.style-ui-placeholder {
+    padding: 20px;
+    text-align: center;
+    background-color: #f0f0f0; /* Light grey to indicate placeholder */
+    border-radius: 8px;
+    border: 2px dashed #ccc;
+    margin-top: 20px;
+}
+
+.style-ui-placeholder h3 {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.textarea-component {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    font-family: inherit;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.textarea-component:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}

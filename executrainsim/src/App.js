@@ -50,7 +50,7 @@ const App = () => {
           >
                 <div className="header-box">
                     <span className="header-title">
-                        {selectedModule ? "Simulation" : "Simulation Library"}
+                        {selectedModule ? "Simulation" : "Kaos Monkey Suite"}
                     </span>
                 </div>
             </header>
