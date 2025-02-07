@@ -1,36 +1,48 @@
 /* src/components/effects/SevenSegmentDisplay.css */
 
-/* Style for the container of the seven-segment display */
 .seven-segment-container {
   position: relative;
-    width: 30px; /* Adjusted to accommodate single digit display */
-    height: 50px; /* Adjusted to fit the digit */
-    display: inline-block; /* Ensure the container takes up only needed space */
-    margin: 0 2px;
-  background-color: black; /* Background to enhance the glow effect */
+  display: inline-flex; /* Use inline-flex for alignment */
+  align-items: center; /* Vertically align digits and suffix */
+  background-color: black;
+  border-radius: 5px;
+  padding: 5px; /* Add padding for a better visual appearance */
 }
 
-/* Common style for all segments */
+.digits-container {
+  display: flex; /* Use flex to arrange digits horizontally */
+}
+
+.digit-container {
+  position: relative;
+  width: 30px;
+  height: 50px;
+  margin: 0 2px;
+}
+
 .segment {
   position: absolute;
   transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   background-color: transparent;
 }
 
-/* Style for horizontal segments (a, d, g) */
 .segment-horizontal {
   height: 3px;
   width: 22px;
 }
 
-/* Style for vertical segments (b, c, e, f) */
 .segment-vertical {
   width: 3px;
   height: 22px;
 }
 
-/* Active segment style for glowing effect */
 .segment-active {
-    background-color: orange;
-   box-shadow: 0 0 5px orange, 0 0 10px orange;
+  background-color: orange;
+  box-shadow: 0 0 5px orange, 0 0 10px orange;
+}
+
+.display-suffix {
+  font-size: 1.2em;
+  color: white; /* Match the display's color */
+  margin-left: 5px; /* Add some space between the digits and the suffix */
 }

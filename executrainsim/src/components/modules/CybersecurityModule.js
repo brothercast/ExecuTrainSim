@@ -22,38 +22,22 @@ import {
     ChevronRight,
     ChevronLeft
 } from 'lucide-react';
-import '../../styles/AppStyles.css';
 import '../../styles/CybersecurityModule.css';
 import {
-    Radar,
-    RadarChart,
-    PolarGrid,
-    PolarAngleAxis,
-    PolarRadiusAxis,
-    ResponsiveContainer,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend
+    Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+    ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid,
+    Tooltip, Legend
 } from 'recharts';
 import DOMPurify from 'dompurify';
 
 // ---------------------------------------------------------------------
-// Unified API Base URL setup:
-// In development, if REACT_APP_API_URL is not set, use http://localhost:8080.
-// In production, default to a relative URL.
+// Unified API Base URL setup
 const API_BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : '');
 console.log("[CybersecurityModule] API_BASE_URL at runtime:", API_BASE_URL);
-
-// Helper to construct full endpoint URLs.
 const constructEndpoint = (baseURL, path) => `${baseURL}${path}`;
 
 // ---------------------------------------------------------------------
-// JSON Parsing Helper:
-// Strips any triple-backticks (and an optional "json" specifier) before parsing.
+// JSON Parsing Helper
 const parseAiJson = (apiResponse) => {
     if (!apiResponse) {
         console.error('parseAiJson: No response data to parse.');
@@ -69,11 +53,9 @@ const parseAiJson = (apiResponse) => {
         } catch (parseError) {
             console.error('parseAiJson: Failed to parse cleaned string as JSON:', parseError);
             console.log('parseAiJson: Raw cleaned content:', cleaned);
-            return cleaned; // Fallback to returning the raw cleaned string.
+            return cleaned;
         }
     }
-    // If the API response is in ChatGPT style with a choices array,
-    // extract the message content and attempt to parse it.
     if (
         apiResponse.choices &&
         Array.isArray(apiResponse.choices) &&
@@ -141,7 +123,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     const [currentTurnIndex, setCurrentTurnIndex] = useState(1);
     const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-    // Define roles and difficulty levels for Cybersecurity
+    // Define roles and difficulty levels
     const roles = [
         { value: 'security-analyst', title: 'Security Analyst' },
         { value: 'it-manager', title: 'IT Manager' },
@@ -215,7 +197,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
     // ---------------------------------------------------------------------
-    // Unified API Call Function (using constructEndpoint)
+    // Unified API Call Function
     const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {
         setIsFetching(true);
         if (isUserAction) {
@@ -280,7 +262,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                 return;
             }
             setErrorMessage('');
-            const prompt = `
+            const prompt = String.raw`
                Create a detailed cybersecurity simulation scenario for a ${selectedRoleTitle} at ${selectedDifficultyTitle} difficulty level.
                The scenario should include a title, a detailed context, specific objectives, a description of the starting state of the system, and a series of interconnected decision points to be resolved by the user.
                Each decision point should have:
@@ -298,16 +280,16 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                    "context": "string",
                    "objectives": ["string"],
                    "startingState": {
-                      "networkHealth": number,
-                      "serverLoad": number,
-                      "intrusionAttempts": number
+                      "networkHealth": "number",
+                      "serverLoad": "number",
+                      "intrusionAttempts": "number"
                    },
                    "decision_points": [
                      {
-                        "id": number,
+                        "id": "number",
                         "description": "string",
                         "options": [
-                           { "name": "string", "description": "string", "result": "string", "consequences": { "networkHealth": number, "serverLoad": number, "intrusionAttempts": number }, "points": number }
+                           { "name": "string", "description": "string", "result": "string", "consequences": { "networkHealth": "number", "serverLoad": "number", "intrusionAttempts": "number" }, "points": "number" }
                         ]
                      }
                    ],
@@ -374,7 +356,8 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
             console.warn('Role or difficulty not set. Skipping response option generation.');
             return;
         }
-        const prompt = `
+       
+        const prompt = String.raw`
              Based on the active simulation and the current alert: "${context}",
              generate 3 to 5 strategic response options that the user could employ.
              Each option should be concise and directly related to the current issue.
@@ -424,7 +407,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
         const selectedOption = responseOptions[actionIndex] || null;
         const actionDescription = selectedOption ? selectedOption.description : 'No action selected';
         addLog(`User action: ${actionDescription}.`);
-        const systemPrompt = `
+        const systemPrompt = String.raw`
               As a simulation engine in a cybersecurity environment, respond to the user's action based on the current alert: "${selectedAlert.description}".
               Evaluate the effectiveness of the user's choice: "${actionDescription}" and adjust the simulation accordingly.
               Provide a follow-up message that includes next steps or challenges the user will face. Keep the message brief and to the point.
@@ -437,23 +420,23 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                       "context": "string",
                       "objectives": ["string"],
                       "startingState": {
-                          "networkHealth": number,
-                          "serverLoad": number,
-                          "intrusionAttempts": number
+                          "networkHealth": "number",
+                          "serverLoad": "number",
+                          "intrusionAttempts": "number"
                       },
                       "decision_points": [
                         {
-                           "id": number,
+                           "id": "number",
                            "description": "string",
                            "options": [
-                               { "option": "string", "result": "string", "consequences": { "networkHealth": number, "serverLoad": number, "intrusionAttempts": number }, "points": number }
+                               { "option": "string", "result": "string", "consequences": { "networkHealth": "number", "serverLoad": "number", "intrusionAttempts": "number" }, "points": "number" }
                            ]
                         }
                      ],
                      "feedback": "string"
                  },
                  "nextAlert": {
-                     "id": number,
+                     "id": "number",
                      "description": "string",
                      "options": [
                         { "option": "string", "result": "string" }
@@ -537,7 +520,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
     const analyzeSimulation = async () => {
-        const analysisPrompt = `
+        const analysisPrompt = String.raw`
            Analyze the following simulation transcript and provide an in-depth analysis of the user's performance based on their responses.
            Evaluate the user’s performance on key decision-making tactics and provide a score (1-10) for each tactic.
            For each tactic, include 2-3 specific examples from the transcript.
@@ -546,11 +529,11 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
            {
                 "Summary": "string",
                 "Tactics": {
-                     "Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                     "Decision Making": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                     "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                     "Strategic Thinking": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                     "Technical Knowledge": { "score": number, "examples": ["string"], "recommendations": ["string"] }
+                     "Problem Solving": { "score": "number", "examples": ["string"], "recommendations": ["string"] },
+                     "Decision Making": { "score": "number", "examples": ["string"], "recommendations": ["string"] },
+                     "Adaptability": { "score": "number", "examples": ["string"], "recommendations": ["string"] },
+                     "Strategic Thinking": { "score": "number", "examples": ["string"], "recommendations": ["string"] },
+                     "Technical Knowledge": { "score": "number", "examples": ["string"], "recommendations": ["string"] }
                 }
            }
            The simulation transcript:
@@ -650,13 +633,13 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
         setTimeLeft(300);
         setNotifications([]);
         setResponseOptions([]);
-        setSimulationStarted(false);
+        setSimulationStarted: false;
         setSystemStatus({ networkHealth: 100, serverLoad: 0, intrusionAttempts: 0 });
         setLogs([]);
-        setScenarioGenerated(false);
+        setScenarioGenerated: false;
         setRadarData(null);
-        setShowFeedback(false);
-        setIsScenarioEditable(false);
+        setShowFeedback: false;
+        setIsScenarioEditable: false;
         setPerformanceData([]);
         setActivePhase('setup');
         setCurrentTurnIndex(1);
@@ -678,6 +661,8 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
         setPerformanceData(prev => [...prev, { time: (300 - timeLeft), score: performanceScore }]);
     };
 
+    // ---------------------------------------------------------------------
+    // Navigation functions
     const goToPreviousTurn = () => {
         if (currentTurnIndex > 1 && simulationComplete) {
             setCurrentTurnIndex(prev => prev - 1);
@@ -685,59 +670,65 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
     const goToNextTurn = () => {
-        const totalTurns = Math.ceil(logs.length / 2);
-        if (currentTurnIndex < totalTurns && simulationComplete) {
+        // const totalTurns = Math.ceil(chatHistory.length / 2); // Removed chatHistory
+        if (currentTurnIndex < 100 /* totalTurns - Removed chatHistory dependency */ && simulationComplete) { // totalTurns removed
             setCurrentTurnIndex(prev => prev + 1);
         }
     };
 
+    // ---------------------------------------------------------------------
+    // Toggle Feedback
     const toggleFeedback = () => {
         setShowFeedback(prev => !prev);
     };
 
     // ---------------------------------------------------------------------
     // Render Functions
-    const renderLeftColumnCardContent = () => {
-        return (
-            <>
+    const renderLeftColumnCardContent = () => (
+        <Card className="card details-card">
+            <CardContent className="card-content">
                 {simulationStarted && scenario ? (
-                    <div className="scenario-info">
-                        <h3 className="left-column-scenario-title">{scenario.title}</h3>
-                        <div className="module-description left-column-scenario-description">
-                            <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                    // Condition 1: Simulation started AND scenario is available
+                    <React.Fragment>
+                        <div className="scenario-info">
+                            <h3 className="left-column-scenario-title">{scenario.title}</h3>
+                            <div className="module-description left-column-scenario-description">
+                                <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
+                            </div>
+                            <div className="module-info">
+                                <strong>Role:</strong> {role ? roles.find(r => r.value === role)?.title : ''}
+                                <br />
+                                <strong>Difficulty:</strong> {difficulty ? difficultyLevels.find(l => l.value === difficulty)?.title : ''}
+                            </div>
                         </div>
-                        <div className="module-info">
-                            <strong>Role:</strong> {role ? roles.find(r => r.value === role)?.title : ''}
-                            <br />
-                            <strong>Difficulty:</strong> {difficulty ? difficultyLevels.find(l => l.value === difficulty)?.title : ''}
-                        </div>
-                    </div>
+                    </React.Fragment>
                 ) : (
-                    <>
+                    // Else for Condition 1: Simulation NOT started OR no scenario
+                    <React.Fragment>
                         <img src={metadata.imageUrl} alt="Scenario Illustration" className="scenario-image" />
-                        {!scenario && (
+                        {!scenario ? ( // Nested Condition 1a: NO scenario available
                             <div className="module-description">
                                 <h2>Cybersecurity Simulator</h2>
                                 <p>
-                                    Welcome to the Cybersecurity Simulator, where you will engage in a dynamic simulation
-                                    to defend against cyber threats. Your objective is to make critical decisions to safeguard your organization.
+                                    Welcome to the Cybersecurity Simulator, ready for action.
                                 </p>
-                                <Button onClick={() => setShowInstructions(!showInstructions)}>
+                                <Button className="button" onClick={() => setShowInstructions(!showInstructions)}>
                                     {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
                                 </Button>
                                 {showInstructions && (
                                     <div dangerouslySetInnerHTML={{ __html: metadata.instructions }} />
                                 )}
                             </div>
-                        )}
-                    </>
+                        ) : null /* Else for Condition 1a: Scenario IS available (but simulation not started - should not happen here, but for completeness) */}
+                    </React.Fragment>
                 )}
                 {simulationStarted && activePhase === 'simulation' && !showInstructions && (
-                    <Card className="system-status-card">
-                        <CardHeader>
-                            <CardTitle>System Status</CardTitle>
+                    // Condition 2: Simulation is active, in 'simulation' phase, and instructions are NOT shown
+                    <Card className="card system-status-card-mini">
+                        <CardHeader className="card-header">
+                            <CardTitle className="card-title">System Status</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="card-content">
                             <div className="status-indicators">
                                 <div className="indicator">
                                     <span>Time Left:</span>
@@ -745,11 +736,7 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                                 </div>
                                 <div className="indicator">
                                     <span>Network Health:</span>
-                                    <Progress value={systemStatus.networkHealth} max={100} />
-                                </div>
-                                <div className="indicator">
-                                    <span>Server Load:</span>
-                                    <Progress value={systemStatus.serverLoad} max={100} />
+                                    <Progress className="progress-mini" value={systemStatus.networkHealth} max={100} />
                                 </div>
                                 <div className="indicator">
                                     <span>Intrusions:</span>
@@ -757,19 +744,22 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                                 </div>
                             </div>
                             <div className="progress-info">
-                                <Progress value={progress} />
+                                <Progress className="progress-mini" value={progress} />
                                 <span className="progress-text">{progress}% Complete</span>
                             </div>
                         </CardContent>
                     </Card>
                 )}
-            </>
-        );
-    };
+            </CardContent>
+        </Card>
+    );
 
     const renderMainContent = () => {
         if (simulationComplete) {
             return renderMainContentDebriefing();
+        }
+        if (!scenario) {
+            return renderMainContentCardSetup();
         }
         if (scenario) {
             if (simulationStarted) {
@@ -777,204 +767,197 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
             } else {
                 return renderMainContentSetupCard();
             }
-        } else {
-            return renderMainContentCardSetup();
         }
+        return renderMainContentCardSetup();
     };
 
-    const renderMainContentSimulationActive = () => {
-        return (
-            <div className="dashboard">
-                <div className="dashboard-grid">
-                    {/* Alerts Card */}
-                    <Card className="alerts-card">
-                        <CardHeader>
-                            <CardTitle>Active Alerts</CardTitle>
-                            <div className="feedback-toggle-container">
-                                <label className="feedback-checkbox-label">
-                                    <input
-                                        type="checkbox"
-                                        checked={showFeedback}
-                                        onChange={toggleFeedback}
-                                    />
-                                    {showFeedback ? <CheckSquare className="checkbox-icon-filled" /> : <Square className="checkbox-icon-empty" />}
-                                    Show Feedback
-                                </label>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            {alerts.map((alert, index) => (
-                                <div
-                                    key={alert.id}
-                                    onClick={() => setSelectedAlert(alert)}
-                                    className={`alert-item ${selectedAlert?.id === alert.id ? 'selected' : ''}`}
-                                    draggable
-                                    onDragStart={(e) => e.dataTransfer.setData('index', index)}
-                                    onDrop={(e) => {
-                                        e.preventDefault();
-                                        const draggedIndex = e.dataTransfer.getData('index');
-                                        handleAlertReorder(draggedIndex, index);
-                                    }}
-                                    onDragOver={(e) => e.preventDefault()}
-                                >
-                                    <AlertTriangle className="icon" />
-                                    <span>{alert.description}</span>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                    {/* Options Card */}
-                    <Card className="options-card">
-                        <CardHeader>
-                            <CardTitle>Response Options</CardTitle>
-                            <div className="spinner-container">
-                                {isResponseLoading && <BeatLoader color="#0073e6" size={8} />}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            {selectedAlert && (
-                                <div className="options-container">
-                                    {responseOptions.map((option, index) => (
-                                        <Button
-                                            key={index}
-                                            onClick={() => handleResolution(index)}
-                                            className={`option-button ${isResponseLoading ? 'loading' : ''}`}
-                                            disabled={isResponseLoading || isButtonDisabled}
-                                        >
-                                            {option.name} - {option.description}
-                                        </Button>
-                                    ))}
-                                    {selectedAlert?.options && selectedAlert.options.length > 0 && showFeedback && (
-                                        <div className="feedback-box">
-                                            <h4 className="feedback-title">
-                                                <Info className="icon" />
-                                                Feedback
-                                            </h4>
-                                            {selectedAlert.options.map((option, index) => (
-                                                <p key={index}>{option.result}</p>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-                {/* Logs Card */}
-                <Card className="logs-card">
-                    <CardHeader>
-                        <CardTitle>System Logs</CardTitle>
-                    </CardHeader>
-                    <CardContent className="logs-container">
-                        <div className="logs-scroll">
-                            {logs.map((log, index) => (
-                                <div key={index} className="log-item">
-                                    <span className="log-message">{log.message}</span>
-                                    <span className="log-timestamp">{log.timestamp.toLocaleTimeString()}</span>
-                                </div>
-                            ))}
-                            <div ref={logsEndRef} />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    };
-
-    const renderMainContentSetupCard = () => {
-        return (
-            <>
-                <CardHeader>
-                    <div className="scenario-title-container">
-                        {isScenarioEditable ? (
-                            <input
-                                type="text"
-                                value={editableScenario.title}
-                                onChange={(e) => handleScenarioChange('title', e.target.value)}
-                                className="editable-scenario-title"
-                                style={{ fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%' }}
-                            />
-                        ) : (
-                            <CardTitle>{scenario.title}</CardTitle>
-                        )}
-                        <div className="spinner-container">
-                            {isFetching && (<BarLoader color="#0073e6" width="100%" />)}
-                        </div>
-                        <div className="scenario-description main-content-scenario-description" style={{ position: 'relative' }}>
-                            {isScenarioEditable ? (
-                                <textarea
-                                    value={editableScenario.context}
-                                    onChange={(e) => handleScenarioChange('context', e.target.value)}
-                                    className="editable-scenario-context"
-                                    style={{ minHeight: '100px', resize: 'vertical' }}
-                                />
-                            ) : (
-                                <div dangerouslySetInnerHTML={{ __html: scenario.context }} />
-                            )}
-                        </div>
-                        {scenarioGenerated && !isScenarioEditable && (
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
-                                <span onClick={handleScenarioEditToggle} className="edit-control-label">
-                                    <Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
-                                </span>
-                            </div>
-                        )}
-                        {isScenarioEditable && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '10px', marginBottom: '10px', whiteSpace: 'nowrap' }}>
-                                <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
-                                    <Save style={{ marginLeft: '5px' }} />
-                                </span>
-                                <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
-                                    <X style={{ marginLeft: '5px' }} />
-                                </span>
-                            </div>
-                        )}
-                    </div>
+    const renderMainContentSimulationActive = () => (
+        <div className="dashboard-vertical-stack">
+            <Card className="card system-status-card">
+                <CardHeader className="card-header">
+                    <CardTitle className="card-title">System Status</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div>
-                        <div className="form-group">
-                            <label>Select your role</label>
-                            <Select onValueChange={setRole} value={role} disabled={simulationStarted}>
-                                <SelectItem value="">Choose a role</SelectItem>
-                                {roles.map((r) => (
-                                    <SelectItem key={r.value} value={r.value}>{r.title}</SelectItem>
-                                ))}
-                            </Select>
+                <CardContent className="card-content">
+                    <div className="status-indicators">
+                        <div className="indicator">
+                            <span>Time Left:</span>
+                            <SevenSegmentDisplay value={Math.floor(timeLeft / 60)} />
                         </div>
-                        <div className="form-group">
-                            <label>Select difficulty level</label>
-                            <Select onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
-                                <SelectItem value="">Choose difficulty</SelectItem>
-                                {difficultyLevels.map((level) => (
-                                    <SelectItem key={level.value} value={level.value}>{level.title}</SelectItem>
-                                ))}
-                            </Select>
+                        <div className="indicator">
+                            <span>Network Health:</span>
+                            <Progress className="progress" value={systemStatus.networkHealth} max={100} />
                         </div>
-                        {scenarioGenerated && (
-                            <Button onClick={startSimulation} disabled={isFetching}>
-                                {isFetching ? 'Starting...' : 'Start Simulation'}
-                            </Button>
-                        )}
+                        <div className="indicator">
+                            <span>Server Load:</span>
+                            <Progress className="progress" value={systemStatus.serverLoad} max={100} />
+                        </div>
+                        <div className="indicator">
+                            <span>Intrusions:</span>
+                            <span>{systemStatus.intrusionAttempts}</span>
+                        </div>
+                    </div>
+                    <div className="progress-info">
+                        <Progress className="progress" value={progress} />
+                        <span className="progress-text">{progress}% Complete</span>
                     </div>
                 </CardContent>
-            </>
-        );
-    };
-
-    const renderMainContentCardSetup = () => {
-        return (
-            <Card className="setup-card">
-                <CardHeader>
-                    <CardTitle className="header-title">Setup Your Simulation</CardTitle>
-                    <div className="spinner-container">
-                        {isFetchingScenario && <BarLoader color="#0073e6" width="100%" />}
+            </Card>
+            <Card className="card alerts-card">
+                <CardHeader className="card-header">
+                    <CardTitle className="card-title">Active Alerts</CardTitle>
+                    <div className="feedback-toggle-container">
+                        <label className="feedback-checkbox-label">
+                            <input
+                                type="checkbox"
+                                checked={showFeedback}
+                                onChange={toggleFeedback}
+                            />
+                            {showFeedback ? <CheckSquare className="checkbox-icon-filled" /> : <Square className="checkbox-icon-empty" />}
+                            Show Feedback
+                        </label>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="card-content">
+                    {alerts.map((alert, index) => (
+                        <div
+                            key={index}
+                            onClick={() => setSelectedAlert(alert)}
+                            className={`alert-item ${selectedAlert?.id === alert.id ? 'selected' : ''}`}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData('index', index)}
+                            onDrop={(e) => {
+                                e.preventDefault();
+                                const draggedIndex = e.dataTransfer.getData('index');
+                                handleAlertReorder(draggedIndex, index);
+                            }}
+                            onDragOver={(e) => e.preventDefault()}
+                        >
+                            <AlertTriangle className="icon" />
+                            <span>{alert.description}</span>
+                        </div>
+                    ))}
+                </CardContent>
+            </Card>
+            <Card className="card options-card">
+                <CardHeader className="card-header">
+                    <CardTitle className="card-title">Response Options</CardTitle>
+                    <div className="spinner-container">
+                        {isResponseLoading && <BeatLoader color="#0073e6" size={8} />}
+                    </div>
+                </CardHeader>
+                <CardContent className="card-content">
+                    {selectedAlert && (
+                        <div className="options-container">
+                            {responseOptions.map((option, index) => (
+                                <Button
+                                    key={index}
+                                    onClick={() => handleResolution(index)}
+                                    className={`option-button button ${isResponseLoading ? 'loading' : ''}`}
+                                    disabled={isResponseLoading || isButtonDisabled}
+                                >
+                                    {option.name} - {option.description}
+                                </Button>
+                                ))}
+                            {selectedAlert?.options && selectedAlert.options.length > 0 && showFeedback && (
+                                <div className="feedback-box">
+                                    <h4 className="feedback-title">
+                                        <Info className="icon" />
+                                        Feedback
+                                    </h4>
+                                    {selectedAlert.options.map((option, index) => (
+                                        <p key={index}>{option.result}</p>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+            <Card className="card logs-card">
+                <CardHeader className="card-header">
+                    <CardTitle className="card-title">System Logs</CardTitle>
+                </CardHeader>
+                <CardContent className="card-content logs-container">
+                    <div className="logs-scroll">
+                        {logs.map((log, index) => (
+                            <div key={index} className="log-item">
+                                <span className="log-message">{log.message}</span>
+                                <span className="log-timestamp">{log.timestamp.toLocaleTimeString()}</span>
+                            </div>
+                        ))}
+                        <div ref={logsEndRef} />
+                    </div>
+                </CardContent>
+            </Card>
+            <Card className="card notifications-card">
+                <CardHeader className="card-header">
+                    <CardTitle className="card-title">Notifications</CardTitle>
+                </CardHeader>
+                <CardContent className="card-content logs-container">
+                    <div className="notifications">
+                        {notifications.map((note, index) => (
+                            <div key={index} className="notification">{note}</div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+
+    const renderMainContentSetupCard = () => (
+        <Card className="card">
+            <CardHeader className="card-header">
+                <div className="scenario-title-container">
+                    {isScenarioEditable ? (
+                        <input
+                            type="text"
+                            value={editableScenario.title}
+                            onChange={(e) => handleScenarioChange('title', e.target.value)}
+                            className="editable-scenario-title"
+                            style={{ fontFamily: 'Jura, sans-serif', fontSize: '2.5em', color: 'black', minWidth: '100%' }}
+                        />
+                    ) : (
+                        <CardTitle className="card-title">{scenario.title}</CardTitle>
+                    )}
+                    <div className="spinner-container">
+                        {isFetching && (<BarLoader color="#0073e6" width="100%" />)}
+                    </div>
+                    <div className="scenario-description main-content-scenario-description" style={{ position: 'relative' }}>
+                        {isScenarioEditable ? (
+                            <textarea
+                                value={editableScenario.context}
+                                onChange={(e) => handleScenarioChange('context', e.target.value)}
+                                className="editable-scenario-context"
+                                style={{ minHeight: '100px', resize: 'vertical' }}
+                            />
+                        ) : (
+                            <div dangerouslySetInnerHTML={{ __html: editableScenario.context }} />
+                        )}
+                    </div>
+                    {scenarioGenerated && !isScenarioEditable && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: '10px' }}>
+                            <span onClick={handleScenarioEditToggle} className="edit-control-label">
+                                <Edit className="scenario-edit-icon" style={{ marginLeft: '5px' }} />
+                            </span>
+                        </div>
+                    )}
+                    {isScenarioEditable && (
+                        <div className="edit-controls">
+                            <span style={{ whiteSpace: 'nowrap' }} onClick={handleSaveScenario} className='edit-control-label'>
+                                <Save style={{ marginLeft: '5px' }} />
+                            </span>
+                            <span style={{ whiteSpace: 'nowrap' }} onClick={handleCancelScenarioEdit} className='edit-control-label'>
+                                <X style={{ marginLeft: '5px' }} />
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </CardHeader>
+            <CardContent className="card-content">
+                <div>
                     <div className="form-group">
                         <label>Select your role</label>
-                        <Select onValueChange={setRole} value={role} disabled={simulationStarted}>
+                        <Select className="select" onValueChange={setRole} value={role} disabled={simulationStarted}>
                             <SelectItem value="">Choose a role</SelectItem>
                             {roles.map((r) => (
                                 <SelectItem key={r.value} value={r.value}>{r.title}</SelectItem>
@@ -983,7 +966,45 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                     </div>
                     <div className="form-group">
                         <label>Select difficulty level</label>
-                        <Select onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
+                        <Select className="select" onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
+                            <SelectItem value="">Choose difficulty</SelectItem>
+                            {difficultyLevels.map((level) => (
+                                <SelectItem key={level.value} value={level.value}>{level.title}</SelectItem>
+                            ))}
+                        </Select>
+                    </div>
+                    {scenarioGenerated && (
+                        <Button className="button" onClick={startSimulation} disabled={isFetching}>
+                            {isFetching ? 'Starting...' : 'Start Simulation'}
+                        </Button>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+    );
+
+    const renderMainContentCardSetup = () => (
+        <div className="dashboard-vertical-stack">
+            <Card className="card setup-card">
+                <CardHeader className="card-header">
+                    <CardTitle className="card-title header-title">Setup Your Simulation</CardTitle>
+                    <div className="spinner-container">
+                        {isFetchingScenario && <BarLoader color="#0073e6" width="100%" />}
+                    </div>
+                    </CardHeader>
+                <CardContent className="card-content">
+                    <div className="form-group">
+                        <label>Select your role</label>
+                        <Select className="select" onValueChange={setRole} value={role} disabled={simulationStarted}>
+                            <SelectItem value="">Choose a role</SelectItem>
+                            {roles.map((r) => (
+                                <SelectItem key={r.value} value={r.value}>{r.title}</SelectItem>
+                            ))}
+                        </Select>
+                    </div>
+                    <div className="form-group">
+                        <label>Select difficulty level</label>
+                        <Select className="select" onValueChange={setDifficulty} value={difficulty} disabled={simulationStarted}>
                             <SelectItem value="">Choose difficulty</SelectItem>
                             {difficultyLevels.map((level) => (
                                 <SelectItem key={level.value} value={level.value}>{level.title}</SelectItem>
@@ -991,95 +1012,93 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                         </Select>
                     </div>
                     {!scenarioGenerated && (
-                        <Button onClick={generateScenario} disabled={isFetching}>
+                        <Button className="button" onClick={generateScenario} disabled={isFetching}>
                             {isFetching ? 'Generating...' : 'Generate Scenario'}
                         </Button>
                     )}
                     {scenarioGenerated && (
-                        <Button onClick={startSimulation} disabled={isFetching}>
+                        <Button className="button" onClick={startSimulation} disabled={isFetching}>
                             {isFetching ? 'Starting...' : 'Start Simulation'}
                         </Button>
                     )}
                 </CardContent>
             </Card>
-        );
-    };
+        </div>
+    );
 
-    const renderMainContentDebriefing = () => {
-        return (
-            <div className="debriefing-section">
-                <h4 className="debriefing-title">Simulation Debriefing</h4>
-                {radarData && (
-                    <div style={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer>
-                            <RadarChart data={radarData}>
-                                <PolarGrid />
-                                <PolarAngleAxis dataKey="skill" />
-                                <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                                <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-                            </RadarChart>
-                        </ResponsiveContainer>
-                        <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>
-                            This graph illustrates your scores in key decision-making tactics.
-                        </p>
-                    </div>
-                )}
-                {performanceData.length > 0 && (
-                    <div style={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer>
-                            <LineChart data={performanceData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="time" label={{ value: "Time Elapsed", position: 'insideBottom', offset: -5 }} />
-                                <YAxis label={{ value: 'Metrics', angle: -90, position: 'insideLeft' }} />
-                                <Tooltip />
-                                <Legend />
-                                <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                        <p style={{ textAlign: 'center', fontSize: '0.8em', marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
-                    </div>
-                )}
-                <p>
-                    <strong>Summary:</strong>
-                    {debriefing.summary?.split('\n').map((line, i) => (
-                        <p key={i}>{line}</p>
-                    ))}
-                </p>
-                <p>
-                    <strong>Outcome:</strong> {debriefing.outcome}
-                    {debriefing.outcomeReason && (
-                        <>
-                            <br /><strong>Reason:</strong> {debriefing.outcomeReason}
-                        </>
-                    )}
-                </p>
-                <p>
-                    <strong>Strengths:</strong> {debriefing.strengths ? debriefing.strengths.join(', ') : 'None'}
-                </p>
-                <p>
-                    <strong>Areas for Improvement:</strong> {debriefing.areasForImprovement ? debriefing.areasForImprovement.join(', ') : 'None'}
-                </p>
-                <p>
-                    <strong>Overall Score:</strong> {debriefing.overallScore}
-                </p>
-                <p>
-                    <strong>Letter Grade:</strong> {debriefing.letterGrade}
-                </p>
-                <p>
-                    <strong>Recommendations:</strong> {debriefing.advice}
-                </p>
-                <div className="action-buttons">
-                    <Button onClick={() => setSimulationComplete(false)}>Try Different Choices</Button>
-                    <Button onClick={resetSimulation}>Run as Different Role</Button>
+    const renderMainContentDebriefing = () => (
+        <div className="debriefing-section">
+            <h4 className="debriefing-title">Simulation Debriefing</h4>
+            {radarData && (
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <RadarChart data={radarData}>
+                            <PolarGrid />
+                            <PolarAngleAxis dataKey="skill" />
+                            <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                            <Radar name="User" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                        </RadarChart>
+                    </ResponsiveContainer>
+                    <p style={{ textAlign: 'center', fontSize: "0.8em", marginTop: '5px' }}>
+                        This graph illustrates your scores in key decision-making tactics.
+                    </p>
                 </div>
+            )}
+            {performanceData.length > 0 && (
+                <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <LineChart data={performanceData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="time" label={{ value: "Time Elapsed", position: 'insideBottom', offset: -5 }} />
+                            <YAxis label={{ value: 'Metrics', angle: -90, position: 'insideLeft' }} />
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="score" stroke="#8884d8" activeDot={{ r: 8 }} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                    <p style={{ textAlign: 'center', fontSize: "0.8em", marginTop: '5px' }}>This graph shows how your overall score changed over time.</p>
+                </div>
+            )}
+            <p>
+                <strong>Summary:</strong>
+                {debriefing.summary?.split('\n').map((line, i) => (
+                    <p key={i}>{line}</p>
+                ))}
+            </p>
+            <p>
+                <strong>Outcome:</strong> {debriefing.outcome}
+                {debriefing.outcomeReason && (
+                    <>
+                        <br /><strong>Reason:</strong> {debriefing.outcomeReason}
+                    </>
+                )}
+            </p>
+            <p>
+                <strong>Strengths:</strong> {debriefing.strengths ? debriefing.strengths.join(', ') : 'None'}
+            </p>
+            <p>
+                <strong>Areas for Improvement:</strong> {debriefing.areasForImprovement ? debriefing.areasForImprovement.join(', ') : 'None'}
+            </p>
+            <p>
+                <strong>Overall Score:</strong> {debriefing.overallScore}
+            </p>
+            <p>
+                <strong>Letter Grade:</strong> {debriefing.letterGrade}
+            </p>
+            <p>
+                <strong>Recommendations:</strong> {debriefing.advice}
+            </p>
+            <div className="action-buttons">
+                <Button className="button" onClick={() => setSimulationComplete(false)}>Try Different Choices</Button>
+                <Button className="button" onClick={resetSimulation}>Run as Different Role</Button>
             </div>
-        );
-    };
+        </div>
+    );
 
     // ---------------------------------------------------------------------
     // Main Render
     return (
-        <div className="app-container">
+        <div className="cybersecurity-module-container">
             <header className="app-header">
                 <div className="header-box">
                     <span className="header-title">{metadata.title}</span>
@@ -1096,13 +1115,9 @@ const CybersecurityModule = ({ onReturn, onSelectModule, modules }) => {
                     )}
                 </div>
             </header>
-            <main className="content-grid">
+            <main className="content-grid monitor-screen">
                 <aside className="left-column">
-                    <Card className="details-card">
-                        <CardContent>
-                            {renderLeftColumnCardContent()}
-                        </CardContent>
-                    </Card>
+                    {renderLeftColumnCardContent()}
                 </aside>
                 <section className="main-content">
                     <div className="main-content-flex">
@@ -1140,7 +1155,6 @@ export const metadata = {
             <li><strong>Prioritize Alerts:</strong> Review active security alerts and prioritize them based on severity and potential impact.</li>
             <li><strong>Select Responses:</strong> Choose appropriate response options from a range of strategic actions to counter each threat.</li>
             <li><strong>Manage System Status:</strong> Monitor key system metrics such as network health, server load, and intrusion attempts, which are dynamically affected by your decisions and the unfolding scenario.</li>
-            <li><strong>Analyze Logs:</strong> Utilize system logs to gain deeper insights into the nature of the threats and the effectiveness of your responses.</li>
          </ol>
          <h3>Key Skills Assessed</h3>
          <ul>

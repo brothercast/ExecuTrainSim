@@ -1,11 +1,14 @@
+// BCPModule.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
 import Button from '../ui/Button';
 import { ChevronLeft, ChevronRight, RefreshCw, Info, CheckSquare, Square } from 'lucide-react';
 import { BarLoader, BeatLoader } from 'react-spinners';
-import '../../styles/AppStyles.css';
+import '../../styles/BCPModule.css';
 import {
+    RadarChart,
+    PolarGrid,
     ResponsiveContainer,
     LineChart,
     Line,
@@ -24,15 +27,8 @@ import Select, { SelectItem } from '../ui/Select';
 
 // ---------------------------------------------------------------------
 // Unified API Base URL setup:
-// In development, if REACT_APP_API_URL is not set, use http://localhost:8080.
-// In production, default to a relative URL.
 const API_BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : '');
-console.log("[BCPModule] API_BASE_URL at runtime:", API_BASE_URL);
-
-// If an image-specific URL is provided, use it; otherwise fall back to API_BASE_URL.
 const IMAGE_API_URL = process.env.REACT_APP_IMAGE_API_URL || API_BASE_URL;
-
-// Helper to construct full endpoint URLs.
 const constructEndpoint = (baseURL, path) => `${baseURL}${path}`;
 
 // ---------------------------------------------------------------------
@@ -46,8 +42,7 @@ const generateSequentialTimestamp = () => {
 };
 
 // ---------------------------------------------------------------------
-// JSON Parsing Helper: Strips triple-backticks (with an optional "json" specifier)
-// and parses the cleaned string.
+// JSON Parsing Helper: Strips triple-backticks and parses the cleaned string.
 const parseAiJson = (apiResponse) => {
     if (!apiResponse) {
         console.error('parseAiJson: No response data to parse.');
@@ -63,7 +58,7 @@ const parseAiJson = (apiResponse) => {
         } catch (parseError) {
             console.error('parseAiJson: Failed to parse cleaned string as JSON:', parseError);
             console.log('parseAiJson: Raw cleaned content:', cleaned);
-            return cleaned; // Fallback to returning the raw cleaned string.
+            return cleaned;
         }
     }
     if (
@@ -125,7 +120,7 @@ const BCPModule = ({ onReturn }) => {
     const [userDraft, setUserDraft] = useState('');
     const [progress, setProgress] = useState(0);
     const [simulationComplete, setSimulationComplete] = useState(false);
-    const [debriefing, setDebriefing] = useState(null);
+    const [debriefing, setDebriefing] = useState(null);  // Initialize as null
     const [errorMessage, setErrorMessage] = useState('');
     const [isFetchingOpponent, setIsFetchingOpponent] = useState(false);
     const [isFetchingUser, setIsFetchingUser] = useState(false);
@@ -167,6 +162,11 @@ const BCPModule = ({ onReturn }) => {
     const selectedRoleObject = bcpScenario?.roles?.find((role) => role.name === selectedRole);
     const timerRef = useRef(null);
     const chatHistoryContainerRef = useRef(null);
+
+    // ---------------------------------------------------------------------
+    // Metric Formatting Function
+    const formatFinancialLoss = (loss) => Math.min(999999, Math.round(loss)); // Max displayable loss
+    const formatPercentage = (percent) => Math.min(100, Math.round(percent));   // Max displayable percentage
 
     // ---------------------------------------------------------------------
     // Timer effect for simulation
@@ -227,6 +227,13 @@ const BCPModule = ({ onReturn }) => {
 
     // ---------------------------------------------------------------------
     // Scenario editing functions
+    const [isScenarioEditable, setIsScenarioEditable] = useState(false);
+    const [editableScenario, setEditableScenario] = useState(bcpScenario);
+
+    useEffect(() => {
+        setEditableScenario(bcpScenario);
+    }, [bcpScenario]);
+
     const handleScenarioEditToggle = () => {
         setIsScenarioEditable(!isScenarioEditable);
     };
@@ -435,14 +442,16 @@ const BCPModule = ({ onReturn }) => {
     const handleActionCardClick = async (card) => {
         setIsButtonDisabled(true);
         setIsFetching(true);
-        const feedbackDelay = 1500;
+        const feedbackDelay = 1500;  // milliseconds
         try {
             const feedback = await generateFeedback(card);
             if (feedback) {
+                // Add feedback message after a delay
                 setTimeout(() => {
                     addMessageToHistory(feedback.feedback, 'feedback', card.points);
                 }, feedbackDelay);
             }
+
             let updatedMetrics = {};
             if (card.consequences) {
                 const prompt = `
@@ -469,17 +478,23 @@ const BCPModule = ({ onReturn }) => {
                     setErrorMessage('Failed to update metrics. Please try again.');
                 }
             }
+
+            // Include timeElapsed in the updated metrics
             updatedMetrics = { ...updatedMetrics, timeElapsed: metrics.timeElapsed };
             updateMetrics(updatedMetrics, card.points);
+
             setActionCards(prevCards => {
+                // Find and update the clicked card's state
                 if (prevCards) {
                     return prevCards.map(c => c.name === card.name ? { ...c, state: 'used' } : c);
                 }
                 return prevCards;
             });
+
+            // Check for simulation outcome
             const outcome = await assessSimulationOutcome();
             if (outcome && outcome.outcome !== 'Partial Success') {
-                finalizeSimulation();
+                finalizeSimulation();  // End if clear success/failure
                 return;
             }
         } catch (error) {
@@ -487,8 +502,8 @@ const BCPModule = ({ onReturn }) => {
         } finally {
             setIsFetching(false);
             setIsButtonDisabled(false);
-            updateProgress((performanceScore / 100) * 100);
-            setCurrentTurnIndex(prev => prev + 1);
+            updateProgress((performanceScore / 100) * 100); //update the score
+            setCurrentTurnIndex(prev => prev + 1); // Increment turn index
             setPerformanceData(prev => [...prev, { turn: currentTurnIndex, score: performanceScore }]);
         }
     };
@@ -498,9 +513,10 @@ const BCPModule = ({ onReturn }) => {
     const assessSimulationOutcome = async () => {
         try {
             const userActionAnalysis = chatHistory
-                .filter(msg => msg.role === 'feedback')
+                .filter(msg => msg.role === 'feedback')  // Only feedback messages
                 .map(msg => msg.content)
                 .join(' ');
+
             const outcomeCheckPrompt = `
                 Based on the user's actions, evaluate the simulation and the following user action analysis, and determine if the recovery goals have been achieved.
                 Return the result in JSON format:
@@ -513,9 +529,11 @@ const BCPModule = ({ onReturn }) => {
                 { messages: [{ role: 'system', content: outcomeCheckPrompt }] },
                 '/api/generate'
             );
+
             if (!rawResponse) throw new Error("Received empty response from server.");
             const parsedResponse = parseAiJson(rawResponse);
             return parsedResponse;
+
         } catch (error) {
             console.error('Failed to assess simulation outcome', error);
             return { outcome: 'Partial Success', reason: 'Failed to assess the outcome. Try again.' };
@@ -523,66 +541,72 @@ const BCPModule = ({ onReturn }) => {
     };
 
     const analyzeSimulation = async () => {
-        const userRole = bcpScenario.roles.find(r => r.name === selectedRole);
-        const analysisPrompt = `
-            Analyze the following BCP simulation transcript, focusing on how ${userRole.name} (in the role of ${userRole.role}) navigated the simulation.
-            Evaluate performance on key BCP tactics and provide scores (1-10) for each tactic with 2-3 examples.
-            Provide an overall summary that includes actionable recommendations.
-            Return the result in JSON format with keys in Sentence Case:
-            {
-                "Summary": "string",
-                "Tactics": {
-                    "Prioritization": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                    "Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                    "Resource Allocation": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                    "Communication": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                    "Decision Making": { "score": number, "examples": ["string"], "recommendations": ["string"] },
-                    "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] }
+      const userRole = bcpScenario.roles.find(r => r.name === selectedRole);
+
+      const analysisPrompt = `
+        Analyze the following BCP simulation transcript, focusing on how ${userRole.name} (in the role of ${userRole.role}) navigated the simulation.
+        Evaluate performance on key BCP tactics and provide scores (1-10) for each tactic with 2-3 examples.
+        Provide an overall summary that includes actionable recommendations.
+        Return the result in JSON format with keys in Sentence Case:
+        {
+            "Summary": "string",
+            "Tactics": {
+                "Prioritization": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                "Problem Solving": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                "Resource Allocation": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                "Communication": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                "Decision Making": { "score": number, "examples": ["string"], "recommendations": ["string"] },
+                "Adaptability": { "score": number, "examples": ["string"], "recommendations": ["string"] }
+            }
+        }
+        The simulation transcript:
+        ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
+    `;
+
+      try {
+        const rawAnalysisResponse = await fetchOpenAIResponse(
+          { messages: [{ role: 'system', content: analysisPrompt }] },
+          '/api/generate'
+        );
+        const parsedAnalysis = parseAiJson(rawAnalysisResponse);
+        // Convert keys to Sentence Case.
+        if(parsedAnalysis){
+            const sentenceCaseKeys = (obj) => {
+            if (typeof obj !== 'object' || obj === null) return obj;
+            if (Array.isArray(obj)) return obj.map(sentenceCaseKeys);
+            const newObj = {};
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                const newKey = key.charAt(0).toUpperCase() + key.slice(1);
+                newObj[newKey] = sentenceCaseKeys(obj[key]);
                 }
             }
-            The simulation transcript:
-            ${JSON.stringify(chatHistory.filter(msg => msg.role !== 'feedback'), null, 2)}
-        `;
-        try {
-            const rawAnalysisResponse = await fetchOpenAIResponse(
-                { messages: [{ role: 'system', content: analysisPrompt }] },
-                '/api/generate'
-            );
-            const parsedAnalysis = parseAiJson(rawAnalysisResponse);
-            if (parsedAnalysis) {
-                const sentenceCaseKeys = (obj) => {
-                    if (typeof obj !== 'object' || obj === null) return obj;
-                    if (Array.isArray(obj)) return obj.map(sentenceCaseKeys);
-                    const newObj = {};
-                    for (const key in obj) {
-                        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                            const newKey = key.charAt(0).toUpperCase() + key.slice(1);
-                            newObj[newKey] = sentenceCaseKeys(obj[key]);
-                        }
-                    }
-                    return newObj;
-                };
-                const formattedAnalysis = sentenceCaseKeys(parsedAnalysis);
-                setDebriefing(prev => ({
-                    ...prev,
-                    summary: formattedAnalysis.Summary,
-                    tactics: formattedAnalysis.Tactics,
-                }));
+            return newObj;
+            };
+            const formattedAnalysis = sentenceCaseKeys(parsedAnalysis); //formatted analysis
+
+            setDebriefing(prev => ({
+                ...prev,
+                summary: formattedAnalysis.Summary,
+                tactics: formattedAnalysis.Tactics,                }));
+
                 const radarDataFormatted = Object.entries(formattedAnalysis.Tactics).map(([name, value]) => ({
                     skill: name,
                     score: value.score,
                 }));
                 setRadarData(radarDataFormatted);
+
                 return formattedAnalysis;
-            } else {
+        } else {
                 setErrorMessage('Failed to analyze simulation. Please try again.');
-                return null;
-            }
-        } catch (error) {
-            setErrorMessage('Failed to analyze simulation. Please try again.');
-            console.error('Error analyzing simulation:', error);
-            return null;
+                return null; // Return null in case of parsing failure
         }
+
+      } catch (error) {
+        setErrorMessage('Failed to analyze simulation. Please try again.');
+        console.error('Error analyzing simulation:', error);
+        return null; // Return null in case of any error during analysis
+      }
     };
 
     const generateRecommendation = async () => {
@@ -605,11 +629,14 @@ const BCPModule = ({ onReturn }) => {
             return "Try again to find a more clear outcome. Be sure to use a strategic approach to get the outcome you want.";
         }
     };
+const finalizeSimulation = async () => {
+        const analysis = await analyzeSimulation(); //get analysis
+        console.log("Analysis:", analysis); // Log the analysis
 
-    const finalizeSimulation = async () => {
-        await analyzeSimulation();
         const outcomeData = await assessSimulationOutcome();
         const recommendationData = await generateRecommendation();
+
+        // Calculate effectivenessScore *before* potentially setting debriefing
         const userStrategyEffectiveness = metricHistory.reduce((acc, metrics) => acc + metrics.taskCompletion, 0);
         const totalMessages = actionCards?.length || 0;
         const effectivenessScore = (userStrategyEffectiveness / totalMessages) * 100;
@@ -619,29 +646,35 @@ const BCPModule = ({ onReturn }) => {
         } else if (effectivenessScore < 30) {
             outcome = 'Failure';
         }
+
         if (outcomeData && recommendationData) {
             const outcome = outcomeData.outcome;
             const outcomeReason = outcomeData.reason;
-            setDebriefing(prev => ({
-                ...prev,
-                strengths: Object.entries(debriefing.tactics)
-                    .filter(([, value]) => value.score > 7)
-                    .map(([key]) => key) || ['None'],
-                areasForImprovement: Object.entries(debriefing.tactics)
-                    .filter(([, value]) => value.score < 6)
-                    .map(([key]) => key) || ['None'],
-                overallScore: Math.round(effectivenessScore),
-                letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
-                advice: recommendationData,
-                transcript: chatHistory,
-                outcome: outcome,
-                outcomeReason: outcomeReason,
-                metricsHistory: metricHistory,
-            }));
+
+             // Now set debriefing *after* analysis is complete
+            setDebriefing({
+                    summary: analysis.Summary, // Use analysis directly
+                    tactics: analysis.Tactics,
+                    strengths: Object.entries(analysis.Tactics)  // Access Tactics from analysis
+                        .filter(([, value]) => value.score > 7)
+                        .map(([key]) => key) || ['None'],
+                    areasForImprovement: Object.entries(analysis.Tactics) // and here
+                        .filter(([, value]) => value.score < 6)
+                        .map(([key]) => key) || ['None'],
+                    overallScore: Math.round(effectivenessScore),
+                    letterGrade: effectivenessScore > 85 ? 'A' : effectivenessScore > 70 ? 'B' : effectivenessScore > 50 ? 'C' : 'D',
+                    advice: recommendationData,
+                    transcript: chatHistory,
+                    outcome: outcome,
+                    outcomeReason: outcomeReason,
+                    metricsHistory: metricHistory,
+                });
+
         } else {
             setErrorMessage('Failed to generate a proper summary. Please try again.');
-            setDebriefing(null);
+            setDebriefing(null); // Keep this for consistency
         }
+
         setSimulationComplete(true);
         clearInterval(timerRef.current);
     };
@@ -676,6 +709,10 @@ const BCPModule = ({ onReturn }) => {
         setPerformanceScore(0);
     };
 
+    const updateProgress = (newProgress) => {
+        setProgress(Math.min(100, newProgress));
+    };
+
     const goToPreviousTurn = () => {
         if (currentTurnIndex > 1 && simulationComplete) {
             setCurrentTurnIndex(prev => prev - 1);
@@ -683,7 +720,7 @@ const BCPModule = ({ onReturn }) => {
     };
 
     const goToNextTurn = () => {
-        const totalTurns = Math.ceil(chatHistory.length / 2);
+        const totalTurns = Math.ceil(chatHistory.length / 2); //calculate turns
         if (currentTurnIndex < totalTurns && simulationComplete) {
             setCurrentTurnIndex(prev => prev + 1);
         }
@@ -754,14 +791,11 @@ const BCPModule = ({ onReturn }) => {
                 <div className="header-time">
                     <span className="time-label">Time Elapsed:</span>
                     <span className="time-value">
-                        {metrics?.timeElapsed ? (
-                            <SevenSegmentDisplay value={Math.min(9, Math.round(metrics.timeElapsed / 60))} />
-                        ) : (
-                            <SevenSegmentDisplay value={0} />
-                        )} min
+                        <SevenSegmentDisplay value={Math.min(99, Math.round(metrics.timeElapsed / 60))} digits={2} /> min
                     </span>
                 </div>
             </header>
+
             <main className="content-grid">
                 <aside className="left-column">
                     {bcpScenario && (
@@ -792,7 +826,7 @@ const BCPModule = ({ onReturn }) => {
                     <Card className="details-card">
                         <CardContent>
                             {simulationStarted && bcpScenario ? (
-                                <div>
+                                <>
                                     <div className="scenario-info">
                                         <h3>{bcpScenario.title}</h3>
                                         <div>
@@ -815,7 +849,29 @@ const BCPModule = ({ onReturn }) => {
                                             />
                                         )}
                                     </div>
-                                </div>
+                                    <div className="dashboard">
+                                        <div className="metrics-area">
+                                            <div className="metric-box" title={`Financial Loss: $${metrics.financialLoss}`}>
+                                                <span className="metric-label">Financial Loss:</span>
+                                                <span>
+                                                    $<SevenSegmentDisplay value={formatFinancialLoss(metrics.financialLoss)} digits={6} />
+                                                </span>
+                                            </div>
+                                            <div className="metric-box" title={`Downtime: ${metrics.downtime}%`}>
+                                                <span className="metric-label">Downtime:</span>
+                                                <SevenSegmentDisplay value={formatPercentage(metrics.downtime)} digits={3} suffix="%" />
+                                            </div>
+                                            <div className="metric-box" title={`Employee Morale: ${metrics.employeeMorale}`}>
+                                                <span className="metric-label">Employee Morale:</span>
+                                                <SevenSegmentDisplay value={formatPercentage(metrics.employeeMorale)} digits={3} suffix="%" />
+                                            </div>
+                                            <div className="metric-box" title={`Task Completion: ${metrics.taskCompletion}%`}>
+                                                <span className="metric-label">Task Completion:</span>
+                                                <SevenSegmentDisplay value={formatPercentage(metrics.taskCompletion)} digits={3} suffix="%" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
                             ) : (
                                 <>
                                     {bcpScenario && images[0] ? (
@@ -849,21 +905,21 @@ const BCPModule = ({ onReturn }) => {
                                             )}
                                         </div>
                                     )}
+                                     {bcpScenario && !simulationStarted && (
+                                        <div className="roles-customization">
+                                            <strong>Customize Roles:</strong>
+                                            {roles.map((role, index) => (
+                                                <input
+                                                    key={index}
+                                                    type="text"
+                                                    className="editable-role"
+                                                    value={role}
+                                                    onChange={(e) => updateRoles(e.target.value, index)}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
                                 </>
-                            )}
-                            {bcpScenario && !simulationStarted && (
-                                <div className="roles-customization">
-                                    <strong>Customize Roles:</strong>
-                                    {roles.map((role, index) => (
-                                        <input
-                                            key={index}
-                                            type="text"
-                                            className="editable-role"
-                                            value={role}
-                                            onChange={(e) => updateRoles(e.target.value, index)}
-                                        />
-                                    ))}
-                                </div>
                             )}
                         </CardContent>
                     </Card>
@@ -883,33 +939,10 @@ const BCPModule = ({ onReturn }) => {
                                         <>
                                             <div className="dashboard">
                                                 <div className="metrics-area">
-                                                    <div className="metric-box" title={`Financial Loss: $${metrics.financialLoss}`}>
-                                                        <span className="metric-label">Financial Loss:</span>
-                                                        <span className="metric-value">
-                                                            $<SevenSegmentDisplay value={Math.min(9, Math.round(metrics.financialLoss / 1000))} />k
-                                                        </span>
-                                                    </div>
-                                                    <div className="metric-box" title={`Downtime: ${metrics.downtime}%`}>
-                                                        <span className="metric-label">Downtime:</span>
-                                                        <span className="metric-value">
-                                                            <SevenSegmentDisplay value={Math.min(9, Math.round(metrics.downtime / 100))} />%
-                                                        </span>
-                                                    </div>
-                                                    <div className="metric-box" title={`Employee Morale: ${metrics.employeeMorale}`}>
-                                                        <span className="metric-label">Employee Morale:</span>
-                                                        <span className="metric-value">
-                                                            <SevenSegmentDisplay value={Math.min(9, Math.round(metrics.employeeMorale / 10))} />
-                                                        </span>
-                                                    </div>
-                                                    <div className="metric-box" title={`Task Completion: ${metrics.taskCompletion}%`}>
-                                                        <span className="metric-label">Task Completion:</span>
-                                                        <span className="metric-value">
-                                                            <SevenSegmentDisplay value={Math.min(9, Math.round(metrics.taskCompletion / 10))} />%
-                                                        </span>
-                                                    </div>
+                                                     {/* Area for Metrics goes here */}
                                                 </div>
                                                 <div className="metrics-chart">
-                                                    {renderMetricsAreaChart()}
+                                                  {renderMetricsAreaChart()}
                                                 </div>
                                             </div>
                                             <CardContent className="action-cards-area">

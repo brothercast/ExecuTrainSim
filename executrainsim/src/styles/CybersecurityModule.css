@@ -1,139 +1,248 @@
-/* src/styles/ModuleCards.css */
+/* CybersecurityModule.css */
 
+/* -------------------- Root Variables for Modern Dashboard UI -------------------- */
 :root {
-  --hover-easing: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother easing */
-  --return-easing: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+  --dashboard-bg-color: #f8f8f8;
+  --dashboard-text-color: #333;
+  --dashboard-accent-color: #007bff;
+  --dashboard-panel-bg: #fff;
+  --dashboard-header-bg: #f0f0f0;
+  --dashboard-border-color: #ddd;
+  --dashboard-hover-bg: #e6f0ff;
+  --dashboard-header-font-family: 'Jura', sans-serif;
+  --dashboard-body-font-family: 'Arial', sans-serif;
 }
 
-.title {
-  font-family: 'Jura', sans-serif;
-  font-size: 40px;
-  font-weight: bold;
-  color: #5D4037;
-  text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.module-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1200px;
+/* -------------------- Module Container (Window Frame) -------------------- */
+.cybersecurity-module-container {
+  background-color: var(--dashboard-bg-color);
   padding: 20px;
-  box-sizing: border-box;
-}
-
-.card-wrap {
-  margin: 10px;
-  transform: perspective(800px);
-  transform-style: preserve-3d;
-  cursor: pointer;
-}
-
-.card-wrap:focus .card-info,
-.card-wrap:hover .card-info {
-  transform: translateY(0);
-}
-
-.card-wrap:focus .card-info p,
-.card-wrap:hover .card-info p {
-  opacity: 1;
-}
-
-.card-wrap:focus .card,
-.card-wrap:hover .card {
-  transform: translateY(-5px);  /* Simplified movement */
-  box-shadow: rgba(0, 0, 0, 0.1) 0 6px 12px; /* More subtle shadow */
-}
-
-.card-wrap:focus .card::before,
-.card-wrap:hover .card::before {
-  background: rgba(0, 0, 0, 0.08); /* Very subtle overlay */
-    opacity: 1;
-    transform: translateY(0);
-    transition: background 0.5s var(--hover-easing), opacity 0.5s var(--hover-easing), transform 0.5s var(--hover-easing);
-}
-
-.card-info,
-.card-info p {
-    transition: transform 0.3s var(--hover-easing), opacity 0.3s var(--hover-easing);
-
-}
-
-.card {
-  position: relative;
-  flex: 0 0 240px;
-  width: 240px;
-  height: 240px;
-  background-color: #ffffff;
-  overflow: hidden;
+  font-family: var(--dashboard-body-font-family);
+  color: var(--dashboard-text-color);
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transform-style: preserve-3d;
-    transition: transform 0.3s var(--return-easing), box-shadow 0.3s var(--hover-easing);
-
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex; /* Changed to Flexbox for main layout */
+  flex-direction: column; /* Stack header and content vertically */
+  align-items: stretch; /* Stretch header and content to full width */
+  height: auto;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
-    width: 100%;
-    height: 100%;
-     background-color: var(--card-color);
-    background-blend-mode: overlay;
-    opacity: 0;
-    transform: translateY(100%);
-   transition: 0.3s 0.1s var(--return-easing), opacity 0.3s 0.1s var(--return-easing), transform 0.3s 0.1s var(--return-easing);
-
-    border-radius: 12px;
-}
-.card-bg{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, var(--card-color), rgba(255,255,255,0.3));
+/* -------------------- Header Bar -------------------- */
+.cybersecurity-module-container .app-header {
+  background-color: var(--dashboard-header-bg);
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--dashboard-border-color);
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--dashboard-header-font-family);
 }
 
-
-.card-info {
-    padding: 20px;
-    position: absolute;
-    bottom: 0;
-    color: #fff;
-    transform: translateY(40%);
-    transition: 0.3s 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+.cybersecurity-module-container .app-header .header-title {
+  font-size: 1.5em;
+  color: var(--dashboard-text-color);
+  text-transform: uppercase;
+  margin: 0;
 }
 
-.card-info * {
-    position: relative;
-    z-index: 1;
+/* -------------------- Monitor Screen (Main Content - VERTICAL STACK FLEX LAYOUT) -------------------- */
+.cybersecurity-module-container .monitor-screen {
+  background-color: var(--dashboard-panel-bg);
+  border: 1px solid var(--dashboard-border-color);
+  border-radius: 0 0 8px 8px;
+  padding: 20px;
+  display: flex; /* Flexbox for vertical stacking of cards */
+  flex-direction: column;
+  overflow: auto;
+  height: auto;
 }
 
-.card-info p {
-    opacity: 0;
-    transition: 0.3s 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+/* Vertically stacking the dashboard cards */
+.cybersecurity-module-container .dashboard-vertical-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* Stretch cards to full width */
 }
 
-.card-info h1 {
-    font-family: 'Jura', sans-serif;
-    font-size: 24px;
-    font-weight: bold;
-    text-transform: uppercase;
-    position: relative;
-    z-index: 1;
+/* -------------------- Card Base Styles (Panels) -------------------- */
+.cybersecurity-module-container .card {
+  background-color: var(--dashboard-panel-bg);
+  border: 1px solid var(--dashboard-border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%; /* Take full width in vertical stack */
 }
 
-.card-info p {
-    font-size: 14px;
-    z-index: 1;
-    margin-top: 10px;
+.cybersecurity-module-container .card.details-card {
+  flex: 0 0 auto; /* Adjust as needed, e.g., '300px' for a fixed height, or '1' to allow vertical growth */
+}
+.cybersecurity-module-container .card.system-status-card {
+  flex: 0 0 auto; /* Adjust as needed */
+}
+.cybersecurity-module-container .card.alerts-card {
+  flex: 1 1 auto; /* Example: Allow Alerts card to grow and take available space */
+}
+.cybersecurity-module-container .card.options-card {
+  flex: 0 0 auto; /* Adjust as needed */
+}
+.cybersecurity-module-container .card.logs-card {
+  flex: 1 1 auto; /* Example: Allow Logs card to grow and take available space */
+}
+.cybersecurity-module-container .card.notifications-card {
+  flex: 0 0 auto; /* Adjust as needed */
+}
+.cybersecurity-module-container .card.setup-card {
+  flex: 0 0 auto; /* Adjust as needed */
+}
+.cybersecurity-module-container .card.scenario-card {
+  flex: 0 0 auto; /* Adjust as needed */
+}
+.cybersecurity-module-container .card.placeholder-card {
+  flex: 0 0 auto; /* Adjust as needed */
+}
+
+
+.cybersecurity-module-container .card-header {
+  background-color: var(--dashboard-header-bg);
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--dashboard-border-color);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cybersecurity-module-container .card-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--dashboard-accent-color);
+  text-transform: uppercase;
+  margin: 0;
+  font-family: var(--dashboard-header-font-family);
+}
+
+.cybersecurity-module-container .card-content {
+  padding: 15px;
+  font-size: 0.9em;
+  color: var(--dashboard-text-color);
+  line-height: 1.5;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+/* -------------------- Text Styles -------------------- */
+.cybersecurity-module-container h1,
+.cybersecurity-module-container h2,
+.cybersecurity-module-container h3,
+.cybersecurity-module-container h4,
+.cybersecurity-module-container h5,
+.cybersecurity-module-container h6 {
+  font-family: var(--dashboard-header-font-family);
+  color: var(--dashboard-accent-color);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.cybersecurity-module-container p,
+.cybersecurity-module-container div,
+.cybersecurity-module-container span,
+.cybersecurity-module-container label,
+.cybersecurity-module-container textarea,
+.cybersecurity-module-container input,
+.cybersecurity-module-container select,
+.cybersecurity-module-container option,
+.cybersecurity-module-container button {
+  font-family: var(--dashboard-body-font-family);
+  color: var(--dashboard-text-color);
+  font-size: 0.95em;
+}
+
+/* Interactive Elements (Buttons, Selects) - No changes needed */
+.cybersecurity-module-container .button,
+.cybersecurity-module-container .select {
+  background-color: var(--dashboard-panel-bg);
+  border: 1px solid var(--dashboard-border-color);
+  border-radius: 3px;
+  padding: 8px 12px;
+  color: var(--dashboard-text-color);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  outline: none;
+  font-family: var(--dashboard-body-font-family);
+}
+
+.cybersecurity-module-container .button:hover,
+.cybersecurity-module-container .select:hover,
+.cybersecurity-module-container .button:focus,
+.cybersecurity-module-container .select:focus {
+  background-color: var(--dashboard-hover-bg);
+}
+
+.cybersecurity-module-container .select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 25px;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position-x: 100%;
+  background-position-y: 5px;
+}
+
+/* Alert Items, Response Options, System Status, Logs, Debriefing, Error Box, Notifications, Spinner - (No changes needed) */
+.cybersecurity-module-container .alerts-card .alert-item,
+.cybersecurity-module-container .alerts-card .alert-item:hover,
+.cybersecurity-module-container .alerts-card .alert-item.selected,
+.cybersecurity-module-container .alerts-card .alert-item .icon,
+.cybersecurity-module-container .options-card .options-container .option-button,
+.cybersecurity-module-container .options-card .options-container .option-button:hover,
+.cybersecurity-module-container .options-card .options-container .option-button:focus,
+.cybersecurity-module-container .system-status-card .card-content .status-indicators,
+.cybersecurity-module-container .system-status-card .card-content .indicator,
+.cybersecurity-module-container .system-status-card .card-content .indicator span,
+.cybersecurity-module-container .progress,
+.cybersecurity-module-container .progress-indicator,
+.cybersecurity-module-container .progress-info,
+.cybersecurity-module-container .logs-card .card-content,
+.cybersecurity-module-container .logs-card .card-content .log-item,
+.cybersecurity-module-container .logs-card .card-content .log-timestamp,
+.cybersecurity-module-container .debriefing-section,
+.cybersecurity-module-container .error-box,
+.cybersecurity-module-container .error-title,
+.cybersecurity-module-container .notifications-card .card-content .notifications,
+.cybersecurity-module-container .notifications-card .card-header .card-title,
+.cybersecurity-module-container .notifications-card .card-content .notifications .notification,
+.cybersecurity-module-container .spinner-container .bar-loader,
+.cybersecurity-module-container .spinner-container .beat-loader {}
+
+/* -------------------- Responsive Adjustments (No changes needed) -------------------- */
+@media (max-width: 1000px) {
+  .cybersecurity-module-container .monitor-screen {
+      grid-template-columns: 1fr;
+      flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .cybersecurity-module-container {
+      padding: 10px;
+  }
+  .cybersecurity-module-container .monitor-screen {
+      padding: 10px;
+  }
+  .cybersecurity-module-container .card-content {
+      padding: 10px;
+  }
+  .cybersecurity-module-container .card-title {
+      font-size: 1em;
+  }
 }

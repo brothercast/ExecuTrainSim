@@ -598,27 +598,63 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             <CardContent className="pitch-style-selection-content">
                 <p>Select the style of pitch simulation you want to experience:</p>
                 <div className="pitch-style-options">
-                    <Card className="pitch-style-card" onClick={() => setPitchStyle('stage-presentation')}>
+                    <Card
+                        className="pitch-style-card"
+                        onClick={() => {
+                            console.log('Stage Presentation Clicked');
+                            setPitchStyle('stage-presentation');
+                        }}
+                    >
                         <CardHeader><CardTitle><Presentation className="style-icon"/>Stage Presentation</CardTitle></CardHeader>
                         <CardContent>Present on a virtual stage, facing a live panel.</CardContent>
                     </Card>
-                    <Card className="pitch-style-card" onClick={() => setPitchStyle('war-room')}>
+                    <Card
+                        className="pitch-style-card"
+                        onClick={() => {
+                            console.log('War Room Clicked');
+                            setPitchStyle('war-room');
+                        }}
+                    >
                         <CardHeader><CardTitle><Layout className="style-icon"/>War Room</CardTitle></CardHeader>
                         <CardContent>High-pressure, metric-driven, real-time decisions.</CardContent>
                     </Card>
-                    <Card className="pitch-style-card" onClick={() => setPitchStyle('elevator-pitch')}>
+                    <Card
+                        className="pitch-style-card"
+                        onClick={() => {
+                            console.log('Elevator Pitch Clicked');
+                            setPitchStyle('elevator-pitch');
+                        }}
+                    >
                         <CardHeader><CardTitle><Rocket className="style-icon"/>Elevator Pitch Challenge</CardTitle></CardHeader>
                         <CardContent>Fast-paced, concise pitching against the clock.</CardContent>
                     </Card>
-                    <Card className="pitch-style-card" onClick={() => setPitchStyle('cyoa')}>
+                    <Card
+                        className="pitch-style-card"
+                        onClick={() => {
+                            console.log('CYOA Clicked');
+                            setPitchStyle('cyoa');
+                        }}
+                    >
                         <CardHeader><CardTitle><Map className="style-icon"/>Choose Your Own Adventure</CardTitle></CardHeader>
                         <CardContent>Narrative-driven, branching story with varied outcomes.</CardContent>
                     </Card>
-                    <Card className="pitch-style-card" onClick={() => setPitchStyle('deck-builder')}>
+                    <Card
+                        className="pitch-style-card"
+                        onClick={() => {
+                            console.log('Deck Builder Clicked');
+                            setPitchStyle('deck-builder');
+                        }}
+                    >
                         <CardHeader><CardTitle><LayoutPanelLeft className="style-icon"/>Gamified Pitch Deck Builder</CardTitle></CardHeader>
                         <CardContent>Interactive deck building, visual presentation focus.</CardContent>
                     </Card>
-                    <Card className="pitch-style-card" onClick={() => setPitchStyle('role-playing-panelist')}>
+                    <Card
+                        className="pitch-style-card"
+                        onClick={() => {
+                            console.log('Role-Playing Panelist Clicked');
+                            setPitchStyle('role-playing-panelist');
+                        }}
+                    >
                         <CardHeader><CardTitle><UserRound className="style-icon"/>Role-Playing Panelist</CardTitle></CardHeader>
                         <CardContent>Empathy-focused, nuanced panelist interaction.</CardContent>
                     </Card>
@@ -634,7 +670,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                 <h3 className="stage-presentation-title">Stage Presentation</h3>
                 <div className="stage-presentation-panelists">
                     {/* Panelist Avatars and Names will go here */}
-                    <p>Panelist Area Placeholder</p>
+                    <p>Panelist Area Placeholder - Style: Stage Presentation</p>
                 </div>
                 <div className="stage-presentation-stage-area">
                     {/* User Stage Area (initially text) */}
@@ -661,7 +697,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             <div className="style-ui-placeholder">
                 <h3>War Room UI - Under Construction</h3>
                 {/* UI elements for War Room style will go here */}
-                <p>... UI for War Room ...</p>
+                <p>... UI for War Room - Under Construction ...</p>
             </div>
         );
     };
@@ -671,7 +707,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             <div className="style-ui-placeholder">
                 <h3>Elevator Pitch Challenge UI - Under Construction</h3>
                 {/* UI elements for Elevator Pitch Challenge style will go here */}
-                <p>... UI for Elevator Pitch Challenge ...</p>
+                <p>... UI for Elevator Pitch Challenge - Under Construction ...</p>
             </div>
         );
     };
@@ -681,7 +717,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             <div className="style-ui-placeholder">
                 <h3>Choose Your Own Adventure Pitch UI - Under Construction</h3>
                 {/* UI elements for Choose Your Own Adventure Pitch style will go here */}
-                <p>... UI for Choose Your Own Adventure Pitch ...</p>
+                <p>... UI for Choose Your Own Adventure Pitch - Under Construction ...</p>
             </div>
         );
     };
@@ -691,7 +727,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             <div className="style-ui-placeholder">
                 <h3>Gamified Pitch Deck Builder UI - Under Construction</h3>
                 {/* UI elements for Gamified Pitch Deck Builder style will go here */}
-                <p>... UI for Gamified Pitch Deck Builder ...</p>
+                <p>... UI for Gamified Pitch Deck Builder - Under Construction ...</p>
             </div>
         );
     };
@@ -701,7 +737,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             <div className="style-ui-placeholder">
                 <h3>Role-Playing Panelist UI - Under Construction</h3>
                 {/* UI elements for Role-Playing Panelist style will go here */}
-                <p>... UI for Role-Playing Panelist ...</p>
+                <p>... UI for Role-Playing Panelist - Under Construction ...</p>
             </div>
         );
     };

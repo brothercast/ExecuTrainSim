@@ -1,0 +1,212 @@
+/* src/styles/InterviewModule.css */
+
+/* --- Inherited Styles --- */
+/* Assume base styles are defined in AppStyles.css */
+
+/* --- Module-Specific Styles --- */
+
+.main-content {
+  /* Override default main-content styles */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  justify-content: flex-start; /* Align content to the top */
+  padding: 20px;
+  position: relative; /* Important for absolute positioning of elements */
+  overflow: hidden; /* Hide any overflowing content */
+}
+
+.interviewer-container {
+  position: relative; /* For absolute positioning of chat overlay */
+  width: 100%;
+  max-width: 600px; /* Adjust as needed */
+  margin-bottom: 1rem; /* Space for the microphone button */
+  display: flex; /* Center the image within the container */
+  justify-content: center;
+}
+
+.interviewer-image {
+  width: 100%;
+  max-width: 450px; /* Adjust as needed - smaller than container */
+  height: auto;
+  border-radius: 12px; /* Rounded corners for a softer look */
+  /* Remove margin-bottom if chat is overlaid */
+}
+.chat-card {
+    width: 100%; /* Occupy full width */
+    max-width: 600px; /* Consistent with interviewer container */
+    margin: 0 auto; /* Center the card */
+    border: none; /* Remove border for cleaner look */
+    box-shadow: none; /* Remove shadow if overlaying */
+    background-color: transparent; /* Make background transparent */
+    position: relative;
+}
+
+.chat-history-container {
+    max-height: 40vh; /* Adjust as needed.  Smaller than before */
+    overflow-y: auto;
+    padding: 1rem;
+    border-radius: 8px; /* Match other elements */
+     /* Glassmorphism effect (Optional) */
+    background: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
+    -webkit-backdrop-filter: blur(10px); /* For Safari */
+    backdrop-filter: blur(10px); /* Blur the background */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+    position: relative;
+
+}
+.chat-history-container::before {
+content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+.chat-history {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-message {
+    margin-bottom: 0.5rem; /* Less vertical space */
+    padding: 0.4rem 0.6rem; /* Smaller padding */
+    border-radius: 8px;
+    max-width: 80%;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.chat-message.user {
+  background-color: rgba(0, 123, 255, 0.8); /* Slightly more transparent blue */
+  color: white;
+  align-self: flex-end;
+}
+
+.chat-message.interviewer {
+    background-color: rgba(240, 240, 240, 0.8);
+    color: black;
+    align-self: flex-start;
+}
+
+.message-timestamp {
+  font-size: 0.7rem; /* Slightly smaller */
+  color: #444; /* Darker gray */
+  margin-top: 0.1rem; /* Less space */
+  display: block;
+}
+.user-input-container {
+    display: flex;
+    justify-content: center;
+    padding: 0rem; /* Remove vertical padding */
+     /* No border needed */
+}
+
+.microphone-button {
+    /* Large, prominent button */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%; /* Circular */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem; /* Larger icon */
+    transition: background-color 0.2s ease, transform 0.2s ease; /* Smooth transitions */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow */
+}
+
+.microphone-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+.microphone-button:disabled
+{
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.recording {
+  background-color: #ff4d4d; /* Red when recording */
+  animation: pulse 1.5s infinite; /* Pulsing animation */
+}
+.recording:hover
+{
+  background-color: #cc0000;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 77, 77, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 77, 77, 0);
+    }
+}
+
+.interviewer-expression-image-container {
+    width: 150px; /* Larger images */
+    height: 150px;
+    overflow: hidden;
+    /* margin-right: 1rem;  Remove margin */
+    border: 3px solid #ddd; /* Thicker border */
+    border-radius: 12px; /* More rounded corners */
+     /* Center the image */
+}
+
+.interviewer-expression-image {
+    width: 450px; /* 3 * 150px */
+    height: 450px;
+    object-fit: none;
+    object-position: 0 0;
+    transition: object-position 0.3s ease; /* Smooth transitions */
+}
+/* Neutral */
+.interviewer-expression-image.expression-neutral {
+    object-position: 0 0;
+}
+
+/* Happy */
+.interviewer-expression-image.expression-happy {
+    object-position: -150px 0; /* Shift 100px to the left */
+}
+
+/* Surprised */
+.interviewer-expression-image.expression-surprised {
+    object-position: -300px 0; /* Shift 200px to the left */
+}
+/* Thoughtful (Second Row)*/
+.interviewer-expression-image.expression-thoughtful {
+   object-position: 0 -150px;
+}
+/* Concerned */
+.interviewer-expression-image.expression-concerned {
+    object-position: -150px -150px; /* Shift 100px to the left */
+}
+
+/* Skeptical */
+.interviewer-expression-image.expression-skeptical {
+    object-position: -300px -150px; /* Shift 200px to the left */
+}
+/* Slightly Angry (Third Row)*/
+.interviewer-expression-image.expression-slightly\ angry {
+   object-position: 0 -300px;
+}
+/* Approving */
+.interviewer-expression-image.expression-approving {
+    object-position: -150px -300px; /* Shift 100px to the left */
+}
+
+/* Listening */
+.interviewer-expression-image.expression-listening\ intently {
+    object-position: -300px -300px; /* Shift 200px to the left */
+}
