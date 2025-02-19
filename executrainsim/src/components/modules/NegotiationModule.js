@@ -871,7 +871,7 @@ const NegotiationModule = ({ onReturn }) => {
     const feedbackPrompt = `
             Analyze the user's message: "${userMessage}" as ${userRole.name} in the role of ${userRole.role}, in the context of the current negotiation, with a focus on negotiation tactics.
             Consider the opponent's position as ${opponentRole.name} in the role of ${opponentRole.role}.
-            Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between roommates.
+            Provide feedback to the user on the effectiveness of their message and what they did well or not so well, considering also whether their message was appropriate for a conversation between collagues.
             Focus on how the user could improve in the future by exploring common ground and advancing the negotiation goals, or by being more emotionally responsive.
             Keep your feedback encouraging and focus on strategic communication and negotiation tactics.
             Score the user's message on the following categories using a scale from -2 to +2, but **only award points if the message actually demonstrates the value of each category, and not simply by including it in their message**:
@@ -1413,11 +1413,7 @@ const NegotiationModule = ({ onReturn }) => {
                     {showInstructions ? 'Hide Instructions' : 'Show Instructions'}
                   </Button>
                   {showInstructions && (
-                    <div>
-                      {metadata.instructions.split('\n').map((line, i) => (
-                        <p key={i}>{line}</p>
-                      ))}
-                    </div>
+                    <div dangerouslySetInnerHTML={{ __html: metadata.instructions }} />
                   )}
                 </div>
               )}

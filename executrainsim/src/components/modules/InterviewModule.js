@@ -91,9 +91,9 @@ const InterviewModule = ({ onReturn }) => {
         chatLogEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const addLog = (message, sender, expression = 'neutral') => {
-        const sanitizedMessage = DOMPurify.sanitize(message);
-        setChatLog(prev => [...prev, { message: sanitizedMessage, timestamp: new Date(), sender, expression }]);
+   const addLog = (message, sender, expression = 'neutral') => {
+      const sanitizedMessage = DOMPurify.sanitize(message);
+      setChatLog(prev => [...prev, { message: sanitizedMessage, timestamp: new Date(), sender, expression }]);
     };
 
     const fetchOpenAIResponse = async (payload, endpointPath) => {
@@ -119,10 +119,24 @@ const InterviewModule = ({ onReturn }) => {
     };
 
     const generateInterviewerImage = async (name, title) => {
-        const prompt = `Create a contact sheet of 9 diverse, professional headshots of a person named ${name}, who is a ${title}.
-                        Each headshot should show a distinct facial expression: neutral, happy, surprised, thoughtful, concerned, skeptical, slightly angry, approving, and listening intently.
-                        The style should be realistic, like a professional photograph.
-                        Arrange the headshots in a 3x3 grid.  No text or labels.`;
+        const prompt = `A single, wide image divided into nine equal square sections, arranged in a 3x3 grid. Each section contains a close-up portrait of the SAME professional woman, from the shoulders up, against a plain light gray background. She is wearing a blue business suit and a white shirt. She has dark, shoulder-length, straight hair and brown eyes.  Each section shows a DIFFERENT FACIAL EXPRESSION:
+
+        Top Row (Left to Right):
+          1. Neutral expression (relaxed, professional)
+          2. Slightly smiling (friendly, approachable)
+          3.  Open-mouthed surprised expression (eyes wide, eyebrows raised)
+
+        Middle Row (Left to Right):
+          4. Thoughtful expression (looking slightly upward, furrowed brow)
+          5. Concerned expression (eyebrows drawn together, slight frown)
+          6. Skeptical expression (one eyebrow raised, slight smirk)
+
+        Bottom Row (Left to Right):
+          7. Slightly angry expression (furrowed brow, narrowed eyes, lips pressed together – but NOT overly dramatic; maintain professionalism)
+          8. Approving expression (nodding slightly, small smile, raised eyebrows)
+          9. Listening intently expression (head tilted slightly, eyes focused, slight smile)
+
+        Style:  Photorealistic, like a professional headshot.  High quality lighting.  No text or labels within the image.  The woman should look like the same person in all nine sections, only the expression changes.`;
 
         try {
             const endpoint = constructEndpoint(API_BASE_URL, '/api/dalle/image');
@@ -139,7 +153,7 @@ const InterviewModule = ({ onReturn }) => {
         }
     };
 
-    const generateInterviewer = async () => {
+const generateInterviewer = async () => {
         setIsGeneratingScenario(true);
         setErrorMessage('');
 
@@ -154,49 +168,51 @@ const InterviewModule = ({ onReturn }) => {
             finalJobDescription = customJobDescription;
         } else {
             if (!jobCategory || !jobTitle) {
-                setErrorMessage('Please select a job category and title.');
-                setIsGeneratingScenario(false);
-                return;
+              setErrorMessage('Please select a job category and title.');
+              setIsGeneratingScenario(false);
+              return;
             }
             try {
                 const jdPrompt = `Generate a detailed job description for the position of ${jobTitle} in the field of ${jobCategories.find(c => c.value === jobCategory)?.label}. Include responsibilities, required skills, and preferred qualifications. Return as plain text.`;
                 const jdResponse = await fetchOpenAIResponse({ messages: [{ role: 'system', content: jdPrompt }] }, '/api/generate');
+
                 finalJobDescription = parseAiJson(jdResponse);
-                if (!finalJobDescription || typeof finalJobDescription !== 'string') {
-                    throw new Error("Failed to generate a valid Job Description");
+                if (!finalJobDescription || typeof finalJobDescription !== 'string')
+                {
+                    throw new Error("Failed to Generate a valid Job Description");
                 }
                 setJobDescription(finalJobDescription);
             } catch (error) {
-                setErrorMessage('Failed to generate job description. Please try again, or use a custom description.');
+                setErrorMessage('Failed to generate job description.');
                 setIsGeneratingScenario(false);
                 return;
             }
         }
 
-        const resumeText = useResume ? resume : 'No resume provided.';
+      const resumeText = useResume ? resume : 'No resume provided.';
 
-        const prompt = `
-            Create a virtual interviewer persona for a job interview.  The job description is:
+      const prompt = `
+          Create a virtual interviewer persona for a job interview.  The job description is:
 
-            ${finalJobDescription}
+          ${finalJobDescription}
 
-            ${useResume ? `The candidate's resume is:\n${resumeText}` : ''}
+          ${useResume ? `The candidate's resume is:\n${resumeText}` : ''}
 
-            Generate an interviewer with:
-            - A realistic name.
-            - A job title relevant to the position.
-            - A brief personality description.
+          Generate an interviewer with:
+          - A realistic name.
+          - A job title relevant to the position.
+          - A brief personality description.
 
-            Return in JSON format:
-            {
-                "interviewer": {
-                    "name": "string",
-                    "title": "string",
-                    "personality": "string",
-                    "introduction": "string"
-                }
-            }
-        `;
+          Return in JSON format:
+          {
+              "interviewer": {
+                  "name": "string",
+                  "title": "string",
+                  "personality": "string",
+                  "introduction": "string"
+              }
+          }
+      `;
 
         try {
             const rawResponse = await fetchOpenAIResponse({ messages: [{ role: 'system', content: prompt }] }, '/api/generate');
@@ -230,11 +246,12 @@ const InterviewModule = ({ onReturn }) => {
             };
 
             mediaRecorderRef.current.onstop = async () => {
-                setIsUserSpeaking(false);
-                const stream = mediaRecorderRef.current.stream;
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
+              setIsUserSpeaking(false);
+              const stream = mediaRecorderRef.current.stream
+              if(stream)
+              {
+                stream.getTracks().forEach(track => track.stop());
+              }
                 mediaRecorderRef.current = null;
             };
 
@@ -292,67 +309,61 @@ const InterviewModule = ({ onReturn }) => {
         });
     };
 
-    const sendAudioToRealtimeAPI = async (base64Audio) => {
-       //Now handled by sendAudioChunk
-    };
-
     const generateAIResponse = async () => {
-        if (!interviewer) {
-            console.error('Interviewer not generated.');
-            return;
-        }
+      if (!interviewer) {
+        console.error('Interviewer not generated.');
+        return;
+      }
 
-        const prompt = `
-            You are ${interviewer.name}, ${interviewer.title}, conducting a job interview. Your personality is: ${interviewer.personality}.
+      const prompt = `
+          You are ${interviewer.name}, ${interviewer.title}, conducting a job interview. Your personality is: ${interviewer.personality}.
 
-            The job description is:
-            ${jobDescription}
+          The job description is:
+          ${jobDescription}
 
-            ${useResume ? `The candidate's resume is:\n${resume}` : ''}
+          ${useResume ? `The candidate's resume is:\n${resume}` : ''}
 
-            Respond naturally, as in a real interview. Ask follow-up questions and assess the candidate's suitability.
-        `;
+          Respond naturally, as in a real interview. Ask follow-up questions and assess the candidate's suitability.
+      `;
 
-        const responseCreate = {
-            type: "response.create",
-            response: {
-                modalities: ["audio", "text"],
-                instructions: prompt,
-                voice: selectedVoice,
-            },
-        };
+      const responseCreate = {
+        type: 'response.create',
+        response: {
+          modalities: ['audio', 'text'],
+          instructions: prompt,
+          voice: selectedVoice,
+        },
+      };
 
-        try {
-            const aiResponse = await fetchOpenAIResponse(responseCreate, '/api/realtime');
-            if (aiResponse && aiResponse.messages) {
-                for (const message of aiResponse.messages) {
-                    if (message.type === "response.text.delta") {
-                        addLog(message.delta, interviewer.name, message.expression || 'neutral');
-                    } else if (message.type === "response.audio.delta") {
-                        console.log("Received audio chunk:", message.delta.length, "bytes");
-                    }
-                    else if (message.type === "response.audio_transcript.delta") {
-                        console.log("AI Audio Transcript Delta:", message.delta);
-                    }
-                    else if(message.type === "response.done")
-                    {
-                      const finalAIMessage = aiResponse.messages.find(msg => msg.type === "response.text.done");
-                      if(finalAIMessage)
-                      {
-                        console.log("AI Final Text Message:", finalAIMessage.text);
-                      }
-                    }
-                }
-            } else {
-                setErrorMessage('Failed to get a valid AI response.');
+      try {
+        const aiResponse = await fetchOpenAIResponse(responseCreate, '/api/realtime');
+        if (aiResponse && aiResponse.messages) {
+          for (const message of aiResponse.messages) {
+            if (message.type === 'response.text.delta') {
+              addLog(message.delta, interviewer.name, message.expression || 'neutral');
+            } else if (message.type === 'response.audio.delta') {
+              console.log('Received audio chunk:', message.delta.length, 'bytes');
+            } else if (message.type === 'response.audio_transcript.delta') {
+              console.log('AI Audio Transcript Delta:', message.delta);
             }
-
-        } catch (error) {
-            console.error('Error during real-time interaction:', error);
-            setErrorMessage('Real-time interaction failed.');
-        } finally {
-            setIsAITurn(false);
+            else if(message.type === "response.done")
+            {
+              const finalAIMessage = aiResponse.messages.find(msg => msg.type === "response.text.done");
+                if(finalAIMessage)
+                {
+                    console.log("AI Final Text Message:", finalAIMessage.text);
+                }
+            }
+          }
+        } else {
+          setErrorMessage('Failed to get a valid AI response.');
         }
+      } catch (error) {
+        console.error('Error during real-time interaction:', error);
+        setErrorMessage('Real-time interaction failed.');
+      } finally {
+        setIsAITurn(false);
+      }
     };
 
     const startInterview = async () => {
@@ -395,7 +406,7 @@ const InterviewModule = ({ onReturn }) => {
                         <div className="module-description">
                             <h2>Interview Simulator</h2>
                             <p>
-                                Practice your interview skills with a virtual interviewer.
+                                Practice your interview skills.
                             </p>
                         </div>
                     </>
@@ -414,109 +425,109 @@ const InterviewModule = ({ onReturn }) => {
     );
 
     const renderSetupForm = () => (
-        <Card className='setup-card'>
-            <CardHeader>
-                <CardTitle>Set Up Your Interview</CardTitle>
-                <div className="spinner-container">
-                    {isGeneratingScenario && <BarLoader color="#0073e6" width="100%" />}
-                </div>
-            </CardHeader>
-            <CardContent>
-                <div className="form-group">
-                    <label>Select Job Category:</label>
-                    <Select
-                        onValueChange={(value) => {
-                            setJobCategory(value);
-                            setJobTitle('');
-                            setIsCustomJobDescription(value === 'custom');
-                        }}
-                        value={jobCategory}
-                    >
-                        <SelectItem value="">Choose a category</SelectItem>
-                        {jobCategories.map((category) => (
-                            <SelectItem key={category.value} value={category.value}>
-                                {category.label}
-                            </SelectItem>
-                        ))}
-                    </Select>
-                </div>
+      <Card className='setup-card'>
+        <CardHeader>
+          <CardTitle>Set Up Your Interview</CardTitle>
+          <div className="spinner-container">
+            {isGeneratingScenario && <BarLoader color="#0073e6" width="100%" />}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="form-group">
+            <label>Select Job Category:</label>
+            <Select
+              onValueChange={(value) => {
+                setJobCategory(value);
+                setJobTitle('');
+                setIsCustomJobDescription(value === 'custom');
+              }}
+              value={jobCategory}
+            >
+              <SelectItem value="">Choose a category</SelectItem>
+              {jobCategories.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
+              ))}
+            </Select>
+          </div>
 
-                {!isCustomJobDescription && jobCategory && (
-                    <div className="form-group">
-                        <label>Select Job Title:</label>
-                        <Select
-                            onValueChange={setJobTitle}
-                            value={jobTitle}
-                            disabled={!jobCategory}
-                        >
-                            <SelectItem value="">Choose a title</SelectItem>
-                            {jobTitles[jobCategory]?.map((title) => (
-                                <SelectItem key={title} value={title}>
-                                    {title}
-                                </SelectItem>
-                            ))}
-                        </Select>
-                    </div>
-                )}
+          {!isCustomJobDescription && jobCategory && (
+            <div className="form-group">
+              <label>Select Job Title:</label>
+              <Select
+                onValueChange={setJobTitle}
+                value={jobTitle}
+                disabled={!jobCategory}
+              >
+                <SelectItem value="">Choose a title</SelectItem>
+                {jobTitles[jobCategory]?.map((title) => (
+                  <SelectItem key={title} value={title}>
+                    {title}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+          )}
 
-                {isCustomJobDescription && (
-                    <div className="form-group">
-                        <label htmlFor="customJobDescription">Custom Job Description:</label>
-                        <TextArea
-                            id="customJobDescription"
-                            value={customJobDescription}
-                            onValueChange={setCustomJobDescription}
-                            placeholder="Paste a custom job description here..."
-                            className='custom-scenario-input'
-                        />
-                    </div>
-                )}
-                <div className="form-group">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={useResume}
-                            onChange={() => setUseResume(!useResume)}
-                        />
-                        Include Resume
-                    </label>
-                </div>
-                {useResume && (
-                    <div className="form-group">
-                        <label htmlFor="resume">Your Resume/CV:</label>
-                        <TextArea
-                            id="resume"
-                            value={resume}
-                            onValueChange={setResume}
-                            placeholder="Paste your resume here..."
-                            className='custom-scenario-input'
-                        />
-                    </div>
-                )}
+          {isCustomJobDescription && (
+            <div className="form-group">
+              <label htmlFor="customJobDescription">Custom Job Description:</label>
+              <TextArea
+                id="customJobDescription"
+                value={customJobDescription}
+                onValueChange={setCustomJobDescription}
+                placeholder="Paste a custom job description here..."
+                className='custom-scenario-input'
+              />
+            </div>
+          )}
+            <div className="form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={useResume}
+                  onChange={() => setUseResume(!useResume)}
+                />
+                Include Resume
+              </label>
+            </div>
+          {useResume && (
+            <div className="form-group">
+              <label htmlFor="resume">Your Resume/CV:</label>
+              <TextArea
+                id="resume"
+                value={resume}
+                onValueChange={setResume}
+                placeholder="Paste your resume here..."
+                className='custom-scenario-input'
+              />
+            </div>
+          )}
 
-                <div className="form-group">
-                    <label>Select Interviewer Voice:</label>
-                    <Select onValueChange={setSelectedVoice} value={selectedVoice}>
-                        <SelectItem value="alloy">Alloy</SelectItem>
-                        <SelectItem value="ash">Ash</SelectItem>
-                        <SelectItem value="ballad">Ballad</SelectItem>
-                        <SelectItem value="coral">Coral</SelectItem>
-                        <SelectItem value="echo">Echo</SelectItem>
-                        <SelectItem value="sage">Sage</SelectItem>
-                        <SelectItem value="shimmer">Shimmer</SelectItem>
-                        <SelectItem value="verse">Verse</SelectItem>
-                    </Select>
-                </div>
-                <Button onClick={generateInterviewer} disabled={isGeneratingScenario}>
-                    {isGeneratingScenario ? 'Generating Interviewer...' : 'Generate Interviewer'}
-                </Button>
-                {interviewer && (
-                    <Button onClick={startInterview} disabled={isFetching}>
-                        {isFetching ? 'Starting...' : 'Start Interview'}
-                    </Button>
-                )}
-            </CardContent>
-        </Card>
+          <div className="form-group">
+            <label>Select Interviewer Voice:</label>
+            <Select onValueChange={setSelectedVoice} value={selectedVoice}>
+              <SelectItem value="alloy">Alloy</SelectItem>
+              <SelectItem value="ash">Ash</SelectItem>
+              <SelectItem value="ballad">Ballad</SelectItem>
+              <SelectItem value="coral">Coral</SelectItem>
+              <SelectItem value="echo">Echo</SelectItem>
+              <SelectItem value="sage">Sage</SelectItem>
+              <SelectItem value="shimmer">Shimmer</SelectItem>
+              <SelectItem value="verse">Verse</SelectItem>
+            </Select>
+          </div>
+          <Button onClick={generateInterviewer} disabled={isGeneratingScenario}>
+            {isGeneratingScenario ? 'Generating Interviewer...' : 'Generate Interviewer'}
+          </Button>
+          {interviewer && (
+            <Button onClick={startInterview} disabled={isFetching}>
+              {isFetching ? 'Starting...' : 'Start Interview'}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     );
 
     const renderChatArea = () => (
@@ -588,18 +599,19 @@ const InterviewModule = ({ onReturn }) => {
             );
         }
     };
- const renderDebriefing = () => {
-    return (
-        <Card>
-          <CardHeader>
-            <CardTitle>Interview Debriefing</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Debriefing content goes here.</p>
-          </CardContent>
-        </Card>
-      );
-  }
+
+    const renderDebriefing = () => {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Interview Debriefing</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p>Debriefing content goes here.</p>
+                </CardContent>
+            </Card>
+        );
+    }
 
     return (
         <div className="app-container">
@@ -634,81 +646,54 @@ export const metadata = {
     instructions: `
         <h2>Interview Simulator Instructions</h2>
 
-        <p>Welcome to the Interview Simulator! This module provides a realistic, voice-activated interview experience powered by Azure OpenAI's real-time API.  You'll be able to practice your interview skills in a dynamic and interactive environment.</p>
+        <p>Welcome to the Interview Simulator! This module provides a realistic, voice-activated interview experience.</p>
 
         <h3>Getting Started</h3>
 
         <ol>
             <li><strong>Provide Job Information:</strong>
                 <ul>
-                    <li>Select a <strong>Job Category</strong> from the dropdown menu.</li>
-                    <li>Select a <strong>Job Title</strong> from the dropdown menu (the options will change based on the category).</li>
-                    <li><strong>Alternatively:</strong> Select "Custom" for the category and paste a <strong>Custom Job Description</strong> into the text area that appears.</li>
+                    <li>Select a <strong>Job Category</strong>.</li>
+                    <li>Select a <strong>Job Title</strong>.</li>
+                    <li><strong>Alternatively:</strong> Select "Custom" and paste a <strong>Custom Job Description</strong>.</li>
                 </ul>
             </li>
             <li><strong>Resume (Optional):</strong>
                 <ul>
-                    <li>By default, the simulator will use your resume to tailor the interview.  You can uncheck the "Include Resume" box if you prefer *not* to use your resume.</li>
-                    <li>If using a resume, paste it into the "Your Resume/CV" text area.</li>
+                    <li>Uncheck "Include Resume" if you prefer not to use it.</li>
+                    <li>If using, paste it into the "Your Resume/CV" area.</li>
                 </ul>
             </li>
             <li><strong>Select Interviewer Voice (Optional):</strong>
                 <ul>
-                    <li>Choose a voice for the interviewer from the dropdown menu. This affects the *AI's* spoken voice. You can also leave it at the default ("Alloy").</li>
+                    <li>Choose a voice for the interviewer.</li>
                 </ul>
             </li>
-            <li><strong>Generate Interviewer:</strong>
-                <ul>
-                    <li>Click the "Generate Interviewer" button.  This creates the virtual interviewer.</li>
-                </ul>
-            </li>
-            <li><strong>Start Interview:</strong>
-              <ul>
-                <li>Click the "Start Interview" button.</li>
-              </ul>
-            </li>
+            <li><strong>Generate Interviewer:</strong> Click "Generate Interviewer".</li>
+            <li><strong>Start Interview:</strong> Click "Start Interview".</li>
         </ol>
 
         <h3>During the Interview</h3>
-
         <ol>
-            <li><strong>Speak Clearly:</strong>
-                <ul>
-                    <li>Click the microphone button to start recording.</li>
-                    <li>Click the microphone button again to stop recording.</li>
-                    <li><em>Grant microphone access to your browser.</em></li>
-                </ul>
-            </li>
-            <li><strong>Listen to the Interviewer:</strong>
-                <ul>
-                    <li>The AI interviewer will respond with questions and follow-ups.</li>
-                    <li>Responses are displayed in the chat log.  You will also *hear* the interviewer's responses.</li>
-                      <li>The interviewer's facial expression will react appropriately.</li>
-                </ul>
-            </li>
-            <li><strong>Real-time Interaction:</strong>
-                <ul>
-                    <li>This is a *real-time* simulation. The AI responds dynamically.</li>
-                    <li>Interaction is entirely voice-based.</li>
-                </ul>
-            </li>
+            <li><strong>Speak Clearly:</strong> Click the microphone to start/stop recording.</li>
+            <li><strong>Listen to the Interviewer:</strong> Responses are displayed in the chat log and spoken.</li>
+            <li><strong>Real-time Interaction:</strong> The AI responds dynamically. Interaction is voice-based.</li>
         </ol>
 
         <h3>Ending the Interview</h3>
-        <p>The interview continues until a natural conclusion, or until you reset it. A debriefing section will be added in the future.</p>
+        <p>The interview continues until reset. A debriefing section will be added.</p>
         <h3>Tips for Success</h3>
         <ul>
-            <li>Prepare as you would for a real interview.</li>
+            <li>Prepare as for a real interview.</li>
             <li>Think about common interview questions.</li>
             <li>Speak clearly and concisely.</li>
-            <li>Be confident!</li>
         </ul>
         <h3>Important Notes</h3>
         <ul>
-            <li>This module uses Azure OpenAI's real-time API (preview).</li>
+            <li>Uses a real-time API (preview).</li>
             <li>Requires microphone access.</li>
-            <li>Designed for use in a trusted environment.</li>
-            <li>Audio output depends on your system and the Azure OpenAI configuration.</li>
+            <li>For use in a trusted environment.</li>
+            <li>Audio output depends on your system and configuration.</li>
         </ul>
     `,
 };

@@ -7,7 +7,11 @@
   },
   "proxy": "http://localhost:8080",
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@google/generative-ai": "^0.21.0",
+    "@mui/material": "^6.4.4",
+    "@mui/styles": "^6.4.4",
     "axios": "^1.7.9",
     "dompurify": "^3.2.3",
     "lucide-react": "^0.469.0",

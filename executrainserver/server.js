@@ -132,26 +132,46 @@ const setupRoutes = () => {
     app.post('/api/dalle/image', async (req, res) => {
         const { prompt } = req.body;
         logMessage('[API Request]', '/api/dalle/image called');
-
+      
         const requestBody = {
-            prompt,
-            size: '1024x1024',
-            n: 1,
-            quality: 'standard',
-            style: 'vivid'
+          prompt,
+          size: '1024x1024',
+          n: 1,
+          quality: 'standard',
+          style: 'vivid'
         };
-
+      
         try {
-            const dalleEndpointURL = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/Dalle3/images/generations?api-version=${process.env.AZURE_DALLE_API_VERSION}`;
-            const response = await axios.post(dalleEndpointURL, requestBody, {
-                headers: { 'Content-Type': 'application/json', 'api-key': process.env.AZURE_OPENAI_API_KEY }
-            });
-            res.json(response.data);
+          const dalleEndpointURL = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/Dalle3/images/generations?api-version=${process.env.AZURE_DALLE_API_VERSION}`;
+      
+          // VERIFY ENVIRONMENT VARIABLES (add logging for debugging)
+          console.log("[DEBUG] DALL-E Endpoint:", dalleEndpointURL);
+          console.log("[DEBUG] API Key:", process.env.AZURE_OPENAI_API_KEY ? "Key Present" : "KEY MISSING!"); // Check if key is at least present
+          console.log("[DEBUG] API Version:", process.env.AZURE_DALLE_API_VERSION);
+      
+      
+          const response = await axios.post(dalleEndpointURL, requestBody, {
+            headers: { 'Content-Type': 'application/json', 'api-key': process.env.AZURE_OPENAI_API_KEY }
+          });
+      
+          // Extract the URL from the response.data (Azure DALL-E 3 format)
+          if (response.data && response.data.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
+            const imageUrl = response.data.data[0].url; // Get the URL of the first image
+            logMessage('[API Response]', `Image URL: ${imageUrl}`); // Log the URL
+            res.json({ imagePath: imageUrl }); // Send the URL with the key 'imagePath'
+          } else {
+            // Handle the case where the response structure is unexpected
+            logError('[API Error]', 'Unexpected response structure from DALL-E API');
+            res.status(500).json({ error: 'Failed to generate image', details: 'Unexpected response structure' });
+          }
+      
         } catch (error) {
-            logError('[API Error]', '/api/dalle/image - DALL-E API Request Failed');
-            res.status(500).json({ error: 'Failed to generate image', details: error.message });
+          logError('[API Error]', '/api/dalle/image - DALL-E API Request Failed');
+           // IMPROVED ERROR HANDLING: Log the entire error object for more detail
+          console.error(error); // Log the full error object
+          res.status(500).json({ error: 'Failed to generate image', details: error.message, fullError: error }); // Send more details to client
         }
-    });
+      });
 
     // Real-time ChatGPT Text Generation Endpoint
     app.post('/api/realtime', async (req, res) => {

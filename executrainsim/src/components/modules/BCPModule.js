@@ -19,6 +19,7 @@ import {
     Legend,
     AreaChart,
     Area,
+    PolarAngleAxis,
 } from 'recharts';
 import SevenSegmentDisplay from '../effects/SevenSegmentDisplay';
 import ActionCard from '../ui/ActionCard';

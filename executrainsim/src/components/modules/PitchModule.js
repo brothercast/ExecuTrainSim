@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
     Card, CardContent, CardHeader, CardTitle,
-} from '../../components/ui/Card'; // Corrected import path
-import Button from '../../components/ui/Button'; // Corrected import path
-import Select, { SelectItem } from '../../components/ui/Select'; // Corrected import path
-import TextArea from '../../components/ui/TextArea'; // Corrected import path
-import Progress from '../../components/ui/Progress'; // Corrected import path
+} from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Select, { SelectItem } from '../../components/ui/Select';
+import TextArea from '../../components/ui/TextArea';
+import Progress from '../../components/ui/Progress';
 import { BarLoader, BeatLoader } from 'react-spinners';
 import {
     AlertTriangle,
@@ -23,15 +23,15 @@ import {
     ChevronLeft,
     MessageCircle,
     QuestionMarkCircle,
-    Presentation, // Lucide Icon for Stage Presentation
-    Layout, // Lucide Icon for War Room
-    Rocket, // Lucide Icon for Elevator Pitch
-    Map, // Lucide Icon for CYOA
-    LayoutPanelLeft, // Lucide Icon for Deck Builder
-    UserRound // Lucide Icon for Role Playing Panelist
+    Presentation,
+    Layout,
+    Rocket,
+    Map,
+    LayoutPanelLeft,
+    UserRound
 } from 'lucide-react';
 import '../../styles/AppStyles.css';
-import '../../styles/PitchModule.css'; // Make sure PitchModule.css exists
+import '../../styles/PitchModule.css';
 import {
     Radar,
     RadarChart,
@@ -102,8 +102,9 @@ const parseAiJson = (apiResponse) => { // ... (same parseAiJson function as befo
 // Pitch Module Component (Refactored for Multi-Style)
 const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     // --- State Variables ---
-    const [pitchStyle, setPitchStyle] = useState(''); // Tracks selected pitch style ('', 'stage', 'warroom', etc.)
-    const [editableScenario, setEditableScenario] = useState(null); // ADDED: For storing the generated scenario
+    const [pitchStyle, setPitchStyle] = useState('');
+    const [, forceUpdate] = useState({}); // State for forcing re-render
+    const [editableScenario, setEditableScenario] = useState(null);
     const [numPanelists, setNumPanelists] = useState(1);
     const [panelistTypes, setPanelistTypes] = useState(['Investor']);
     const [pitchCategory, setPitchCategory] = useState('');
@@ -111,7 +112,11 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     const [desiredOutcome, setDesiredOutcome] = useState('');
     const [customOutcomeInput, setCustomOutcomeInput] = useState('');
     const [businessPlanInput, setBusinessPlanInput] = useState('');
-    const [panelists, setPanelists] = useState([]);
+    const [panelists, setPanelists] = useState([
+        { name: 'Panelist 1', role: 'Role 1', persona: 'Persona 1' },
+        { name: 'Panelist 2', role: 'Role 2', persona: 'Persona 2' },
+        { name: 'Panelist 3', role: 'Role 3', persona: 'Persona 3' }
+    ]); // Placeholder Panelists for UI demo
     const [pitchLog, setPitchLog] = useState([]);
     const [userPitchDraft, setUserPitchDraft] = useState('');
     const [performanceScore, setPerformanceScore] = useState(0);
@@ -120,9 +125,13 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [isFetching, setIsFetching] = useState(false);
     const [isFetchingScenario, setIsFetchingScenario] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(300);
+    const [timeLeft, setTimeLeft] = useState(300); // Example for Elevator Pitch
     const [notifications, setNotifications] = useState([]);
-    const [responseOptions, setResponseOptions] = useState([]);
+    const [responseOptions, setResponseOptions] = useState([
+        { name: 'Option 1', description: 'Description for Option 1' },
+        { name: 'Option 2', description: 'Description for Option 2' },
+        { name: 'Option 3', description: 'Description for Option 3' }
+    ]); // Example Response Options
     const [pitchStarted, setPitchStarted] = useState(false);
     const [showInstructions, setShowInstructions] = useState(false);
     const [systemStatus, setSystemStatus] = useState({});
@@ -136,13 +145,13 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     const [isUserReplyLoading, setIsUserReplyLoading] = useState(false);
     const [activePhase, setActivePhase] = useState('setup');
     const [currentTurnIndex, setCurrentTurnIndex] = useState(1);
-    const [selectedQuestion, setSelectedQuestion] = useState(null);
+    const [selectedQuestion, setSelectedQuestion] = useState({ panelist: 'Panelist Name', question: 'Example Question?' }); // Example Question
     const [panelistSentiment, setPanelistSentiment] = useState({});
-    const [images, setImages] = useState({}); // For panelist avatars
-    const [imageStatus, setImageStatus] = useState('idle'); // 'idle', 'loading', 'success', 'failed'
+    const [images, setImages] = useState({});
+    const [imageStatus, setImageStatus] = useState('idle');
     const [isCustomInputMode, setIsCustomInputMode] = useState(false);
 
-    const pitchCategories = [ // ... (same categories as before) ...
+    const pitchCategories = [
         { value: 'technology', title: 'Technology' },
         { value: 'healthcare', title: 'Healthcare' },
         { value: 'finance', title: 'Finance' },
@@ -151,7 +160,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         { value: 'custom', title: 'Custom Area' }
     ];
 
-    const pitchSubcategories = { // ... (same subcategories as before) ...
+    const pitchSubcategories = {
         technology: ['SaaS', 'AI', 'Biotech', 'Hardware', 'E-commerce'],
         healthcare: ['MedTech', 'Pharma', 'Digital Health', 'Healthcare Services'],
         finance: ['FinTech', 'Investment Management', 'Banking', 'Insurance'],
@@ -159,7 +168,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         services: ['Consulting', 'Marketing', 'Education', 'Logistics']
     };
 
-    const desiredOutcomesList = [ // ... (same outcomes as before) ...
+    const desiredOutcomesList = [
         "Secure Seed Funding",
         "Gain Strategic Partnership",
         "Acquire Key Client",
@@ -168,48 +177,48 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     ];
 
 
-    const scrollToBottom = () => { // ... (same scrollToBottom function as before) ...
+    const scrollToBottom = () => {
         pitchLogEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
-    useEffect(() => { // ... (same useEffect hook as before) ...
+    useEffect(() => {
         if (pitchLog.length > 0) {
             scrollToBottom();
         }
     }, [pitchLog]);
 
 
-    const generateSequentialTimestamp = () => { // ... (same timestamp function as before) ...
+    const generateSequentialTimestamp = () => {
         const now = new Date();
         const options = { weekday: 'long', hour: 'numeric', minute: 'numeric', hour12: true };
         return now.toLocaleTimeString('en-US', options);
     };
 
 
-    const addLog = (log) => { // ... (same addLog function as before) ...
+    const addLog = (log) => {
         setPitchLog(prev => [...prev, { message: log, timestamp: new Date() }]);
     };
-    const addNotification = (message) => { // ... (same addNotification function as before) ...
+    const addNotification = (message) => {
         setNotifications(prev => [...prev, message]);
     };
 
 
-    const handleNumPanelistsChange = (event) => { // ... (same handleNumPanelistsChange function as before) ...
+    const handleNumPanelistsChange = (event) => {
         setNumPanelists(parseInt(event.target.value, 10));
     };
 
-    const handlePanelistTypeChange = (index, event) => { // ... (same handlePanelistTypeChange function as before) ...
+    const handlePanelistTypeChange = (index, event) => {
         const newTypes = [...panelistTypes];
         newTypes[index] = event.target.value;
         setPanelistTypes(newTypes);
     };
 
-    const generatePanelistImages = async (panelistNames) => { // ... (same generatePanelistImages function as before) ...
+    const generatePanelistImages = async (panelistNames) => {
         setImageStatus('loading');
         let newImages = {};
         for (let i = 0; i < panelistNames.length; i++) {
             const prompt = `Create a professional avatar for ${panelistNames[i]}, a panelist for a business pitch, 1990s colorful stock art, simple lines, diverse.`;
             try {
-                const endpoint = constructEndpoint(API_BASE_URL, '/api/dalle/image'); // Use constructEndpoint
+                const endpoint = constructEndpoint(API_BASE_URL, '/api/dalle/image');
                 const response = await axios.post(endpoint, { prompt });
                 newImages[panelistNames[i]] = response.data.imagePath;
             } catch (error) {
@@ -224,13 +233,13 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => { // ... (same fetchOpenAIResponse function as before) ...
+    const fetchOpenAIResponse = async (input, endpointPath, isUserAction = false) => {
         setIsFetching(true);
         if (isUserAction) {
             setIsUserReplyLoading(true);
         }
         try {
-            const endpoint = constructEndpoint(API_BASE_URL, endpointPath); // Use constructEndpoint
+            const endpoint = constructEndpoint(API_BASE_URL, endpointPath);
             console.log('Requesting:', endpoint, 'with payload:', input);
             const response = await axios.post(endpoint, input, {
                 headers: { 'Content-Type': 'application/json' },
@@ -253,7 +262,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const generatePitchScenario = async () => { // ... (same generatePitchScenario function as before) ...
+    const generatePitchScenario = async () => {
         setIsFetchingScenario(true);
         try {
             const selectedCategoryTitle = pitchCategories.find(cat => cat.value === pitchCategory)?.title;
@@ -288,7 +297,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             `;
             const rawScenarioData = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: scenarioPrompt }] },
-                '/api/generate' // Use generate endpoint
+                '/api/generate'
             );
             const parsedScenario = parseAiJson(rawScenarioData);
             if (parsedScenario?.scenario) {
@@ -306,7 +315,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const startPitch = async () => { // ... (same startPitch function as before) ...
+    const startPitch = async () => {
         if (!desiredOutcome) {
             setErrorMessage('Please select your desired outcome.');
             return;
@@ -329,7 +338,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                 `;
                 const rawIntroResponse = await fetchOpenAIResponse(
                     { messages: [{ role: 'system', content: introPrompt }], temperature: 0.7, max_tokens: 300 },
-                    '/api/generate' // Use generate endpoint
+                    '/api/generate'
                 );
                 const parsedIntro = parseAiJson(rawIntroResponse);
                 const introMessageContent = parsedIntro?.message || 'Welcome, we are ready for your pitch.';
@@ -345,20 +354,20 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             console.error('Error generating panelist introductions:', error);
             setErrorMessage('Failed to generate panelist introductions. Please try again.');
         }
-        setActivePhase('pitch'); // Set active phase to 'pitch'
+        setActivePhase('pitch');
     };
 
 
-    const handlePitchSubmit = async () => { // ... (same handlePitchSubmit function as before) ...
-        if (!userPitchDraft.trim()) { // User pitch draft - might not be needed in this UI
+    const handlePitchSubmit = async () => {
+        if (!userPitchDraft.trim()) {
             setErrorMessage('Please type your pitch before submitting.');
             return;
         }
         setErrorMessage('');
         const userPitchContent = DOMPurify.sanitize(userPitchDraft);
-        setUserPitchDraft(''); // Clear user pitch draft
+        setUserPitchDraft('');
 
-        addLog(`You: Initial Pitch Submitted.`); // Log user pitch submission
+        addLog(`You: Initial Pitch Submitted.`);
 
         // Generate panelist questions/responses (similar to previous version)
         for (const panelist of panelists) {
@@ -370,24 +379,24 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
 
             const rawQuestionResponse = await fetchOpenAIResponse(
                 { messages: [{ role: 'system', content: questionPrompt }], temperature: 0.7, max_tokens: 300 },
-                '/api/generate' // Use generate endpoint
+                '/api/generate'
             );
             const parsedQuestion = parseAiJson(rawQuestionResponse);
             const questionMessageContent = parsedQuestion?.message || 'Could you elaborate further?';
 
             await new Promise(resolve => setTimeout(resolve, 1500)); // Delay
 
-            addLog(`${panelist.name}: ${questionMessageContent}`); // Log panelist question
-             setResponseOptions([]); // Clear previous response options
-            setSelectedQuestion({ panelist: panelist.name, question: questionMessageContent }); // Set current question
+            addLog(`${panelist.name}: ${questionMessageContent}`);
+            setResponseOptions([]);
+            setSelectedQuestion({ panelist: panelist.name, question: questionMessageContent });
         }
-        setIsUserTurn(true); // Set back to user turn
+        setIsUserTurn(true);
         setCurrentTurnIndex(prev => prev + 1);
-        setUserPitchDraft(''); // Clear user pitch draft again just in case
+        setUserPitchDraft('');
     };
 
 
-    const generateResponseOptions = async (context) => { // ... (same generateResponseOptions function as before) ...
+    const generateResponseOptions = async (context) => {
         if (!selectedQuestion) {
             console.warn('No question selected. Skipping response option generation.');
             return;
@@ -406,7 +415,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                 messages: [{ role: 'system', content: prompt }],
                 temperature: 0.7,
                 max_tokens: 400,
-            }, '/api/generate'); // Use generate endpoint
+            }, '/api/generate');
             handleResponseOptions(rawResponse);
         } catch (error) {
             console.error('Failed to generate response options:', error);
@@ -414,7 +423,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         }
     };
 
-    const handleResponseOptions = async (rawResponse) => { // ... (same handleResponseOptions function as before) ...
+    const handleResponseOptions = async (rawResponse) => {
         if (!rawResponse) {
             console.error('Received empty response from API.');
             setErrorMessage('Failed to generate response options. Please try again.');
@@ -430,7 +439,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         }
     };
 
-    const handleResolution = async (actionIndex) => { // ... (same handleResolution function as before) ...
+    const handleResolution = async (actionIndex) => {
         if (!selectedQuestion) return;
         setIsResponseLoading(true);
         setIsUserReplyLoading(true);
@@ -438,9 +447,9 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         const actionDescription = selectedOption ? selectedOption.description : 'No action selected';
         const responseText = selectedOption ? selectedOption.name : 'No action selected';
 
-        addLog(`You: Response - ${responseText}.`); // Log user response
+        addLog(`You: Response - ${responseText}.`);
 
-        const panelist = panelists.find(p => p.name === selectedQuestion.panelist); // Find the panelist who asked the question
+        const panelist = panelists.find(p => p.name === selectedQuestion.panelist);
 
         const systemPrompt = `
               As ${panelist.name}, in your role as "${panelist.role}" and with your persona: "${panelist.persona}", having just heard the user's response: "${actionDescription}" to your question: "${selectedQuestion.question}", provide a brief follow-up message.
@@ -448,7 +457,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
               Return the response in JSON format:
               {
                  "message": "string",
-                 "sentiment": "positive" | "negative" | "neutral" // Optional sentiment
+                 "sentiment": "positive" | "negative" | "neutral"
               }
         `;
 
@@ -457,25 +466,25 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                 messages: [{ role: 'system', content: systemPrompt }],
                 temperature: 0.7,
                 max_tokens: 500,
-            }, '/api/generate'); // Use generate endpoint
+            }, '/api/generate');
             if (!rawResponse) {
                 throw new Error('No response from AI server');
             }
             const parsed = parseAiJson(rawResponse);
             const panelistResponse = parsed?.message;
-            const panelistNewSentiment = parsed?.sentiment || 'neutral'; // Default to neutral sentiment if not provided
+            const panelistNewSentiment = parsed?.sentiment || 'neutral';
 
             if (!panelistResponse) {
                 throw new Error('Panelist response is empty or invalid JSON.');
             }
 
-            addLog(`${panelist.name}: ${panelistResponse}`); // Log panelist response
-            setPanelistSentiment(prevSentiment => ({ // Update panelist sentiment
+            addLog(`${panelist.name}: ${panelistResponse}`);
+            setPanelistSentiment(prevSentiment => ({
                 ...prevSentiment,
                 [panelist.name]: panelistNewSentiment,
             }));
-            setSelectedQuestion(null); // Clear selected question after response
-            setResponseOptions([]); // Clear response options after action
+            setSelectedQuestion(null);
+            setResponseOptions([]);
              // Check for simulation completion condition here, e.g., after a certain number of questions or sentiment reaches a threshold
 
         } catch (error) {
@@ -488,9 +497,9 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const resetPitchModule = () => { // ... (updated resetPitchModule function) ...
-        setPitchStyle(''); // Reset pitchStyle to ''
-        setEditableScenario(null); // Reset editableScenario
+    const resetPitchModule = () => {
+        setPitchStyle('');
+        setEditableScenario(null);
         setNumPanelists(1);
         setPanelistTypes(['Investor']);
         setPitchCategory('');
@@ -526,7 +535,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const renderLeftColumnCardContent = () => { // ... (same renderLeftColumnCardContent function as before, now using editableScenario?.scenario) ...
+    const renderLeftColumnCardContent = () => {
         return (
             <>
                 {pitchStarted && editableScenario ? (
@@ -565,21 +574,21 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const renderMainContent = () => { // --- Updated renderMainContent for Style Selection ---
+    const renderMainContent = () => {
         if (pitchStyle === '') {
-            return renderStyleSelectionUI(); // Render style selection UI
+            return renderStyleSelectionUI();
         } else if (pitchStyle === 'stage-presentation') {
-            return renderStagePresentationUI(); // Placeholder - Stage Presentation UI
+            return renderStagePresentationUI();
         } else if (pitchStyle === 'war-room') {
-            return renderWarRoomUI(); // Placeholder - War Room UI
+            return renderWarRoomUI();
         } else if (pitchStyle === 'elevator-pitch') {
-            return renderElevatorPitchUI(); // Placeholder - Elevator Pitch UI
+            return renderElevatorPitchUI();
         } else if (pitchStyle === 'cyoa') {
-            return renderCYOAUI(); // Placeholder - CYOA UI
+            return renderCYOAUI();
         } else if (pitchStyle === 'deck-builder') {
-            return renderDeckBuilderUI(); // Placeholder - Deck Builder UI
+            return renderDeckBuilderUI();
         } else if (pitchStyle === 'role-playing-panelist') {
-            return renderRolePlayingPanelistUI(); // Placeholder - Role-Playing Panelist UI
+            return renderRolePlayingPanelistUI();
         } else if (simulationComplete) {
             return renderMainContentDebriefing();
         } else if (editableScenario) {
@@ -591,159 +600,378 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
 
     // --- Style Selection UI ---
     const renderStyleSelectionUI = () => (
-        <Card className="setup-card">
-            <CardHeader>
-                <CardTitle className="header-title">Choose Your Pitch Style</CardTitle>
-            </CardHeader>
-            <CardContent className="pitch-style-selection-content">
+        <div className="setup-card"> {/* We can keep the setup-card container for styling */}
+            <div className="card-header">
+                <h3 className="header-title">Choose Your Pitch Style</h3>
+            </div>
+            <div className="pitch-style-selection-content">
                 <p>Select the style of pitch simulation you want to experience:</p>
                 <div className="pitch-style-options">
-                    <Card
-                        className="pitch-style-card"
-                        onClick={() => {
-                            console.log('Stage Presentation Clicked');
-                            setPitchStyle('stage-presentation');
-                        }}
+                    {/* Using simple divs instead of Card components */}
+                    <div
+                        className="pitch-style-option" // Class for styling
+                        style={{ cursor: 'pointer', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', marginBottom: '10px' }} // Basic inline styles for now
+                        onClick={() => { console.log('Stage Presentation Clicked (Simple)'); setPitchStyle('stage-presentation'); }}
                     >
-                        <CardHeader><CardTitle><Presentation className="style-icon"/>Stage Presentation</CardTitle></CardHeader>
-                        <CardContent>Present on a virtual stage, facing a live panel.</CardContent>
-                    </Card>
-                    <Card
-                        className="pitch-style-card"
-                        onClick={() => {
-                            console.log('War Room Clicked');
-                            setPitchStyle('war-room');
-                        }}
+                        <Presentation className="style-icon" style={{ verticalAlign: 'middle', marginRight: '5px' }} /> Stage Presentation
+                        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>Present on a virtual stage, facing a live panel.</p>
+                    </div>
+                    <div
+                        className="pitch-style-option" // Class for styling
+                        style={{ cursor: 'pointer', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', marginBottom: '10px' }} // Basic inline styles for now
+                        onClick={() => { console.log('War Room Clicked (Simple)'); setPitchStyle('war-room'); }}
                     >
-                        <CardHeader><CardTitle><Layout className="style-icon"/>War Room</CardTitle></CardHeader>
-                        <CardContent>High-pressure, metric-driven, real-time decisions.</CardContent>
-                    </Card>
-                    <Card
-                        className="pitch-style-card"
-                        onClick={() => {
-                            console.log('Elevator Pitch Clicked');
-                            setPitchStyle('elevator-pitch');
-                        }}
+                        <Layout className="style-icon" style={{ verticalAlign: 'middle', marginRight: '5px' }} /> War Room
+                        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>High-pressure, metric-driven, real-time decisions.</p>
+                    </div>
+                    <div
+                        className="pitch-style-option" // Class for styling
+                        style={{ cursor: 'pointer', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', marginBottom: '10px' }} // Basic inline styles for now
+                        onClick={() => { console.log('Elevator Pitch Clicked (Simple)'); setPitchStyle('elevator-pitch'); }}
                     >
-                        <CardHeader><CardTitle><Rocket className="style-icon"/>Elevator Pitch Challenge</CardTitle></CardHeader>
-                        <CardContent>Fast-paced, concise pitching against the clock.</CardContent>
-                    </Card>
-                    <Card
-                        className="pitch-style-card"
-                        onClick={() => {
-                            console.log('CYOA Clicked');
-                            setPitchStyle('cyoa');
-                        }}
+                        <Rocket className="style-icon" style={{ verticalAlign: 'middle', marginRight: '5px' }} /> Elevator Pitch Challenge
+                        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>Fast-paced, concise pitching against the clock.</p>
+                    </div>
+                    <div
+                        className="pitch-style-option" // Class for styling
+                        style={{ cursor: 'pointer', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', marginBottom: '10px' }} // Basic inline styles for now
+                        onClick={() => { console.log('CYOA Clicked (Simple)'); setPitchStyle('cyoa'); }}
                     >
-                        <CardHeader><CardTitle><Map className="style-icon"/>Choose Your Own Adventure</CardTitle></CardHeader>
-                        <CardContent>Narrative-driven, branching story with varied outcomes.</CardContent>
-                    </Card>
-                    <Card
-                        className="pitch-style-card"
-                        onClick={() => {
-                            console.log('Deck Builder Clicked');
-                            setPitchStyle('deck-builder');
-                        }}
+                        <Map className="style-icon" style={{ verticalAlign: 'middle', marginRight: '5px' }} /> Choose Your Own Adventure
+                        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>Narrative-driven, branching story with varied outcomes.</p>
+                    </div>
+                    <div
+                        className="pitch-style-option" // Class for styling
+                        style={{ cursor: 'pointer', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', marginBottom: '10px' }} // Basic inline styles for now
+                        onClick={() => { console.log('Deck Builder Clicked (Simple)'); setPitchStyle('deck-builder'); }}
                     >
-                        <CardHeader><CardTitle><LayoutPanelLeft className="style-icon"/>Gamified Pitch Deck Builder</CardTitle></CardHeader>
-                        <CardContent>Interactive deck building, visual presentation focus.</CardContent>
-                    </Card>
-                    <Card
-                        className="pitch-style-card"
-                        onClick={() => {
-                            console.log('Role-Playing Panelist Clicked');
-                            setPitchStyle('role-playing-panelist');
-                        }}
+                        <LayoutPanelLeft className="style-icon" style={{ verticalAlign: 'middle', marginRight: '5px' }} /> Gamified Pitch Deck Builder
+                        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>Interactive deck building, visual presentation focus.</p>
+                    </div>
+                    <div
+                        className="pitch-style-option" // Class for styling
+                        style={{ cursor: 'pointer', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '8px', marginBottom: '10px' }} // Basic inline styles for now
+                        onClick={() => { console.log('Role-Playing Panelist Clicked (Simple)'); setPitchStyle('role-playing-panelist'); }}
                     >
-                        <CardHeader><CardTitle><UserRound className="style-icon"/>Role-Playing Panelist</CardTitle></CardHeader>
-                        <CardContent>Empathy-focused, nuanced panelist interaction.</CardContent>
-                    </Card>
+                        <UserRound className="style-icon" style={{ verticalAlign: 'middle', marginRight: '5px' }} /> Role-Playing Panelist
+                        <p style={{ fontSize: '0.9em', color: '#666', marginTop: '5px' }}>Empathy-focused, nuanced panelist interaction.</p>
+                    </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 
 
-    const renderStagePresentationUI = () => { // Placeholder for Stage Presentation UI
+    const renderStagePresentationUI = () => {
         return (
             <div className="stage-presentation-container">
                 <h3 className="stage-presentation-title">Stage Presentation</h3>
                 <div className="stage-presentation-panelists">
-                    {/* Panelist Avatars and Names will go here */}
-                    <p>Panelist Area Placeholder - Style: Stage Presentation</p>
-                </div>
-                <div className="stage-presentation-stage-area">
-                    {/* User Stage Area (initially text) */}
-                    <p>Your Stage Area Placeholder</p>
-                    <div className="stage-presentation-question-area">
-                        {/* Panelist Question Display */}
-                        <p>Question Area Placeholder</p>
+                    <h4>Panelists</h4>
+                    <div className="panelist-list">
+                        {panelists.map((panelist, index) => (
+                            <div key={index} className="panelist-item">
+                                <div className="panelist-avatar"> {/* Placeholder for Avatar */}
+                                    <UserRound size={48} />
+                                </div>
+                                <div className="panelist-info">
+                                    <strong>{panelist.name}</strong>
+                                    <p>{panelist.role}</p>
+                                    <p className="persona">({panelist.persona})</p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
-                <div className="stage-presentation-response-options">
-                    {/* Response Options Buttons */}
-                    <p>Response Options Placeholder</p>
+                <div className="stage-presentation-stage-area">
+                    <h4>Your Virtual Stage</h4>
+                    <div className="stage-display">
+                        <p>Welcome to the stage! Your pitch will be displayed here.</p>
+                        {editableScenario && (
+                            <div className="scenario-summary">
+                                <h5>Scenario Summary: {editableScenario.pitchTitle}</h5>
+                                <div dangerouslySetInnerHTML={{ __html: editableScenario.pitchDescription }} />
+                            </div>
+                        )}
+                        {selectedQuestion && (
+                            <div className="panelist-question">
+                                <h5>Question from {selectedQuestion.panelist}:</h5>
+                                <p>{selectedQuestion.question}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="stage-presentation-response-area">
+                    <h4>Response Options</h4>
+                    <div className="response-options-grid">
+                        {responseOptions.map((option, index) => (
+                            <Button key={index} className="response-button" onClick={() => { console.log(`Option ${index + 1} Clicked: ${option.name}`); }}>
+                                {option.name}
+                            </Button>
+                        ))}
+                    </div>
                 </div>
                 <div className="stage-presentation-pitch-log">
-                    {/* Pitch Log */}
-                    <p>Pitch Log Placeholder</p>
+                    <h4>Pitch Log</h4>
+                    <div className="pitch-log-display">
+                        {pitchLog.map((logEntry, index) => (
+                            <div key={index} className="log-entry">
+                                <span className="timestamp">{generateSequentialTimestamp(logEntry.timestamp)}</span>
+                                <p className="message">{logEntry.message}</p>
+                            </div>
+                        ))}
+                        <div ref={pitchLogEndRef} />
+                    </div>
                 </div>
             </div>
         );
     };
 
-    const renderWarRoomUI = () => { // Placeholder for War Room UI
-        return ( // ... (rest of placeholder UI functions are the same as before) ...
-            <div className="style-ui-placeholder">
-                <h3>War Room UI - Under Construction</h3>
-                {/* UI elements for War Room style will go here */}
-                <p>... UI for War Room - Under Construction ...</p>
-            </div>
-        );
-    };
-
-    const renderElevatorPitchUI = () => { // Placeholder for Elevator Pitch UI
+    const renderWarRoomUI = () => {
         return (
-            <div className="style-ui-placeholder">
-                <h3>Elevator Pitch Challenge UI - Under Construction</h3>
-                {/* UI elements for Elevator Pitch Challenge style will go here */}
-                <p>... UI for Elevator Pitch Challenge - Under Construction ...</p>
+            <div className="war-room-container">
+                <h3 className="war-room-title">War Room</h3>
+                <div className="war-room-metrics">
+                    <h4>Real-time Metrics</h4>
+                    <div className="metrics-display">
+                        <p>Engagement Level: <Progress value={60} /></p>
+                        <p>Investor Interest: <Progress value={30} /></p>
+                        <p>Market Sentiment: <Progress value={80} /></p>
+                        {/* Add more metrics as needed */}
+                    </div>
+                </div>
+                <div className="war-room-decision-center">
+                    <h4>Decision Dashboard</h4>
+                    <div className="decision-dashboard">
+                        <div className="scenario-brief">
+                            <h5>Scenario Brief</h5>
+                            {editableScenario && (
+                                <div dangerouslySetInnerHTML={{ __html: editableScenario.pitchDescription }} />
+                            )}
+                        </div>
+                        <div className="current-question">
+                            {selectedQuestion && (
+                                <>
+                                    <h5>Current Question from {selectedQuestion.panelist}</h5>
+                                    <p>{selectedQuestion.question}</p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <div className="war-room-response-options">
+                    <h4>Immediate Response Options</h4>
+                    <div className="response-options-list">
+                        {responseOptions.map((option, index) => (
+                            <Button key={index} className="response-button" onClick={() => { console.log(`Option ${index + 1} Clicked: ${option.name}`); }}>
+                                {option.name}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+                <div className="war-room-pitch-log">
+                    <h4>Event Log</h4>
+                    <div className="pitch-log-display">
+                        {pitchLog.map((logEntry, index) => (
+                            <div key={index} className="log-entry">
+                                <span className="timestamp">{generateSequentialTimestamp(logEntry.timestamp)}</span>
+                                <p className="message">{logEntry.message}</p>
+                            </div>
+                        ))}
+                        <div ref={pitchLogEndRef} />
+                    </div>
+                </div>
             </div>
         );
     };
 
-    const renderCYOAUI = () => { // Placeholder for CYOA UI
+    const renderElevatorPitchUI = () => {
+        const [timer, setTimer] = useState(timeLeft);
+        useEffect(() => {
+            if (pitchStarted && timer > 0) {
+                const interval = setInterval(() => {
+                    setTimer(timer - 1);
+                }, 1000);
+                return () => clearInterval(interval);
+            } else if (timer === 0 && pitchStarted) {
+                setPitchStarted(false); // End pitch when timer runs out (for now, just stop timer)
+                alert("Time's up for your elevator pitch!"); // Example time-out action
+            }
+        }, [timer, pitchStarted]);
+
+
         return (
-            <div className="style-ui-placeholder">
-                <h3>Choose Your Own Adventure Pitch UI - Under Construction</h3>
-                {/* UI elements for Choose Your Own Adventure Pitch style will go here */}
-                <p>... UI for Choose Your Own Adventure Pitch - Under Construction ...</p>
+            <div className="elevator-pitch-container">
+                <h3 className="elevator-pitch-title">Elevator Pitch Challenge</h3>
+                <div className="elevator-pitch-timer">
+                    <h4>Time Remaining: {timer} seconds</h4>
+                    <Progress value={(timeLeft - timer) / timeLeft * 100} /> {/* Example progress bar */}
+                </div>
+                <div className="elevator-pitch-area">
+                    <h4>Your Pitch Area</h4>
+                    <div className="pitch-text-area">
+                        <TextArea
+                            placeholder="Start typing your elevator pitch here..."
+                            value={userPitchDraft}
+                            onValueChange={setUserPitchDraft}
+                            className="elevator-pitch-textarea"
+                        />
+                    </div>
+                </div>
+                <div className="elevator-pitch-action">
+                    <Button onClick={() => { console.log('Submit Elevator Pitch'); alert('Pitch Submitted (Placeholder)'); }} disabled={!userPitchDraft.trim()}>
+                        Submit Pitch
+                    </Button>
+                </div>
+                <div className="elevator-pitch-log">
+                    <h4>Pitch Log</h4>
+                    <div className="pitch-log-display">
+                        {pitchLog.map((logEntry, index) => (
+                            <div key={index} className="log-entry">
+                                <span className="timestamp">{generateSequentialTimestamp(logEntry.timestamp)}</span>
+                                <p className="message">{logEntry.message}</p>
+                            </div>
+                        ))}
+                        <div ref={pitchLogEndRef} />
+                    </div>
+                </div>
             </div>
         );
     };
 
-    const renderDeckBuilderUI = () => { // Placeholder for Deck Builder UI
+
+    const renderCYOAUI = () => {
         return (
-            <div className="style-ui-placeholder">
-                <h3>Gamified Pitch Deck Builder UI - Under Construction</h3>
-                {/* UI elements for Gamified Pitch Deck Builder style will go here */}
-                <p>... UI for Gamified Pitch Deck Builder - Under Construction ...</p>
+            <div className="cyoa-container">
+                <h3 className="cyoa-title">Choose Your Own Adventure Pitch</h3>
+                <div className="cyoa-scenario-display">
+                    <h4>Current Scenario Scene</h4>
+                    <div className="scenario-text">
+                        <p>You are in a critical juncture of your pitch. The lead investor leans forward, awaiting your response...</p>
+                        {selectedQuestion && (
+                            <div className="panelist-question">
+                                <h5>Current Situation / Question:</h5>
+                                <p>{selectedQuestion.question}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="cyoa-decision-points">
+                    <h4>Decision Points</h4>
+                    <div className="decision-options">
+                        {responseOptions.map((option, index) => (
+                            <Button key={index} className="response-button" onClick={() => { console.log(`Decision ${index + 1} Clicked: ${option.name}`); }}>
+                                {option.name}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+                <div className="cyoa-story-log">
+                    <h4>Story Log</h4>
+                    <div className="pitch-log-display">
+                        {pitchLog.map((logEntry, index) => (
+                            <div key={index} className="log-entry">
+                                <span className="timestamp">{generateSequentialTimestamp(logEntry.timestamp)}</span>
+                                <p className="message">{logEntry.message}</p>
+                            </div>
+                        ))}
+                        <div ref={pitchLogEndRef} />
+                    </div>
+                </div>
             </div>
         );
     };
 
-    const renderRolePlayingPanelistUI = () => { // Placeholder for Role-Playing Panelist UI
+    const renderDeckBuilderUI = () => {
         return (
-            <div className="style-ui-placeholder">
-                <h3>Role-Playing Panelist UI - Under Construction</h3>
-                {/* UI elements for Role-Playing Panelist style will go here */}
-                <p>... UI for Role-Playing Panelist - Under Construction ...</p>
+            <div className="deck-builder-container">
+                <h3 className="deck-builder-title">Gamified Pitch Deck Builder</h3>
+                <div className="deck-builder-slide-area">
+                    <h4>Current Slide Preview</h4>
+                    <div className="slide-preview">
+                        <Square className="slide-placeholder-icon" size={100} />
+                        <p>Slide Content Preview</p>
+                        {/* Slide preview area - can be enhanced with actual slide rendering later */}
+                    </div>
+                </div>
+                <div className="deck-builder-elements-palette">
+                    <h4>Deck Elements Palette</h4>
+                    <div className="elements-grid">
+                        <Button className="element-button" onClick={() => { console.log('Added Title Slide'); alert('Title Slide Element Added (Placeholder)'); }}>Title Slide</Button>
+                        <Button className="element-button" onClick={() => { console.log('Added Problem Slide'); alert('Problem Slide Element Added (Placeholder)'); }}>Problem Slide</Button>
+                        <Button className="element-button" onClick={() => { console.log('Added Solution Slide'); alert('Solution Slide Element Added (Placeholder)'); }}>Solution Slide</Button>
+                        {/* More deck elements can be added here */}
+                    </div>
+                </div>
+                <div className="deck-builder-deck-overview">
+                    <h4>Deck Overview</h4>
+                    <div className="deck-slides-list">
+                        <p>Deck Slides will be listed here as draggable thumbnails</p>
+                        {/* Deck slide list - can be made interactive and draggable later */}
+                    </div>
+                </div>
+                <div className="deck-builder-action-bar">
+                    <Button onClick={() => { console.log('Present Deck'); alert('Deck Presentation Started (Placeholder)'); }}>Present Deck</Button>
+                </div>
+            </div>
+        );
+    };
+
+    const renderRolePlayingPanelistUI = () => {
+        return (
+            <div className="role-playing-panelist-container">
+                <h3 className="role-playing-panelist-title">Role-Playing Panelist</h3>
+                <div className="role-playing-panelist-context">
+                    <h4>Scenario Context</h4>
+                    <div className="context-display">
+                        <p>You are now role-playing as a panelist. Your task is to evaluate pitches with empathy...</p>
+                        {editableScenario && (
+                            <div className="scenario-summary">
+                                <h5>Scenario: {editableScenario.pitchTitle}</h5>
+                                <div dangerouslySetInnerHTML={{ __html: editableScenario.pitchDescription }} />
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="role-playing-panelist-pitch-area">
+                    <h4>Pitch to Evaluate</h4>
+                    <div className="pitch-summary">
+                        <p>Pitch content from the user will appear here for you to evaluate...</p>
+                        {userPitchDraft && (
+                            <div className="user-pitch-content">
+                                <h5>User's Pitch:</h5>
+                                <p>{userPitchDraft}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="role-playing-panelist-evaluation-tools">
+                    <h4>Evaluation Tools</h4>
+                    <div className="evaluation-controls">
+                        <Button onClick={() => { console.log('Provide Positive Feedback'); alert('Positive Feedback Provided (Placeholder)'); }}>Give Positive Feedback</Button>
+                        <Button className="constructive-button" onClick={() => { console.log('Provide Constructive Criticism'); alert('Constructive Criticism Provided (Placeholder)'); }}>Offer Constructive Criticism</Button>
+                        <Button className="question-button" onClick={() => { console.log('Ask Clarifying Question'); alert('Clarifying Question Asked (Placeholder)'); }}>Ask Question</Button>
+                        {/* More evaluation tools and controls can be added */}
+                    </div>
+                </div>
+                <div className="role-playing-panelist-log">
+                    <h4>Panelist Role-Play Log</h4>
+                    <div className="pitch-log-display">
+                        {pitchLog.map((logEntry, index) => (
+                            <div key={index} className="log-entry">
+                                <span className="timestamp">{generateSequentialTimestamp(logEntry.timestamp)}</span>
+                                <p className="message">{logEntry.message}</p>
+                            </div>
+                        ))}
+                        <div ref={pitchLogEndRef} />
+                    </div>
+                </div>
             </div>
         );
     };
 
 
-    const renderMainContentSetupCard = () => { // ... (same renderMainContentSetupCard function as before, now using editableScenario?.scenario) ...
+    const renderMainContentSetupCard = () => {
         return (
             <>
                 <CardHeader>
@@ -773,7 +1001,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
 
                     <div className="business-plan-input">
                         <label htmlFor="businessPlan">Enter Your Business Plan (Optional)</label>
-                        <TextArea // Using imported TextArea component
+                        <TextArea
                             id="businessPlan"
                             className="custom-scenario-input"
                             placeholder="Paste your business plan here to get more specific feedback..."
@@ -796,7 +1024,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const renderMainContentCardSetup = () => { // ... (same renderMainContentCardSetup function as before) ...
+    const renderMainContentCardSetup = () => {
         return (
             <Card className="setup-card">
                 <CardHeader>
@@ -885,7 +1113,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    const renderMainContentDebriefing = () => { // ... (same renderMainContentDebriefing function as before) ...
+    const renderMainContentDebriefing = () => {
         return (
             <div className="debriefing-section">
                 <h4 className="debriefing-title">Pitch Simulation Debriefing</h4>
@@ -900,7 +1128,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
 
-    return ( // ... (Main Return - mostly the same, updated renderMainContent call) ...
+    return (
         <div className="app-container">
             <header className="app-header">
                 <div className="header-box">
@@ -925,7 +1153,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                                 <p>{errorMessage}</p>
                             </div>
                         )}
-                        {renderMainContent()} {/* Call updated renderMainContent */}
+                        {renderMainContent()}
                     </div>
                 </section>
                 {/* Notifications Section - Consider if needed */}
@@ -941,7 +1169,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
 };
 
 
-export const metadata = { // ... (same metadata as before) ...
+export const metadata = {
     title: 'Pitch Simulator',
     description: 'Present your pitch to a panel of virtual experts and refine your presentation skills.',
     imageUrl: '../images/PitchModule.png',
