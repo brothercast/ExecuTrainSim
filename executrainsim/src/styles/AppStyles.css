@@ -62,7 +62,6 @@ body {
   padding-top: 80px;
 }
 
-/* -------------------- Left Column Styles -------------------- */
 .left-column {
   width: 35%;
   padding: 0 20px 20px;
@@ -116,6 +115,8 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  align-items: center;
+  width: 95%; /* Add this line to make main-content-flex 100% width of its parent */
 }
 
 /* Scenario Titles and Descriptions in Main Content Area */
@@ -257,7 +258,6 @@ body {
 .form-group {
     margin-bottom: 15px;
     display: flex;
-    width: 100%;
   flex-direction: column;
 }
 
@@ -528,11 +528,6 @@ h3 {
   display: flex;
   flex-direction: column;
 }
-
-.debriefing-text-container {
- margin-top: 20px;
-}
-
 .debriefing-list {
   margin-left: 20px;
   padding: 0;
@@ -671,8 +666,8 @@ h3 {
   }
 
   .chat-history {
-    max-height: 60vh;
-    overflow-y: auto;
+    height: 200px;
+    max-height: none;
   }
 }
 
@@ -796,29 +791,17 @@ h3 {
   display: none;
 }
 .feedback-toggle-container {
-  margin-bottom: 10px;
-  padding: 0px 10px;
-  display: flex;
-  flex-direction: row-reverse;
-}
-
-.feedback-tooltip {
-  position: absolute;
-  left: 100%;    /* Start at the right edge of the cursor/anchor element */
-  top: 100%;     /* Start at the bottom edge of the cursor/anchor element */
-  margin-left: 5px;
-  margin-top: 5px;
-  z-index: 100;
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  padding: 5px;
-  border-radius: 4px;
-}
+   margin-bottom: 10px;
+    padding: 0px 10px;
+  }
 
 .chat-history-container {
-  position: relative;
-  flex: 1;
-  padding-bottom: 40px;
+  flex-grow: 1;
+  max-height: 60vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0px;
 }
 
 .chat-history {
@@ -1273,4 +1256,32 @@ display: none; /* Remove the dots by hiding this div */
 }
 .chat-message .feedback-box > div > span:nth-child(6) > span:first-child{
    color: #e74c3c;  /* Collaborative Problem Solving (Red) */
+}
+
+/* New styles for full-width card using Grid */
+.content-grid.full-width-card-layout {
+    grid-template-columns: 1fr; /* Single column layout */
+    grid-template-areas:
+      "main"
+      "left"; /* Stack main above left (you can adjust order if needed) */
+}
+
+.content-grid.full-width-card-layout .left-column {
+    grid-area: left; /* Keep grid area assignment */
+    /* You might want to adjust styles for left column in full-width view, e.g., margin-top */
+    margin-top: 20px; /* Example: Add margin to separate from full-width card */
+    width: 100%; /* Take full width in single column layout */
+    padding: 0 20px 20px; /* Keep padding */
+}
+
+.content-grid.full-width-card-layout .main-content {
+    grid-area: main; /* Keep grid area assignment */
+    width: 100%; /* Make main-content full width */ }
+
+.full-width-card {
+  width: 100%;
+  max-width: none;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
 }

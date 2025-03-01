@@ -216,7 +216,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         setImageStatus('loading');
         let newImages = {};
         for (let i = 0; i < panelistNames.length; i++) {
-            const prompt = `Create a professional avatar for ${panelistNames[i]}, a panelist for a business pitch, 1990s colorful stock art, simple lines, diverse.`;
+            const prompt = `Create a professional avatar for ${panelistNames[i]}, a panelist for a business pitch, 1990s colorful stock art, simple lines, diverse, **seated on a stage, facing forward.**`; // Added "seated on a stage, facing forward"
             try {
                 const endpoint = constructEndpoint(API_BASE_URL, '/api/dalle/image');
                 const response = await axios.post(endpoint, { prompt });
@@ -314,6 +314,42 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         setIsFetchingScenario(false);
     };
 
+    const generatePitchScenarioForCategory = async (selectedPanelCategory) => {
+        setIsFetchingScenario(true);
+        setErrorMessage(''); // Clear any previous errors
+
+        try {
+            // **[BASIC SCENARIO GENERATION - REPLACE LATER WITH CATEGORY-AWARE LOGIC]**
+            // For now, let's just generate a generic scenario regardless of category
+            const genericScenarioPrompt = `Create a generic business pitch scenario for a stage presentation. Include a title, short description, and 3 diverse panelists with names, roles, and personas. Return in JSON format: ... (same JSON format as before)`;
+
+            const rawScenarioData = await fetchOpenAIResponse(
+                { messages: [{ role: 'system', content: genericScenarioPrompt }] },
+                '/api/generate'
+            );
+            const parsedScenario = parseAiJson(rawScenarioData);
+
+            if (parsedScenario?.scenario) {
+                setEditableScenario(parsedScenario.scenario);
+                setPanelists(parsedScenario.scenario.panelists);
+                setPitchGenerated(true);
+                await generatePanelistImages(parsedScenario.scenario.panelists.map(p => p.name));
+
+                // **[TRANSITION TO PITCH UI AFTER SCENARIO GENERATION]**
+                setPanelCategory(selectedPanelCategory); // Set panelCategory state
+                console.log(`Scenario generated for category: ${selectedPanelCategory}. Proceeding to pitch UI.`);
+
+            } else {
+                setErrorMessage('Failed to generate scenario. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Error generating scenario for category:', error);
+            setErrorMessage('Error generating pitch scenario. Please try again.');
+        } finally {
+            setIsFetchingScenario(false);
+        }
+    };
 
     const startPitch = async () => {
         if (!desiredOutcome) {
@@ -365,9 +401,9 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         }
         setErrorMessage('');
         const userPitchContent = DOMPurify.sanitize(userPitchDraft);
-        setUserPitchDraft('');
+        setUserPitchDraft(''); // Clear input immediately
 
-        addLog(`You: Initial Pitch Submitted.`);
+        addLog({ message: `You: ${userPitchContent}`, sender: 'user' }); // Log user pitch, set sender
 
         // Generate panelist questions/responses (similar to previous version)
         for (const panelist of panelists) {
@@ -386,7 +422,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
 
             await new Promise(resolve => setTimeout(resolve, 1500)); // Delay
 
-            addLog(`${panelist.name}: ${questionMessageContent}`);
+            addLog({ message: `${panelist.name}: ${questionMessageContent}`, sender: panelist.name }); // Log panelist question, set sender
             setResponseOptions([]);
             setSelectedQuestion({ panelist: panelist.name, question: questionMessageContent });
         }
@@ -440,51 +476,76 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
     };
 
     const handleResolution = async (actionIndex) => {
-        if (!selectedQuestion) return;
+        if (!selectedQuestion) {
+            console.log('[DEBUG handleResolution] No selectedQuestion, returning early.');
+            return;
+        }
         setIsResponseLoading(true);
         setIsUserReplyLoading(true);
         const selectedOption = responseOptions[actionIndex] || null;
         const actionDescription = selectedOption ? selectedOption.description : 'No action selected';
         const responseText = selectedOption ? selectedOption.name : 'No action selected';
 
-        addLog(`You: Response - ${responseText}.`);
+        addLog(`You: Response - ${responseText}.`); // Log user response
 
-        const panelist = panelists.find(p => p.name === selectedQuestion.panelist);
+        console.log('[DEBUG handleResolution] selectedQuestion:', selectedQuestion); // Debug log
+        console.log('[DEBUG handleResolution] selectedQuestion.panelist:', selectedQuestion.panelist); // Debug log
+        console.log('[DEBUG handleResolution] panelists:', panelists); // Debug log
+
+        const panelist = panelists.find(p => p.name === selectedQuestion.panelist); // Find the panelist who asked the question
+
+        if (!panelist) {
+            console.error('[ERROR handleResolution] Panelist not found for selectedQuestion.panelist:', selectedQuestion.panelist);
+            setIsResponseLoading(false);
+            setIsUserReplyLoading(false);
+            return; // Return early if panelist not found
+        }
+
+
+        const panelistPersonalityProfile = panelistPersonalitySetting[opponentPersonality]; // Get personality profile
 
         const systemPrompt = `
-              As ${panelist.name}, in your role as "${panelist.role}" and with your persona: "${panelist.persona}", having just heard the user's response: "${actionDescription}" to your question: "${selectedQuestion.question}", provide a brief follow-up message.
-              This could be a new question, feedback, or a statement indicating their current sentiment towards the pitch. Keep the message concise and professional.
+              You are ${panelist.name}, in your role as "${panelist.role}" and with your persona: "${panelist.persona}".
+              You are also embodying a **${panelistPersonalityProfile.tone}** and **${panelistPersonalityProfile.complexity}** communication style in this pitch scenario.
+        `;
+
+        const panelistResponsePrompt = `
+              As ${panelist.name}, having just heard the user's response: "${actionDescription}" to your question: "${selectedQuestion.question}", provide a brief follow-up message.
+              This could be a new question, feedback, or a statement indicating your current sentiment towards the pitch. Keep the message concise and professional, and in line with your personality.
               Return the response in JSON format:
               {
                  "message": "string",
-                 "sentiment": "positive" | "negative" | "neutral"
+                 "sentiment": "positive" | "negative" | "neutral" // Optional sentiment
               }
         `;
 
         try {
             const rawResponse = await fetchOpenAIResponse({
-                messages: [{ role: 'system', content: systemPrompt }],
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: panelistResponsePrompt }
+                ],
                 temperature: 0.7,
                 max_tokens: 500,
-            }, '/api/generate');
+            }, '/api/generate'); // Use generate endpoint
             if (!rawResponse) {
                 throw new Error('No response from AI server');
             }
             const parsed = parseAiJson(rawResponse);
             const panelistResponse = parsed?.message;
-            const panelistNewSentiment = parsed?.sentiment || 'neutral';
+            const panelistNewSentiment = parsed?.sentiment || 'neutral'; // Default to neutral sentiment if not provided
 
             if (!panelistResponse) {
                 throw new Error('Panelist response is empty or invalid JSON.');
             }
 
-            addLog(`${panelist.name}: ${panelistResponse}`);
-            setPanelistSentiment(prevSentiment => ({
+            addLog(`${panelist.name}: ${panelistResponse}`); // Log panelist response
+            setPanelistSentiment(prevSentiment => ({ // Update panelist sentiment
                 ...prevSentiment,
                 [panelist.name]: panelistNewSentiment,
             }));
-            setSelectedQuestion(null);
-            setResponseOptions([]);
+            setSelectedQuestion(null); // Clear selected question after response
+            setResponseOptions([]); // Clear response options after action
              // Check for simulation completion condition here, e.g., after a certain number of questions or sentiment reaches a threshold
 
         } catch (error) {
@@ -496,6 +557,78 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
         }
     };
 
+    const handleResponseSubmit = async () => {
+        if (!userPitchDraft.trim()) {
+            setErrorMessage('Please type your response before sending.');
+            return;
+        }
+        setErrorMessage('');
+        const userResponseContent = DOMPurify.sanitize(userPitchDraft);
+        setUserPitchDraft(''); // Clear input immediately
+
+        addLog({ message: `You: ${userResponseContent}`, sender: 'user' }); // Log user response in chat
+
+        setIsResponseLoading(true);
+        setIsUserReplyLoading(true);
+
+        if (!selectedQuestion) {
+            console.warn('No question selected to respond to.');
+            setIsResponseLoading(false);
+            setIsUserReplyLoading(false);
+            return;
+        }
+
+        const panelist = panelists.find(p => p.name === selectedQuestion.panelist);
+        if (!panelist) {
+            console.error('Panelist not found:', selectedQuestion.panelist);
+            setIsResponseLoading(false);
+            setIsUserReplyLoading(false);
+            return;
+        }
+
+        const systemPrompt = `
+              As ${panelist.name}, in your role as "${panelist.role}" and with your persona: "${panelist.persona}", having just heard the user's response: "${userResponseContent}" to your question: "${selectedQuestion.question}", provide a brief follow-up message.
+              This could be a new question, feedback, or a statement indicating their current sentiment towards the pitch. Keep the message concise and professional.
+              Return the response in JSON format:
+              {
+                 "message": "string",
+                 "sentiment": "positive" | "negative" | "neutral" // Optional sentiment
+              }
+        `;
+
+        try {
+            const rawResponse = await fetchOpenAIResponse({
+                messages: [{ role: 'system', content: systemPrompt }],
+                temperature: 0.7,
+                max_tokens: 500,
+            }, '/api/generate', true); // isUserAction = true
+            if (!rawResponse) {
+                throw new Error('No response from AI server');
+            }
+            const parsed = parseAiJson(rawResponse);
+            const panelistResponse = parsed?.message;
+            const panelistNewSentiment = parsed?.sentiment || 'neutral';
+
+            if (!panelistResponse) {
+                throw new Error('Panelist response is empty or invalid JSON.');
+            }
+
+            addLog({ message: `${panelist.name}: ${panelistResponse}`, sender: panelist.name }); // Log panelist response
+            setPanelistSentiment(prevSentiment => ({
+                ...prevSentiment,
+                [panelist.name]: panelistNewSentiment,
+            }));
+            setSelectedQuestion(null); // Clear selected question after response
+            setResponseOptions([]);     // Clear response options
+
+        } catch (error) {
+            console.error('Failed to generate panelist response:', error);
+            setErrorMessage('Failed to generate panelist response. Please try again.');
+        } finally {
+            setIsResponseLoading(false);
+            setIsUserReplyLoading(false);
+        }
+    };
 
     const resetPitchModule = () => {
         setPitchStyle('');
@@ -660,33 +793,77 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
             </div>
         </div>
     );
-
+    const renderStageSetupUI = () => ( // New function for Stage Presentation Setup
+        <Card className="setup-card">
+            <CardHeader>
+                <CardTitle className="header-title">Stage Presentation Setup</CardTitle>
+            </CardHeader>
+            <CardContent className="pitch-style-selection-content">
+                <p>Choose a category for your panel to tailor the expert focus:</p>
+                <div className="pitch-style-options">
+                    <div className="form-group">
+                        <label>Select Panel Category</label>
+                        <Select
+                            onValueChange={(value) => setPanelCategory(value)}
+                            value={panelCategory}
+                        >
+                            <SelectItem value="">Choose category</SelectItem>
+                            {panelCategories.map((category) => (
+                                <SelectItem key={category.value} value={category.value}>
+                                    {category.title}
+                                </SelectItem>
+                            ))}
+                        </Select>
+                    </div>
+                    <Button
+                        onClick={() => {
+                            if (panelCategory) {
+                                // Proceed to generate scenario and then pitch UI
+                                console.log(`Panel Category Selected: ${panelCategory}`);
+                                // **[MODIFIED]: Generate scenario and THEN transition to pitch UI**
+                                generatePitchScenarioForCategory(panelCategory);
+                            } else {
+                                setErrorMessage('Please select a panel category.');
+                            }
+                        }}
+                        disabled={!panelCategory} // Disable if no category selected
+                    >
+                        Confirm Category and Continue
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+    );
 
     const renderStagePresentationUI = () => {
         return (
             <div className="stage-presentation-container">
                 <h3 className="stage-presentation-title">Stage Presentation</h3>
                 <div className="stage-presentation-panelists">
-                    <h4>Panelists</h4>
-                    <div className="panelist-list">
-                        {panelists.map((panelist, index) => (
-                            <div key={index} className="panelist-item">
-                                <div className="panelist-avatar"> {/* Placeholder for Avatar */}
+                <h4>Panelists</h4>
+                <div className="panelist-row"> {/* Changed to panelist-row for horizontal layout */}
+                    {panelists.map((panelist, index) => (
+                        <div key={index} className="panelist-card"> {/* Changed to panelist-card for individual styling */}
+                            <div className="panelist-avatar">
+                                {/* Panelist Avatar will go here - Placeholder for now */}
+                                {images[panelist.name] ? (
+                                    <img src={images[panelist.name]} alt={panelist.name} style={{ width: '100%', height: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                                ) : (
                                     <UserRound size={48} />
-                                </div>
-                                <div className="panelist-info">
-                                    <strong>{panelist.name}</strong>
-                                    <p>{panelist.role}</p>
-                                    <p className="persona">({panelist.persona})</p>
-                                </div>
+                                )}
                             </div>
-                        ))}
-                    </div>
+                            <div className="panelist-info">
+                                <strong>{panelist.name}</strong>
+                                <p>{panelist.role}</p>
+                                <p className="persona">({panelist.persona})</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
+            </div>
                 <div className="stage-presentation-stage-area">
-                    <h4>Your Virtual Stage</h4>
+                    <h4>Virtual Stage</h4>
                     <div className="stage-display">
-                        <p>Welcome to the stage! Your pitch will be displayed here.</p>
                         {editableScenario && (
                             <div className="scenario-summary">
                                 <h5>Scenario Summary: {editableScenario.pitchTitle}</h5>
@@ -701,18 +878,75 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                         )}
                     </div>
                 </div>
+    
+                {/* Chat Area Integration */}
+                <div className="chat-area-wrapper">
+                    <div className="chat-history-container">
+                        <div className="chat-history">
+                            {pitchLog.map((logEntry, index) => (
+                                <div key={index} className={`chat-message ${logEntry.sender || 'opponent'}-message-align ${logEntry.sender || 'opponent'}`}>
+                                    <div className="message-content">
+                                        <p>{logEntry.message}</p>
+                                        <span className="message-timestamp">{generateSequentialTimestamp(logEntry.timestamp)}</span>
+                                    </div>
+                                </div>
+                            ))}
+                            <div ref={pitchLogEndRef} />
+                        </div>
+                    </div>
+    
+                    <div className="message-input-container">
+                        <div className="user-input-container">
+                            <div>
+                                <TextArea
+                                    className="user-draft-textarea"
+                                    placeholder="Type your pitch or response here..."
+                                    value={userPitchDraft}
+                                    onValueChange={setUserPitchDraft}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) { // Send message on Enter, not Shift+Enter
+                                            e.preventDefault(); // Prevent newline in textarea
+                                            if (pitchStarted && selectedQuestion) {
+                                                handleResponseSubmit(); // Call response submit if question is active
+                                            } else if (pitchStarted) {
+                                                handlePitchSubmit();      // Call pitch submit if no active question (initial pitch)
+                                            }
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <Button
+                                className="send-button"
+                                onClick={() => {
+                                    if (pitchStarted && selectedQuestion) {
+                                        handleResponseSubmit(); // Call response submit if question is active
+                                    } else if (pitchStarted) {
+                                        handlePitchSubmit();      // Call pitch submit if no active question (initial pitch)
+                                    }
+                                }}
+                                disabled={!userPitchDraft.trim()}
+                            >
+                                Send
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+    
+    
+                {/* Response Options (moved below chat for better flow) */}
                 <div className="stage-presentation-response-area">
                     <h4>Response Options</h4>
                     <div className="response-options-grid">
                         {responseOptions.map((option, index) => (
-                            <Button key={index} className="response-button" onClick={() => { console.log(`Option ${index + 1} Clicked: ${option.name}`); }}>
+                            <Button key={index} className="response-button" onClick={() => handleResolution(index)} disabled={isResponseLoading}>
                                 {option.name}
                             </Button>
                         ))}
                     </div>
                 </div>
-                <div className="stage-presentation-pitch-log">
-                    <h4>Pitch Log</h4>
+    
+                <div className="stage-presentation-pitch-log" style={{display: 'none'}}> {/* Hiding the old pitch log */}
+                    <h4>Pitch Log (Old - Hidden)</h4>
                     <div className="pitch-log-display">
                         {pitchLog.map((logEntry, index) => (
                             <div key={index} className="log-entry">
@@ -723,6 +957,7 @@ const PitchModule = ({ onReturn, onSelectModule, modules }) => {
                         <div ref={pitchLogEndRef} />
                     </div>
                 </div>
+    
             </div>
         );
     };
